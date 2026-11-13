@@ -1,0 +1,19 @@
+# GerudoValley
+
+[regions.Root.exits]
+"GerudoValley" = "is_adult or Deku_Tree_Clear"
+
+[regions."GerudoValley"]
+
+[regions."GerudoValley".locations]
+"GerudoValley Dynamic room 0 #0 (Item_ScrubBusinessSeed)" = "is_adult and Silver_Gauntlets and Iron_Boots"
+"GerudoValley Dynamic room 0 #0 (TBox_Rupee_Green)" = "is_adult and Song_of_Storms and (Eponas_Song or Longshot)"
+"GerudoValley Dynamic room 0 #0 (TBox_Rupee_Red)" = "is_adult and Song_of_Storms and Lens_of_Truth and (Eponas_Song or Longshot)"
+"GerudoValley Dynamic room 0 #1 (TBox_Rupee_Red)" = "is_adult and Megaton_Hammer and (Eponas_Song or Longshot)"
+"GerudoValley Static room 0 #0 (Obj_Heart_Piece)" = "true"
+
+[regions."GerudoValley".skulltulas]
+"GV GS Small Bridge" = "is_child and Boomerang"  # original: can_use(Boomerang) and at_night
+"GV GS Bean Patch" = "is_child"  # original: can_plant_bugs and can_child_attack
+"GV GS Behind Tent" = "is_adult and (Hookshot or Longshot) and (Eponas_Song or Longshot)"  # original: can_use(Hookshot) and at_night
+"GV GS Pillar" = "is_adult and (Hookshot or Longshot) and (Eponas_Song or Longshot)"  # original: can_use(Hookshot) and at_night

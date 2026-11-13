@@ -1,0 +1,19 @@
+# BossRushIntervalRoom
+
+[regions.Root.exits]
+"BossRushIntervalRoom" = "true"
+
+[regions."BossRushIntervalRoom"]
+excluded = true
+
+[regions."BossRushIntervalRoom".locations]
+"BossRushIntervalRoom Static room 0 #0 (TBox_Rupee_Gold)" = "true"
+"BossRushIntervalRoom Static room 0 #1 (TBox_Rupee_Gold)" = "true"
+"BossRushIntervalRoom Static room 0 #2 (TBox_Rupee_Gold)" = "true"
+"BossRushIntervalRoom Static room 0 #3 (TBox_Rupee_Gold)" = "true"
+"BossRushIntervalRoom Static room 0 #4 (TBox_Rupee_Gold)" = "true"
+"BossRushIntervalRoom Static room 0 #5 (TBox_Rupee_Gold)" = "true"
+"BossRushIntervalRoom Static room 0 #6 (TBox_Rupee_Gold)" = "true"
+"BossRushIntervalRoom Static room 0 #7 (TBox_Rupee_Gold)" = "true"
+"BossRushIntervalRoom Static room 0 #8 (TBox_Rupee_Gold)" = "true"
+"BossRushIntervalRoom Static room 0 #9 (TBox_Rupee_Gold)" = "true"

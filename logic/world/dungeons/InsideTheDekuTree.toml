@@ -1,0 +1,25 @@
+# InsideTheDekuTree
+
+[regions.Root.exits]
+"InsideTheDekuTree" = "is_child and Kokiri_Sword and Deku_Shield"
+
+[regions."InsideTheDekuTree"]
+dungeon = true
+
+[regions."InsideTheDekuTree".events]
+"Deku_Tree_Clear" = "is_child and Kokiri_Sword and Deku_Shield and Slingshot"
+
+[regions."InsideTheDekuTree".locations]
+"Dm_Kokiri_0130 (event item)" = "Deku_Tree_Clear"
+"InsideTheDekuTree Dynamic room 3 #0 (TBox_DekuNutBundle)" = "Slingshot or Boomerang"
+"InsideTheDekuTree Dynamic room 4 #0 (Item_DekuStickBundle_Small)" = "Slingshot or Boomerang"
+"InsideTheDekuTree Static room 0 #0 (Item_Dungeon_Map)" = "true"
+"InsideTheDekuTree Static room 2 #0 (Item_Range_SlingShot)" = "true"
+"InsideTheDekuTree Static room 2 #0 (TBox_DekuNutBundle)" = "true"
+"InsideTheDekuTree Static room 3 #0 (Item_Dungeon_Compass)" = "Slingshot or Boomerang"
+
+[regions."InsideTheDekuTree".skulltulas]
+"Deku Tree GS Compass Room" = "true"  # original: is_adult or can_child_attack
+"Deku Tree GS Basement Gate" = "true"  # original: is_adult or can_child_attack
+"Deku Tree GS Basement Vines" = "true"  # original: can_use_projectile or can_use(Dins_Fire) or (logic_deku_basement_gs and (is_adult or Sticks or Kokiri_Sword))
+"Deku Tree GS Basement Back Room" = "((is_child and Slingshot) or (is_adult and Bow)) and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))) or (is_adult and Megaton_Hammer)) and ((is_adult and (Hookshot or Longshot)) or (is_child and Boomerang))"  # original: here(has_fire_source_with_torch or can_use(Bow)) and here(can_blast_or_smash) and (can_use(Boomerang) or ca...

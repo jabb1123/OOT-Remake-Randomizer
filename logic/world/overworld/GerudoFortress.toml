@@ -1,0 +1,16 @@
+# GerudoFortress
+
+[regions.Root.exits]
+"GerudoFortress" = "is_adult and (Longshot or Eponas_Song)"
+
+[regions."GerudoFortress"]
+
+[regions."GerudoFortress".locations]
+"GerudoFortress Static room 0 #0 (Obj_Heart_Piece)" = "is_adult and Longshot"
+"GerudoFortress Static room 0 #0 (TBox_Rupee_Red)" = "is_adult"
+"Minigame_HorsebackArchery: Item_Quiver_Medium (npc item)" = "is_adult and Bow"
+"Minigame_HorsebackArchery: Item_Quiver_Large (npc item)" = "is_adult and Bow and Quiver_Medium"
+
+[regions."GerudoFortress".skulltulas]
+"GF GS Archery Range" = "(is_adult and (Hookshot or Longshot))"  # original: can_use(Hookshot) and Gerudo_Membership_Card and at_night
+"GF GS Top Floor" = "is_adult"  # original: is_adult and at_night

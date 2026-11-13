@@ -1,0 +1,183 @@
+"""Per-slot sold-out state for the Kokiri Shop.
+
+The native sold-out counter is shared by a whole shelf, so a randomized item bought from one
+Kokiri slot cannot be tracked by it. DisplayShop.bfevfl is shared by every shop, so this patch
+adds two gates that only apply while the Kokiri Shop session is open
+(`KokiriForest_Shop_Talking` is set by Root_Buy and cleared by Buy_End):
+
+* SelectItem_CheckAvailable: before the native buy check, a slot whose
+  `KokiriForest_Shop_SoldOut_<index>` bool is set routes to the not-available branch.
+* ShopItem_Buy_SecondMove: after a purchase, the selected slot's bool is set before the item
+  is put in the pouch.
+
+Only the Kokiri child shop NPC is covered. The adult flow is not extracted yet.
+"""
+
+from __future__ import annotations
+
+import io
+
+from .gamedata_list import SHOP_SOLDOUT_NAMES
+
+DISPLAY_SHOP_FLOW = "DisplayShop.bfevfl.zs"
+KOKIRI_SESSION_BOOL = "KokiriForest_Shop_Talking"
+
+_SELECT_ENTRY = "SelectItem_CheckAvailable"
+_SELECT_VANILLA = "Event318"
+_NOT_AVAILABLE = "Event312"
+_BUY_ENTRY = "ShopItem_Buy_SecondMove"
+_BUY_VANILLA = "Event268"
+
+_GAME_DATA_ACTOR = "GameDataActor"
+_EVENT_STARTER = "Npc_EventStarter"
+_QUERY_BOOL = "EventQueryIsGameDataBool"
+_SET_BOOL = "EventTriggerSetGameDataBool"
+_QUERY_SLOT = "EventQueryCheckShopSelectItemName"
+_SLOT_COUNT = len(SHOP_SOLDOUT_NAMES)
+
+
+def _actor(flow, name: str):
+    for actor in flow.flowchart.actors:
+        if actor.identifier.name == name:
+            return actor
+    raise ValueError(f"actor {name} not found in DisplayShop flow")
+
+
+def _entry_main_event(flow, entry_name: str):
+    for entry in flow.flowchart.entry_points:
+        if entry.name == entry_name:
+            return entry
+    raise ValueError(f"entry point {entry_name} not found in DisplayShop flow")
+
+
+def _container(params: dict | None):
+    from evfl.container import Container
+
+    if not params:
+        return None
+    container = Container()
+    container.data.update(params)
+    return container
+
+
+def _event(flow, name: str, data):
+    from evfl.event import Event
+
+    event = Event()
+    event.name = name
+    event.data = data
+    flow.flowchart.events.append(event)
+    return event
+
+
+def _find_event(flow, name: str):
+    for event in flow.flowchart.events:
+        if event.name == name:
+            return event
+    raise ValueError(f"event {name} not found in DisplayShop flow")
+
+
+def _action_event(flow, name: str, actor, action: str, params: dict, nxt):
+    from evfl.event import ActionEvent
+    from evfl.util import make_index, make_rindex
+
+    data = ActionEvent()
+    data.nxt = make_index(nxt)
+    data.actor = make_rindex(actor)
+    data.actor_action = make_rindex(_string_holder(actor.actions, action))
+    data.params = _container(params)
+    return _event(flow, name, data)
+
+
+def _switch_event(flow, name: str, actor, query: str, cases: dict, params: dict | None):
+    from evfl.event import SwitchEvent
+    from evfl.util import make_rindex
+
+    data = SwitchEvent()
+    data.actor = make_rindex(actor)
+    data.actor_query = make_rindex(_string_holder(actor.queries, query))
+    data.params = _container(params)
+    data.cases = {value: make_rindex(target) for value, target in cases.items()}
+    return _event(flow, name, data)
+
+
+def _string_holder(holders: list, name: str):
+    for holder in holders:
+        if holder.v == name:
+            return holder
+    raise ValueError(f"{name} is not an action or query of this actor")
+
+
+def _bool_params(game_data_name: str) -> dict:
+    return {"Index": -1, "GameDataName": game_data_name}
+
+
+def _already_patched(flow) -> bool:
+    main = _entry_main_event(flow, _SELECT_ENTRY).main_event.v
+    data = main.data
+    params = getattr(data, "params", None)
+    return bool(params and params.data.get("GameDataName") == KOKIRI_SESSION_BOOL)
+
+
+def _add_select_gate(flow) -> None:
+    vanilla = _find_event(flow, _SELECT_VANILLA)
+    not_available = _find_event(flow, _NOT_AVAILABLE)
+    game_data = _actor(flow, _GAME_DATA_ACTOR)
+    starter = _actor(flow, _EVENT_STARTER)
+
+    checks = {}
+    for index, bool_name in enumerate(SHOP_SOLDOUT_NAMES):
+        checks[index] = _switch_event(
+            flow, f"ShopSoldOut_Check{index}", game_data, _QUERY_BOOL,
+            {0: vanilla, 1: not_available}, _bool_params(bool_name),
+        )
+    slot_switch = _switch_event(
+        flow, "ShopSoldOut_SelectSlot", starter, _QUERY_SLOT,
+        {**checks, _SLOT_COUNT: vanilla}, None,
+    )
+    session = _switch_event(
+        flow, "ShopSoldOut_SelectSession", game_data, _QUERY_BOOL,
+        {0: vanilla, 1: slot_switch}, _bool_params(KOKIRI_SESSION_BOOL),
+    )
+    _entry_main_event(flow, _SELECT_ENTRY).main_event.v = session
+
+
+def _add_buy_mark(flow) -> None:
+    vanilla = _find_event(flow, _BUY_VANILLA)
+    game_data = _actor(flow, _GAME_DATA_ACTOR)
+    starter = _actor(flow, _EVENT_STARTER)
+
+    marks = {}
+    for index, bool_name in enumerate(SHOP_SOLDOUT_NAMES):
+        marks[index] = _action_event(
+            flow, f"ShopSoldOut_Mark{index}", game_data, _SET_BOOL,
+            {"Index": -1, "GameDataName": bool_name, "Value": True}, vanilla,
+        )
+    slot_switch = _switch_event(
+        flow, "ShopSoldOut_MarkSlot", starter, _QUERY_SLOT,
+        {**marks, _SLOT_COUNT: vanilla}, None,
+    )
+    session = _switch_event(
+        flow, "ShopSoldOut_MarkSession", game_data, _QUERY_BOOL,
+        {0: vanilla, 1: slot_switch}, _bool_params(KOKIRI_SESSION_BOOL),
+    )
+    _entry_main_event(flow, _BUY_ENTRY).main_event.v = session
+
+
+def patch_kokiri_soldout(data: bytes) -> bytes:
+    """Add the per-slot sold-out gate and mark to DisplayShop. Applying it twice is a no-op."""
+    from evfl import EventFlow
+
+    flow = EventFlow()
+    flow.read(data)
+    if _already_patched(flow):
+        return data
+    if _entry_main_event(flow, _SELECT_ENTRY).main_event.v.name != _SELECT_VANILLA:
+        raise ValueError(f"{_SELECT_ENTRY} no longer starts at {_SELECT_VANILLA}")
+    if _entry_main_event(flow, _BUY_ENTRY).main_event.v.name != _BUY_VANILLA:
+        raise ValueError(f"{_BUY_ENTRY} no longer starts at {_BUY_VANILLA}")
+    _add_select_gate(flow)
+    _add_buy_mark(flow)
+    out = io.BytesIO()
+    flow.write(out)
+    return out.getvalue()

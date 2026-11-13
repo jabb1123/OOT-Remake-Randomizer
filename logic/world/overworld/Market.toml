@@ -1,0 +1,23 @@
+# Market
+
+[regions.Root.exits]
+"Market" = "is_adult or Deku_Tree_Clear"
+
+[regions."Market"]
+
+[regions."Market".skulltulas]
+"Market GS Guard House" = "is_child"  # original: is_child and can_break_crate
+
+[regions."Market".locations]
+"MiniGame_BombchuBowling: Item_BombBag_Medium (npc item)" = "Bomb_Bag"
+"MiniGame_BombchuBowling: Item_BombBag_Large (npc item)" = "Bomb_Bag and Bomb_Bag_Medium"
+"MiniGame_BombchuBowling: Item_BombchuBundle_Medium (npc item)" = "true"
+
+[regions."Market".exits]
+"Bazaar" = "is_child"
+
+[regions."Bazaar".locations]
+"Bazaar Slot 0" = "true"  # vanilla: Shop_Heart
+"Bazaar Slot 5" = "true"  # vanilla: Shop_DekuNutBundle_01
+"Bazaar Slot 6" = "true"  # vanilla: Shop_Weapon_Shield_Hylian
+"Bazaar Slot 7" = "true"  # vanilla: Shop_DekuStick

@@ -1,0 +1,19 @@
+# Graveyard
+
+[regions.Root.exits]
+"Graveyard" = "is_adult or Deku_Tree_Clear"
+
+[regions."Graveyard"]
+
+[regions."Graveyard".locations]
+"Dm_MelodyGet_Sun_03" = "Zeldas_Lullaby"  # song: Sun's Song from Royal Tomb
+"Graveyard Dynamic room 0 #0 (TBox_Shield_Hylian)" = "true"
+"Graveyard Static room 0 #0 (Item_Hookshot)" = "is_adult"
+"Graveyard Static room 0 #0 (Obj_Heart_Piece)" = "true"
+"Graveyard Static room 0 #0 (TBox_Rupee_Blue)" = "is_adult"
+"Graveyard Static room 0 #0 (TBox_Rupee_Red)" = "is_adult"
+"Graveyard Static room 0 #1 (Obj_Heart_Piece)" = "is_adult"
+
+[regions."Graveyard".skulltulas]
+"Graveyard GS Wall" = "is_child and Boomerang"  # original: can_use(Boomerang) and at_night
+"Graveyard GS Bean Patch" = "is_child"  # original: can_plant_bugs and can_child_attack

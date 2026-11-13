@@ -1,0 +1,3518 @@
+[
+  {
+    "scene_file": "Banc/BottomOfTheWell/BottomOfTheWell_Dynamic.bcett.byml.zs",
+    "count": 10,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 1,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 136
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 1,
+        "vanilla_drop": "Item_Dungeon_Compass",
+        "str_table_index": 38
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 1,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 40
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 1,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 138
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 1,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 138
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 1,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 136
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 1,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 136
+      },
+      {
+        "gyaml": "Obj_TBox_GlassTruth_A_01",
+        "room_index": 2,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 137
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 9,
+        "vanilla_drop": "Item_Dungeon_Map",
+        "str_table_index": 39
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 11,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 41
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/BottomOfTheWell/BottomOfTheWell_Static.bcett.byml.zs",
+    "count": 2,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_06",
+        "room_index": 6,
+        "vanilla_drop": "TBox_Shield_Deku",
+        "str_table_index": 415
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 8,
+        "vanilla_drop": "Item_GlassTruth",
+        "str_table_index": 253
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DeathMountainCrater/DeathMountainCrater_Adult_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 41
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DeathMountainCrater/DeathMountainCrater_Adult_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 240
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DeathMountainCrater/DeathMountainCrater_Child_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 44
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DeathMountainCrater/DeathMountainCrater_Child_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 226
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DeathMountainTrail/DeathMountainTrail_Adult_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 40
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DeathMountainTrail/DeathMountainTrail_Child_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 37
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DesertColossus/DesertColossus_Adult_Static.bcett.byml.zs",
+    "count": 3,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 0,
+        "vanilla_drop": "Item_Gauntlet_Silver",
+        "str_table_index": 172
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "Item_Shield_Mirror",
+        "str_table_index": 173
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 279
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DesertColossus/DesertColossus_Child_Static.bcett.byml.zs",
+    "count": 3,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 0,
+        "vanilla_drop": "Item_Gauntlet_Silver",
+        "str_table_index": 170
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "Item_Shield_Mirror",
+        "str_table_index": 171
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 277
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DodongoCavern/DodongoCavern_Dynamic.bcett.byml.zs",
+    "count": 5,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 1,
+        "vanilla_drop": "Item_Dungeon_Map",
+        "str_table_index": 48
+      },
+      {
+        "gyaml": "Obj_TBox_A_06",
+        "room_index": 1,
+        "vanilla_drop": "TBox_Shield_Deku",
+        "str_table_index": 231
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 1,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 230
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 10,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 49
+      },
+      {
+        "gyaml": "Obj_TBox_A_06",
+        "room_index": 13,
+        "vanilla_drop": "TBox_Shield_Deku",
+        "str_table_index": 231
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DodongoCavern/DodongoCavern_Static.bcett.byml.zs",
+    "count": 4,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 5,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 601
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 11,
+        "vanilla_drop": "Item_Dungeon_Compass",
+        "str_table_index": 332
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 13,
+        "vanilla_drop": "Item_BombBag_Small",
+        "str_table_index": 331
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 16,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 333
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DreamWorld/BossRushIntervalRoom_Static.bcett.byml.zs",
+    "count": 10,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Gold",
+        "str_table_index": 184
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Gold",
+        "str_table_index": 184
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Gold",
+        "str_table_index": 184
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Gold",
+        "str_table_index": 184
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Gold",
+        "str_table_index": 184
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Gold",
+        "str_table_index": 184
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Gold",
+        "str_table_index": 184
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Gold",
+        "str_table_index": 184
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Gold",
+        "str_table_index": 184
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Gold",
+        "str_table_index": 184
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/FireTemple/FireTemple_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 5,
+        "vanilla_drop": "Item_Dungeon_Map",
+        "str_table_index": 38
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/FireTemple/FireTemple_Static.bcett.byml.zs",
+    "count": 15,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 10,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 591
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 3,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 1043
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 4,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 591
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 2,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 591
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 1,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 591
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 11,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 591
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 16,
+        "vanilla_drop": "Item_Dungeon_Compass",
+        "str_table_index": 590
+      },
+      {
+        "gyaml": "Obj_TBox_A_03",
+        "room_index": 17,
+        "vanilla_drop": "Item_Dungeon_BossKey",
+        "str_table_index": 589
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 1042
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 1043
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 1043
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 22,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 591
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 5,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 591
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 5,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 591
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 13,
+        "vanilla_drop": "Item_Hammer",
+        "str_table_index": 592
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/ForestTemple/ForestTemple_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 27,
+        "vanilla_drop": "TBox_ArrowBundle_Large",
+        "str_table_index": 164
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/ForestTemple/ForestTemple_Static.bcett.byml.zs",
+    "count": 10,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 22,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 568
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 18,
+        "vanilla_drop": "Item_Dungeon_Compass",
+        "str_table_index": 566
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 17,
+        "vanilla_drop": "Item_Range_Bow",
+        "str_table_index": 569
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 4,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 568
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 16,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 568
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 15,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 568
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 568
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 14,
+        "vanilla_drop": "Item_Dungeon_Map",
+        "str_table_index": 567
+      },
+      {
+        "gyaml": "Obj_TBox_A_03_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "Item_Dungeon_BossKey",
+        "str_table_index": 565
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 8,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 940
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GerudoFortress/GerudoFortress_Adult_Static.bcett.byml.zs",
+    "count": 2,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 580
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 0,
+        "vanilla_drop": "Obj_Heart_Piece",
+        "str_table_index": 545
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GerudoTrainingGround/GerudoTrainingGround_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 22
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GerudoTrainingGround/GerudoTrainingGround_Static.bcett.byml.zs",
+    "count": 19,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 3,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 573
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 4,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 324
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 9,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 324
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 573
+      },
+      {
+        "gyaml": "Obj_TBox_GlassTruth_A_01",
+        "room_index": 10,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 324
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 10,
+        "vanilla_drop": "Item_BombBundle_Small",
+        "str_table_index": 322
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 10,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 575
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 10,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 326
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 7,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 324
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 5,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 324
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 324
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 575
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 8,
+        "vanilla_drop": "Item_Arrow_Ice",
+        "str_table_index": 321
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "Item_BombchuBundle_Small",
+        "str_table_index": 323
+      },
+      {
+        "gyaml": "Obj_TBox_A_06",
+        "room_index": 8,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 575
+      },
+      {
+        "gyaml": "Obj_TBox_A_06",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 575
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 574
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 324
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 1,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 324
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GerudoValley/GerudoValley_Adult_Dynamic.bcett.byml.zs",
+    "count": 4,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 26
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Green",
+        "str_table_index": 252
+      },
+      {
+        "gyaml": "Obj_TBox_GlassTruth_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 253
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 253
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GerudoValley/GerudoValley_Adult_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 0,
+        "vanilla_drop": "Obj_Heart_Piece",
+        "str_table_index": 250
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GerudoValley/GerudoValley_Child_Dynamic.bcett.byml.zs",
+    "count": 3,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 22
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Green",
+        "str_table_index": 196
+      },
+      {
+        "gyaml": "Obj_TBox_GlassTruth_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 197
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GerudoValley/GerudoValley_Child_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 0,
+        "vanilla_drop": "Obj_Heart_Piece",
+        "str_table_index": 219
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GoronCity/GoronCity_Adult_Dynamic.bcett.byml.zs",
+    "count": 4,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 167
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 165
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 165
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 166
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GoronCity/GoronCity_Adult_Static.bcett.byml.zs",
+    "count": 2,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Green",
+        "str_table_index": 259
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 260
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GoronCity/GoronCity_Child_Dynamic.bcett.byml.zs",
+    "count": 4,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 176
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 174
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 174
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 175
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GoronCity/GoronCity_Child_Static.bcett.byml.zs",
+    "count": 2,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Green",
+        "str_table_index": 326
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 327
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/Graveyard/Graveyard_Adult_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_06",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Shield_Hylian",
+        "str_table_index": 304
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/Graveyard/Graveyard_Adult_Static.bcett.byml.zs",
+    "count": 5,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 0,
+        "vanilla_drop": "Obj_Heart_Piece",
+        "str_table_index": 324
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "Item_Hookshot",
+        "str_table_index": 207
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "Obj_Heart_Piece",
+        "str_table_index": 324
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 407
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 406
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/Graveyard/Graveyard_Child_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_06",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Shield_Hylian",
+        "str_table_index": 221
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/Graveyard/Graveyard_Child_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 0,
+        "vanilla_drop": "Obj_Heart_Piece",
+        "str_table_index": 352
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/HountedWasteland/HountedWasteland_Adult_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 201
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/HountedWasteland/HountedWasteland_Child_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 191
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/HyruleField/HyruleField_Adult_Dynamic.bcett.byml.zs",
+    "count": 5,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 97
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_memo11",
+        "room_index": 0,
+        "vanilla_drop": "Obj_Heart_Piece",
+        "str_table_index": 680
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 716
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 716
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 716
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/HyruleField/HyruleField_Adult_Static.bcett.byml.zs",
+    "count": 2,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 1132
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 1133
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/HyruleField/HyruleField_Child_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 97
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/HyruleField/HyruleField_Child_Static.bcett.byml.zs",
+    "count": 3,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 1039
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 1040
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_memo11",
+        "room_index": 0,
+        "vanilla_drop": "Obj_Heart_Piece",
+        "str_table_index": 912
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/IceCavern/IceCavern_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 149
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/IceCavern/IceCavern_Static.bcett.byml.zs",
+    "count": 3,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 5,
+        "vanilla_drop": "Item_Dungeon_Map",
+        "str_table_index": 182
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 6,
+        "vanilla_drop": "Item_Dungeon_Compass",
+        "str_table_index": 181
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 10,
+        "vanilla_drop": "Item_HeavyBoot",
+        "str_table_index": 183
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/InsideGanonCastle/InsideGanonCastle_Dynamic.bcett.byml.zs",
+    "count": 6,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "TBox_ArrowBundle_Medium",
+        "str_table_index": 126
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 5,
+        "vanilla_drop": "Item_BombchuBundle_Small",
+        "str_table_index": 54
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 12,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 127
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 12,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 127
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 12,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 127
+      },
+      {
+        "gyaml": "Obj_TBox_GlassTruth_A_01",
+        "room_index": 13,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 55
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/InsideGanonCastle/InsideGanonCastle_Static.bcett.byml.zs",
+    "count": 6,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 8,
+        "vanilla_drop": "Item_Gauntlet_Gold",
+        "str_table_index": 440
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 2,
+        "vanilla_drop": "TBox_ArrowBundle_Medium",
+        "str_table_index": 856
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 12,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 858
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 13,
+        "vanilla_drop": "TBox_Rupee_Green",
+        "str_table_index": 857
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 17,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 441
+      },
+      {
+        "gyaml": "Obj_TBox_A_03_NoBake",
+        "room_index": 24,
+        "vanilla_drop": "Item_Dungeon_BossKey",
+        "str_table_index": 439
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/InsideJabuJabuBelly/InsideJabuJabuBelly_Static.bcett.byml.zs",
+    "count": 4,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 9,
+        "vanilla_drop": "Item_Boomerang",
+        "str_table_index": 408
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 12,
+        "vanilla_drop": "Item_Dungeon_Compass",
+        "str_table_index": 409
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 13,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 627
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 14,
+        "vanilla_drop": "Item_Dungeon_Map",
+        "str_table_index": 410
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/InsideTheDekuTree/InsideTheDekuTree_Dynamic.bcett.byml.zs",
+    "count": 2,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 3,
+        "vanilla_drop": "TBox_DekuNutBundle",
+        "str_table_index": 209
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 4,
+        "vanilla_drop": "Item_DekuStickBundle_Small",
+        "str_table_index": 46
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/InsideTheDekuTree/InsideTheDekuTree_Static.bcett.byml.zs",
+    "count": 4,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 3,
+        "vanilla_drop": "Item_Dungeon_Compass",
+        "str_table_index": 284
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 0,
+        "vanilla_drop": "Item_Dungeon_Map",
+        "str_table_index": 285
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 2,
+        "vanilla_drop": "TBox_DekuNutBundle",
+        "str_table_index": 480
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 2,
+        "vanilla_drop": "Item_Range_SlingShot",
+        "str_table_index": 286
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/KakarikoVillage/KakarikoVillage_Adult_Alternative_Dynamic.bcett.byml.zs",
+    "count": 2,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 219
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 220
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/KakarikoVillage/KakarikoVillage_Adult_Dynamic.bcett.byml.zs",
+    "count": 2,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 213
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 214
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/KakarikoVillage/KakarikoVillage_Child_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 186
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/KokiriForest/KokiriForest_Adult_Dynamic.bcett.byml.zs",
+    "count": 6,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 409
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Green",
+        "str_table_index": 408
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 407
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 407
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 407
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 0,
+        "vanilla_drop": "Item_Sword_Kokiri",
+        "str_table_index": 63
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/KokiriForest/KokiriForest_Adult_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Green",
+        "str_table_index": 398
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/KokiriForest/KokiriForest_Child_Dynamic.bcett.byml.zs",
+    "count": 6,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 407
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Green",
+        "str_table_index": 406
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 405
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 405
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 405
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 0,
+        "vanilla_drop": "Item_Sword_Kokiri",
+        "str_table_index": 64
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/KokiriForest/KokiriForest_Child_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Green",
+        "str_table_index": 565
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/LostWood/LostWood_Adult_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 130
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/LostWood/LostWood_Child_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 128
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/SacredForestMeadow/SacredForestMeadow_Adult_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 21
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/SacredForestMeadow/SacredForestMeadow_Adult_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 260
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/SacredForestMeadow/SacredForestMeadow_Child_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 18
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/SacredForestMeadow/SacredForestMeadow_Child_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 253
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/ShadowTemple/ShadowTemple_Dynamic.bcett.byml.zs",
+    "count": 3,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 11,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 256
+      },
+      {
+        "gyaml": "Obj_TBox_GlassTruth_A_01",
+        "room_index": 15,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 34
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 19,
+        "vanilla_drop": "Tbox_MagicJar_Large",
+        "str_table_index": 257
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/ShadowTemple/ShadowTemple_Static.bcett.byml.zs",
+    "count": 11,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 3,
+        "vanilla_drop": "Item_Dungeon_Map",
+        "str_table_index": 400
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 4,
+        "vanilla_drop": "Item_HoverBoot",
+        "str_table_index": 402
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 7,
+        "vanilla_drop": "Item_Dungeon_Compass",
+        "str_table_index": 399
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 6,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 401
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 11,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 401
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 31,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 801
+      },
+      {
+        "gyaml": "Obj_TBox_GlassTruth_A_01",
+        "room_index": 31,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 801
+      },
+      {
+        "gyaml": "Obj_TBox_GlassTruth_A_01",
+        "room_index": 16,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 401
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 16,
+        "vanilla_drop": "TBox_Rupee_Green",
+        "str_table_index": 800
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 21,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 401
+      },
+      {
+        "gyaml": "Obj_TBox_A_03",
+        "room_index": 19,
+        "vanilla_drop": "Item_Dungeon_BossKey",
+        "str_table_index": 398
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/SpiritTemple/SpiritTemple_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_06",
+        "room_index": 2,
+        "vanilla_drop": "TBox_Shield_Deku",
+        "str_table_index": 442
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/SpiritTemple/SpiritTemple_Static.bcett.byml.zs",
+    "count": 13,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 4,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 488
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 6,
+        "vanilla_drop": "Item_BombchuBundle_Small",
+        "str_table_index": 484
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 7,
+        "vanilla_drop": "Item_Dungeon_Map",
+        "str_table_index": 487
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 7,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 488
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 9,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 488
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 14,
+        "vanilla_drop": "Item_Dungeon_Compass",
+        "str_table_index": 486
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 16,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 488
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 18,
+        "vanilla_drop": "Item_BombBundle_Small",
+        "str_table_index": 483
+      },
+      {
+        "gyaml": "Obj_TBox_GlassTruth_A_01",
+        "room_index": 23,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 966
+      },
+      {
+        "gyaml": "Obj_TBox_GlassTruth_A_01",
+        "room_index": 23,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 966
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 26,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 488
+      },
+      {
+        "gyaml": "Obj_TBox_A_03",
+        "room_index": 29,
+        "vanilla_drop": "Item_Dungeon_BossKey",
+        "str_table_index": 485
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 31,
+        "vanilla_drop": "Item_BombBundle_Small",
+        "str_table_index": 483
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/WaterTemple/WaterTemple_Static.bcett.byml.zs",
+    "count": 9,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 17,
+        "vanilla_drop": "Item_Dungeon_Map",
+        "str_table_index": 409
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 18,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 410
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 4,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 410
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 20,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 410
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 3,
+        "vanilla_drop": "Item_Dungeon_Compass",
+        "str_table_index": 408
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 2,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 732
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 7,
+        "vanilla_drop": "Item_Longshot",
+        "str_table_index": 411
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 410
+      },
+      {
+        "gyaml": "Obj_TBox_A_03",
+        "room_index": 15,
+        "vanilla_drop": "Item_Dungeon_BossKey",
+        "str_table_index": 407
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/ZoraDomain/ZoraDomain_Child_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "Obj_Heart_Piece",
+        "str_table_index": 269
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/ZoraFountain/ZoraFountain_Adult_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 227
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/ZoraRiver/ZoraRiver_Adult_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 34
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/ZoraRiver/ZoraRiver_Child_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 34
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/BottomOfTheWell/BottomOfTheWell_Dynamic.bcett.byml.zs",
+    "count": 10,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 1,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 136
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 1,
+        "vanilla_drop": "Item_Dungeon_Compass",
+        "str_table_index": 38
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 1,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 40
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 1,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 138
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 1,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 138
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 1,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 136
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 1,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 136
+      },
+      {
+        "gyaml": "Obj_TBox_GlassTruth_A_01",
+        "room_index": 2,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 137
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 9,
+        "vanilla_drop": "Item_Dungeon_Map",
+        "str_table_index": 39
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 11,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 41
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/BottomOfTheWell/BottomOfTheWell_Static.bcett.byml.zs",
+    "count": 2,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_06",
+        "room_index": 6,
+        "vanilla_drop": "TBox_Shield_Deku",
+        "str_table_index": 415
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 8,
+        "vanilla_drop": "Item_GlassTruth",
+        "str_table_index": 253
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DeathMountainCrater/DeathMountainCrater_Adult_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 41
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DeathMountainCrater/DeathMountainCrater_Adult_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 240
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DeathMountainCrater/DeathMountainCrater_Child_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 44
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DeathMountainCrater/DeathMountainCrater_Child_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 226
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DeathMountainTrail/DeathMountainTrail_Adult_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 40
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DeathMountainTrail/DeathMountainTrail_Child_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 37
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DesertColossus/DesertColossus_Adult_Static.bcett.byml.zs",
+    "count": 3,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 0,
+        "vanilla_drop": "Item_Gauntlet_Silver",
+        "str_table_index": 172
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "Item_Shield_Mirror",
+        "str_table_index": 173
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 279
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DesertColossus/DesertColossus_Child_Static.bcett.byml.zs",
+    "count": 3,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 0,
+        "vanilla_drop": "Item_Gauntlet_Silver",
+        "str_table_index": 170
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "Item_Shield_Mirror",
+        "str_table_index": 171
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 277
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DodongoCavern/DodongoCavern_Dynamic.bcett.byml.zs",
+    "count": 5,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 1,
+        "vanilla_drop": "Item_Dungeon_Map",
+        "str_table_index": 48
+      },
+      {
+        "gyaml": "Obj_TBox_A_06",
+        "room_index": 1,
+        "vanilla_drop": "TBox_Shield_Deku",
+        "str_table_index": 231
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 1,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 230
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 10,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 49
+      },
+      {
+        "gyaml": "Obj_TBox_A_06",
+        "room_index": 13,
+        "vanilla_drop": "TBox_Shield_Deku",
+        "str_table_index": 231
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DodongoCavern/DodongoCavern_Static.bcett.byml.zs",
+    "count": 4,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 5,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 601
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 11,
+        "vanilla_drop": "Item_Dungeon_Compass",
+        "str_table_index": 332
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 13,
+        "vanilla_drop": "Item_BombBag_Small",
+        "str_table_index": 331
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 16,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 333
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/DreamWorld/BossRushIntervalRoom_Static.bcett.byml.zs",
+    "count": 10,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Gold",
+        "str_table_index": 184
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Gold",
+        "str_table_index": 184
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Gold",
+        "str_table_index": 184
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Gold",
+        "str_table_index": 184
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Gold",
+        "str_table_index": 184
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Gold",
+        "str_table_index": 184
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Gold",
+        "str_table_index": 184
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Gold",
+        "str_table_index": 184
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Gold",
+        "str_table_index": 184
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Gold",
+        "str_table_index": 184
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/FireTemple/FireTemple_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 5,
+        "vanilla_drop": "Item_Dungeon_Map",
+        "str_table_index": 38
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/FireTemple/FireTemple_Static.bcett.byml.zs",
+    "count": 15,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 10,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 591
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 3,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 1043
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 4,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 591
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 2,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 591
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 1,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 591
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 11,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 591
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 16,
+        "vanilla_drop": "Item_Dungeon_Compass",
+        "str_table_index": 590
+      },
+      {
+        "gyaml": "Obj_TBox_A_03",
+        "room_index": 17,
+        "vanilla_drop": "Item_Dungeon_BossKey",
+        "str_table_index": 589
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 1042
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 1043
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 1043
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 22,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 591
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 5,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 591
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 5,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 591
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 13,
+        "vanilla_drop": "Item_Hammer",
+        "str_table_index": 592
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/ForestTemple/ForestTemple_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 27,
+        "vanilla_drop": "TBox_ArrowBundle_Large",
+        "str_table_index": 164
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/ForestTemple/ForestTemple_Static.bcett.byml.zs",
+    "count": 10,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 22,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 568
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 18,
+        "vanilla_drop": "Item_Dungeon_Compass",
+        "str_table_index": 566
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 17,
+        "vanilla_drop": "Item_Range_Bow",
+        "str_table_index": 569
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 4,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 568
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 16,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 568
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 15,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 568
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 568
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 14,
+        "vanilla_drop": "Item_Dungeon_Map",
+        "str_table_index": 567
+      },
+      {
+        "gyaml": "Obj_TBox_A_03_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "Item_Dungeon_BossKey",
+        "str_table_index": 565
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 8,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 940
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GerudoFortress/GerudoFortress_Adult_Static.bcett.byml.zs",
+    "count": 2,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 580
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 0,
+        "vanilla_drop": "Obj_Heart_Piece",
+        "str_table_index": 545
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GerudoTrainingGround/GerudoTrainingGround_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 22
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GerudoTrainingGround/GerudoTrainingGround_Static.bcett.byml.zs",
+    "count": 19,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 3,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 573
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 4,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 324
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 9,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 324
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 573
+      },
+      {
+        "gyaml": "Obj_TBox_GlassTruth_A_01",
+        "room_index": 10,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 324
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 10,
+        "vanilla_drop": "Item_BombBundle_Small",
+        "str_table_index": 322
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 10,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 575
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 10,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 326
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 7,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 324
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 5,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 324
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 324
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 575
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 8,
+        "vanilla_drop": "Item_Arrow_Ice",
+        "str_table_index": 321
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "Item_BombchuBundle_Small",
+        "str_table_index": 323
+      },
+      {
+        "gyaml": "Obj_TBox_A_06",
+        "room_index": 8,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 575
+      },
+      {
+        "gyaml": "Obj_TBox_A_06",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 575
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 574
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 324
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 1,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 324
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GerudoValley/GerudoValley_Adult_Dynamic.bcett.byml.zs",
+    "count": 4,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 26
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Green",
+        "str_table_index": 252
+      },
+      {
+        "gyaml": "Obj_TBox_GlassTruth_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 253
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 253
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GerudoValley/GerudoValley_Adult_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 0,
+        "vanilla_drop": "Obj_Heart_Piece",
+        "str_table_index": 250
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GerudoValley/GerudoValley_Child_Dynamic.bcett.byml.zs",
+    "count": 3,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 22
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Green",
+        "str_table_index": 196
+      },
+      {
+        "gyaml": "Obj_TBox_GlassTruth_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 197
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GerudoValley/GerudoValley_Child_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 0,
+        "vanilla_drop": "Obj_Heart_Piece",
+        "str_table_index": 219
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GoronCity/GoronCity_Adult_Dynamic.bcett.byml.zs",
+    "count": 4,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 167
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 165
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 165
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 166
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GoronCity/GoronCity_Adult_Static.bcett.byml.zs",
+    "count": 2,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Green",
+        "str_table_index": 259
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 260
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GoronCity/GoronCity_Child_Dynamic.bcett.byml.zs",
+    "count": 4,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 176
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 174
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 174
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 175
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/GoronCity/GoronCity_Child_Static.bcett.byml.zs",
+    "count": 2,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Green",
+        "str_table_index": 326
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 327
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/Graveyard/Graveyard_Adult_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_06",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Shield_Hylian",
+        "str_table_index": 304
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/Graveyard/Graveyard_Adult_Static.bcett.byml.zs",
+    "count": 5,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 0,
+        "vanilla_drop": "Obj_Heart_Piece",
+        "str_table_index": 324
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "Item_Hookshot",
+        "str_table_index": 207
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "Obj_Heart_Piece",
+        "str_table_index": 324
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 407
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 406
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/Graveyard/Graveyard_Child_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_06",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Shield_Hylian",
+        "str_table_index": 221
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/Graveyard/Graveyard_Child_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 0,
+        "vanilla_drop": "Obj_Heart_Piece",
+        "str_table_index": 352
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/HountedWasteland/HountedWasteland_Adult_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 201
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/HountedWasteland/HountedWasteland_Child_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 191
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/HyruleField/HyruleField_Adult_Dynamic.bcett.byml.zs",
+    "count": 5,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 97
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_memo11",
+        "room_index": 0,
+        "vanilla_drop": "Obj_Heart_Piece",
+        "str_table_index": 680
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 716
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 716
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 716
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/HyruleField/HyruleField_Adult_Static.bcett.byml.zs",
+    "count": 2,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 1132
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 1133
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/HyruleField/HyruleField_Child_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 97
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/HyruleField/HyruleField_Child_Static.bcett.byml.zs",
+    "count": 3,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 1039
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 1040
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_memo11",
+        "room_index": 0,
+        "vanilla_drop": "Obj_Heart_Piece",
+        "str_table_index": 912
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/IceCavern/IceCavern_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 149
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/IceCavern/IceCavern_Static.bcett.byml.zs",
+    "count": 3,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 5,
+        "vanilla_drop": "Item_Dungeon_Map",
+        "str_table_index": 182
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 6,
+        "vanilla_drop": "Item_Dungeon_Compass",
+        "str_table_index": 181
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 10,
+        "vanilla_drop": "Item_HeavyBoot",
+        "str_table_index": 183
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/InsideGanonCastle/InsideGanonCastle_Dynamic.bcett.byml.zs",
+    "count": 6,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "TBox_ArrowBundle_Medium",
+        "str_table_index": 126
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 5,
+        "vanilla_drop": "Item_BombchuBundle_Small",
+        "str_table_index": 54
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 12,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 127
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 12,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 127
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 12,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 127
+      },
+      {
+        "gyaml": "Obj_TBox_GlassTruth_A_01",
+        "room_index": 13,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 55
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/InsideGanonCastle/InsideGanonCastle_Static.bcett.byml.zs",
+    "count": 6,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 8,
+        "vanilla_drop": "Item_Gauntlet_Gold",
+        "str_table_index": 440
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 2,
+        "vanilla_drop": "TBox_ArrowBundle_Medium",
+        "str_table_index": 856
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 12,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 858
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 13,
+        "vanilla_drop": "TBox_Rupee_Green",
+        "str_table_index": 857
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 17,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 441
+      },
+      {
+        "gyaml": "Obj_TBox_A_03_NoBake",
+        "room_index": 24,
+        "vanilla_drop": "Item_Dungeon_BossKey",
+        "str_table_index": 439
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/InsideJabuJabuBelly/InsideJabuJabuBelly_Static.bcett.byml.zs",
+    "count": 4,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 9,
+        "vanilla_drop": "Item_Boomerang",
+        "str_table_index": 408
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 12,
+        "vanilla_drop": "Item_Dungeon_Compass",
+        "str_table_index": 409
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 13,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 627
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 14,
+        "vanilla_drop": "Item_Dungeon_Map",
+        "str_table_index": 410
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/InsideTheDekuTree/InsideTheDekuTree_Dynamic.bcett.byml.zs",
+    "count": 2,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 3,
+        "vanilla_drop": "TBox_DekuNutBundle",
+        "str_table_index": 209
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 4,
+        "vanilla_drop": "Item_DekuStickBundle_Small",
+        "str_table_index": 46
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/InsideTheDekuTree/InsideTheDekuTree_Static.bcett.byml.zs",
+    "count": 4,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 3,
+        "vanilla_drop": "Item_Dungeon_Compass",
+        "str_table_index": 284
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 0,
+        "vanilla_drop": "Item_Dungeon_Map",
+        "str_table_index": 285
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 2,
+        "vanilla_drop": "TBox_DekuNutBundle",
+        "str_table_index": 480
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 2,
+        "vanilla_drop": "Item_Range_SlingShot",
+        "str_table_index": 286
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/KakarikoVillage/KakarikoVillage_Adult_Alternative_Dynamic.bcett.byml.zs",
+    "count": 2,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 219
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 220
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/KakarikoVillage/KakarikoVillage_Adult_Dynamic.bcett.byml.zs",
+    "count": 2,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 213
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 214
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/KakarikoVillage/KakarikoVillage_Child_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 186
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/KokiriForest/KokiriForest_Adult_Dynamic.bcett.byml.zs",
+    "count": 6,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 409
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Green",
+        "str_table_index": 408
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 407
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 407
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 407
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 0,
+        "vanilla_drop": "Item_Sword_Kokiri",
+        "str_table_index": 63
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/KokiriForest/KokiriForest_Adult_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Green",
+        "str_table_index": 398
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/KokiriForest/KokiriForest_Child_Dynamic.bcett.byml.zs",
+    "count": 6,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 407
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Green",
+        "str_table_index": 406
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 405
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 405
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Blue",
+        "str_table_index": 405
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 0,
+        "vanilla_drop": "Item_Sword_Kokiri",
+        "str_table_index": 64
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/KokiriForest/KokiriForest_Child_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Green",
+        "str_table_index": 565
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/LostWood/LostWood_Adult_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 130
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/LostWood/LostWood_Child_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 128
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/SacredForestMeadow/SacredForestMeadow_Adult_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 21
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/SacredForestMeadow/SacredForestMeadow_Adult_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 260
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/SacredForestMeadow/SacredForestMeadow_Child_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 18
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/SacredForestMeadow/SacredForestMeadow_Child_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 253
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/ShadowTemple/ShadowTemple_Dynamic.bcett.byml.zs",
+    "count": 3,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 11,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 256
+      },
+      {
+        "gyaml": "Obj_TBox_GlassTruth_A_01",
+        "room_index": 15,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 34
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 19,
+        "vanilla_drop": "Tbox_MagicJar_Large",
+        "str_table_index": 257
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/ShadowTemple/ShadowTemple_Static.bcett.byml.zs",
+    "count": 11,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 3,
+        "vanilla_drop": "Item_Dungeon_Map",
+        "str_table_index": 400
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 4,
+        "vanilla_drop": "Item_HoverBoot",
+        "str_table_index": 402
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 7,
+        "vanilla_drop": "Item_Dungeon_Compass",
+        "str_table_index": 399
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 6,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 401
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 11,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 401
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 31,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 801
+      },
+      {
+        "gyaml": "Obj_TBox_GlassTruth_A_01",
+        "room_index": 31,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 801
+      },
+      {
+        "gyaml": "Obj_TBox_GlassTruth_A_01",
+        "room_index": 16,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 401
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 16,
+        "vanilla_drop": "TBox_Rupee_Green",
+        "str_table_index": 800
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 21,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 401
+      },
+      {
+        "gyaml": "Obj_TBox_A_03",
+        "room_index": 19,
+        "vanilla_drop": "Item_Dungeon_BossKey",
+        "str_table_index": 398
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/SpiritTemple/SpiritTemple_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_06",
+        "room_index": 2,
+        "vanilla_drop": "TBox_Shield_Deku",
+        "str_table_index": 442
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/SpiritTemple/SpiritTemple_Static.bcett.byml.zs",
+    "count": 13,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 4,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 488
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 6,
+        "vanilla_drop": "Item_BombchuBundle_Small",
+        "str_table_index": 484
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 7,
+        "vanilla_drop": "Item_Dungeon_Map",
+        "str_table_index": 487
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 7,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 488
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 9,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 488
+      },
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 14,
+        "vanilla_drop": "Item_Dungeon_Compass",
+        "str_table_index": 486
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 16,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 488
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 18,
+        "vanilla_drop": "Item_BombBundle_Small",
+        "str_table_index": 483
+      },
+      {
+        "gyaml": "Obj_TBox_GlassTruth_A_01",
+        "room_index": 23,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 966
+      },
+      {
+        "gyaml": "Obj_TBox_GlassTruth_A_01",
+        "room_index": 23,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 966
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 26,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 488
+      },
+      {
+        "gyaml": "Obj_TBox_A_03",
+        "room_index": 29,
+        "vanilla_drop": "Item_Dungeon_BossKey",
+        "str_table_index": 485
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 31,
+        "vanilla_drop": "Item_BombBundle_Small",
+        "str_table_index": 483
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/WaterTemple/WaterTemple_Static.bcett.byml.zs",
+    "count": 9,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 17,
+        "vanilla_drop": "Item_Dungeon_Map",
+        "str_table_index": 409
+      },
+      {
+        "gyaml": "Obj_TBox_A_01_NoBake",
+        "room_index": 18,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 410
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 4,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 410
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 20,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 410
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 3,
+        "vanilla_drop": "Item_Dungeon_Compass",
+        "str_table_index": 408
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 2,
+        "vanilla_drop": "TBox_Rupee_Red",
+        "str_table_index": 732
+      },
+      {
+        "gyaml": "Obj_TBox_A_02",
+        "room_index": 7,
+        "vanilla_drop": "Item_Longshot",
+        "str_table_index": 411
+      },
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 8,
+        "vanilla_drop": "Item_Dungeon_SmallKey",
+        "str_table_index": 410
+      },
+      {
+        "gyaml": "Obj_TBox_A_03",
+        "room_index": 15,
+        "vanilla_drop": "Item_Dungeon_BossKey",
+        "str_table_index": 407
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/ZoraDomain/ZoraDomain_Child_Static.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_02_NoBake",
+        "room_index": 0,
+        "vanilla_drop": "Obj_Heart_Piece",
+        "str_table_index": 269
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/ZoraFountain/ZoraFountain_Adult_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "TBox_Rupee_Purple",
+        "str_table_index": 227
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/ZoraRiver/ZoraRiver_Adult_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 34
+      }
+    ]
+  },
+  {
+    "scene_file": "Banc/ZoraRiver/ZoraRiver_Child_Dynamic.bcett.byml.zs",
+    "count": 1,
+    "chests": [
+      {
+        "gyaml": "Obj_TBox_A_01",
+        "room_index": 0,
+        "vanilla_drop": "Item_ScrubBusinessSeed",
+        "str_table_index": 34
+      }
+    ]
+  }
+]

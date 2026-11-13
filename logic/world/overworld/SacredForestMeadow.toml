@@ -1,0 +1,15 @@
+# SacredForestMeadow
+
+[regions.Root.exits]
+"SacredForestMeadow" = "true"
+
+[regions."SacredForestMeadow"]
+
+[regions."SacredForestMeadow".locations]
+"Dm_MelodyGet_Saria" = "is_child and Deku_Tree_Clear"  # song: Saria's Song from Saria, Sacred Forest Meadow
+"Dm_MelodyGet_Forest" = "is_adult and Deku_Tree_Clear"  # song: Minuet of Forest from Sheik, Sacred Forest Meadow
+"SacredForestMeadow Dynamic room 0 #0 (Item_ScrubBusinessSeed)" = "((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus)))) and Song_of_Time and (Ocarina_of_Time or Fairy_Ocarina)"
+"SacredForestMeadow Static room 0 #0 (TBox_Rupee_Purple)" = "Song_of_Storms"
+
+[regions."SacredForestMeadow".skulltulas]
+"SFM GS" = "(is_adult and (Hookshot or Longshot)) and (Sarias_Song or Minuet_of_Forest)"  # original: can_use(Hookshot) and at_night

@@ -1,0 +1,29 @@
+# DodongoCavern
+
+[regions.Root.exits]
+"DodongoCavern" = "(is_adult or Deku_Tree_Clear) and Goron_Bracelet"
+
+[regions."DodongoCavern"]
+dungeon = true
+
+[regions."DodongoCavern".events]
+"Dodongos_Cavern_Clear" = "is_child and Bomb_Bag and Goron_Bracelet and (SLingshot or Boomerang)"
+
+[regions."DodongoCavern".locations]
+"Dm_DeathMtTrail_0025 (event item)" = "Dodongos_Cavern_Clear"
+"DodongoCavern Dynamic room 1 #0 (Item_Dungeon_Map)" = "true"
+"DodongoCavern Dynamic room 1 #0 (TBox_Rupee_Blue)" = "true"
+"DodongoCavern Dynamic room 1 #0 (TBox_Shield_Deku)" = "true"
+"DodongoCavern Dynamic room 10 #0 (Item_ScrubBusinessSeed)" = "true"
+"DodongoCavern Dynamic room 13 #0 (TBox_Shield_Deku)" = "true"
+"DodongoCavern Static room 11 #0 (Item_Dungeon_Compass)" = "true"
+"DodongoCavern Static room 13 #0 (Item_BombBag_Small)" = "(is_child and Slingshot) or (is_adult and Bow)"
+"DodongoCavern Static room 16 #0 (Item_ScrubBusinessSeed)" = "(is_child and Slingshot) or (is_adult and Bow)"
+"DodongoCavern Static room 5 #0 (TBox_Rupee_Red)" = "true"
+
+[regions."DodongoCavern".skulltulas]
+"Dodongos Cavern GS Side Room Near Lower Lizalfos" = "true"  # original: is_adult or has_explosives or Sticks or Slingshot or Boomerang or Kokiri_Sword
+"Dodongos Cavern GS Scarecrow" = "(is_adult and (Hookshot or Longshot))"  # original: can_use(Scarecrow) or can_use(Longshot) or (logic_dc_scarecrow_gs and (is_adult or can_child_attack))
+"Dodongos Cavern GS Vines Above Stairs" = "true"  # original: at('Dodongos Cavern Climb', True) or (logic_dc_vines_gs and can_use(Longshot))
+"Dodongos Cavern GS Alcove Above Stairs" = "((is_adult and (Hover_Boots or Longshot)) or (((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))) or (is_adult and Megaton_Hammer) or Goron_Bracelet or Silver_Gauntlets or Golden_Gauntlets) and ((is_child and Slingshot) or (is_adult and Bow)))) and ((is_adult and (Hookshot or Longshot)) or (is_child and Boomerang))"  # original: can_use(Hookshot) or can_use(Boomerang)
+"Dodongos Cavern GS Back Room" = "((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus)))) and ((is_adult and (Hover_Boots or Longshot or Bow)) or (is_child and Slingshot))"  # original: can_blast_or_smash

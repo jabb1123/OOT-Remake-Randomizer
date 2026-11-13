@@ -1,0 +1,35 @@
+# KokiriForest
+
+[regions.Root.exits]
+"KokiriForest" = "true"
+
+[regions."KokiriForest"]
+
+[regions."KokiriForest".locations]
+"KokiriForest Dynamic room 0 #0 (Item_Sword_Kokiri)" = "true"
+"KokiriForest Dynamic room 0 #0 (TBox_Rupee_Blue)" = "true"
+"KokiriForest Dynamic room 0 #0 (TBox_Rupee_Green)" = "true"
+"KokiriForest Dynamic room 0 #0 (TBox_Rupee_Purple)" = "Song_of_Storms"
+"KokiriForest Dynamic room 0 #1 (TBox_Rupee_Blue)" = "true"
+"KokiriForest Dynamic room 0 #2 (TBox_Rupee_Blue)" = "true"
+"KokiriForest Static room 0 #0 (TBox_Rupee_Green)" = "true"
+
+[regions."KokiriForest".skulltulas]
+"KF GS Know It All House" = "is_child"  # original: is_child and can_child_attack and at_night and (had_night_start or can_leave_forest or can_play(Suns_Song) )
+"KF GS Bean Patch" = "is_child"  # original: can_plant_bugs and can_child_attack
+"KF GS House of Twins" = "(is_adult and (Hookshot or Longshot))"  # original: is_adult and at_night and (Hookshot or (logic_adult_kokiri_gs_hovers and Hover_Boots) or logic_adult_kokiri...
+
+# Kokiri Shop (shopsanity). Slot numbers are the shelf ShopItemIndex; only slots listed here
+# can hold randomized items, and a slot's price adds a wallet requirement per seed.
+[regions."KokiriForest".exits]
+"KokiriShop" = "true"
+
+[regions."KokiriShop".locations]
+"Kokiri Shop Slot 0" = "Deku_Tree_Clear"  # vanilla: Shop_Heart; shelf appears after the Deku Tree
+"Kokiri Shop Slot 1" = "Deku_Tree_Clear"  # vanilla: Shop_DekuSeedBundle_02; shelf appears after the Deku Tree
+"Kokiri Shop Slot 2" = "true"  # vanilla: Shop_DekuNutBundle_01
+"Kokiri Shop Slot 3" = "Deku_Tree_Clear"  # vanilla: Shop_DekuNutBundle_02; shelf appears after the Deku Tree
+"Kokiri Shop Slot 4" = "Deku_Tree_Clear"  # vanilla: Shop_DekuSeedBundle_01; shelf appears after the Deku Tree
+"Kokiri Shop Slot 5" = "Deku_Tree_Clear"  # vanilla: Shop_DekuStickBundle_Medium; shelf appears after the Deku Tree
+"Kokiri Shop Slot 6" = "true"  # vanilla: Shop_Weapon_Shield_Deku
+"Kokiri Shop Slot 7" = "true"  # vanilla: Shop_DekuStick

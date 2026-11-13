@@ -1,0 +1,31 @@
+# ForestTemple
+
+[regions.Root.exits]
+"ForestTemple" = "is_adult and (Hookshot or Longshot)"
+
+[regions."ForestTemple"]
+dungeon = true
+
+[regions."ForestTemple".events]
+"Forest_Temple_Clear" = "is_adult and Bow and Goron_Bracelet"
+
+[regions."ForestTemple".locations]
+"Dm_Awake_Forest_Get (event item)" = "Forest_Temple_Clear"
+"ForestTemple Dynamic room 27 #0 (TBox_ArrowBundle_Large)" = "true"
+"ForestTemple Static room 0 #0 (Item_Dungeon_BossKey)" = "true"
+"ForestTemple Static room 0 #0 (Item_Dungeon_SmallKey)" = "true"
+"ForestTemple Static room 14 #0 (Item_Dungeon_Map)" = "true"
+"ForestTemple Static room 15 #0 (Item_Dungeon_SmallKey)" = "true"
+"ForestTemple Static room 16 #0 (Item_Dungeon_SmallKey)" = "true"
+"ForestTemple Static room 17 #0 (Item_Range_Bow)" = "Goron_Bracelet"
+"ForestTemple Static room 18 #0 (Item_Dungeon_Compass)" = "true"
+"ForestTemple Static room 22 #0 (Item_Dungeon_SmallKey)" = "true"
+"ForestTemple Static room 4 #0 (Item_Dungeon_SmallKey)" = "true"
+"ForestTemple Static room 8 #0 (TBox_Rupee_Purple)" = "true"
+
+[regions."ForestTemple".skulltulas]
+"Forest Temple GS First Room" = "true"  # original: (is_adult and (Hookshot or Bow or Bombs)) or (is_child and (Boomerang or Slingshot)) or has_bombchus or can...
+"Forest Temple GS Lobby" = "((is_adult and (Hookshot or Longshot)) or (is_child and Boomerang))"  # original: can_use(Hookshot) or can_use(Boomerang)
+"Forest Temple GS Level Island Courtyard" = "(is_adult and Longshot and (Song_of_Time or Bow or Hover_Boots)) or (is_adult and (Hookshot or Longshot) and (Hover_Boots or (Bow and (Goron_Bracelet or Silver_Gauntlets or Golden_Gauntlets))))"  # original: can_use(Longshot) or at('Forest Temple Outside Upper Ledge', can_use(Hookshot) or can_use(Boomerang))
+"Forest Temple GS Raised Island Courtyard" = "(is_adult and (Hookshot or Longshot) and (Song_of_Time or Bow or Hover_Boots)) or (is_adult and (Goron_Bracelet or Silver_Gauntlets or Golden_Gauntlets))"  # original: can_use(Hookshot) or (logic_forest_outdoor_east_gs and can_use(Boomerang)) or at('Forest Temple Falling Roo...
+"Forest Temple GS Basement" = "is_adult and Bow and (Goron_Bracelet or Silver_Gauntlets or Golden_Gauntlets) and (Hookshot or Longshot)"  # original: can_use(Hookshot) or can_use(Boomerang)

@@ -1,0 +1,14 @@
+# ZoraFountain
+
+[regions.Root.exits]
+"ZoraFountain" = "(is_adult or Deku_Tree_Clear) and Zeldas_Lullaby"
+
+[regions."ZoraFountain"]
+
+[regions."ZoraFountain".locations]
+"ZoraFountain Dynamic room 0 #0 (TBox_Rupee_Purple)" = "is_adult"
+
+[regions."ZoraFountain".skulltulas]
+"ZF GS Tree" = "is_child"  # original: is_child and can_bonk
+"ZF GS Above the Log" = "is_child and Boomerang"  # original: can_use(Boomerang) and at_night
+"ZF GS Hidden Cave" = "is_adult and (Silver_Gauntlets or Golden_Gauntlets) and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))) or Megaton_Hammer) and (Hookshot or Longshot)"  # original: Hookshot and at_night

@@ -1,0 +1,323 @@
+"""Patch record types and patch application logic.
+
+PatchRecord describes a logical chest change: which scene file, which actor,
+and what Drop__DropActor string to place. No numeric byte IDs are used —
+the remake identifies items by actor string name.
+
+RomPatcher applies records against an already-copied NUP using NupChestPatcher.
+For files where byte offsets are not yet resolved it falls back to manifest-only mode.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from dataclasses import dataclass, field
+from pathlib import Path, PurePosixPath
+
+from .chest_events import SWORD_EVENT_FLOW, SWORD_VANILLA_ITEM, skip_sword_demo
+from .cutscene_skips import INTRO_EVENT_FLOW, skip_intro_demo
+from .event_items import EVENT_SLOTS, patch_event_item
+from .npc_grants import NPC_SLOTS, SCRUB_BIGGORON_FLOW, disable_scrub_biggoron_sale, patch_npc_grants
+from .item_ids import resolve_actor_name
+from .location_mapper import build_scene_file_index, load_summary_file
+from .locations import OOTLocation
+from .skulltula_rewards import SKULL_FLOW, SKULL_REWARDS, patch_skull_rewards
+from .stone_gates import STONE_GATE_FLOWS, patch_stone_gates
+from .songs import SONG_SLOTS, patch_bfevfl_song
+
+
+def _legacy_item_id(actor_name: str) -> int:
+    """Return a stable 32-bit compatibility ID for an actor name.
+
+    The modern patch pipeline identifies items by their BYML string actor names,
+    but older manifests/tests still expect a numeric item id field. The value is
+    derived from the actor name so it is deterministic and does not depend on the
+    original N64 byte IDs.
+    """
+    digest = hashlib.sha256(actor_name.encode("utf-8")).digest()
+    return int.from_bytes(digest[:4], byteorder="big", signed=False)
+
+
+@dataclass(frozen=True, slots=True)
+class PatchRecord:
+    location_name: str
+    scene: str
+    check_type: str
+    check_index: int
+    vanilla_item: str       # Drop__DropActor actor name before patching
+    replacement_item: str   # Drop__DropActor actor name after patching
+    byte_offset: int | None # resolved by BYML walker; None = manifest-only
+    item_id: int = 0
+    scene_file: str | None = None
+    room_index: int | None = None
+    chest_order: int | None = None  # position of the chest in the bcett scan order
+
+
+def make_patch(
+    location: OOTLocation,
+    replacement_item: str,
+    *,
+    scene_file: str | None = None,
+    room_index: int | None = None,
+) -> PatchRecord:
+    return PatchRecord(
+        location_name=location.name,
+        scene=location.scene,
+        check_type=location.check_type,
+        check_index=location.check_index,
+        vanilla_item=resolve_actor_name(location.vanilla_item),
+        replacement_item=replacement_item,
+        byte_offset=None,
+        item_id=_legacy_item_id(replacement_item),
+        scene_file=scene_file,
+        room_index=room_index,
+    )
+
+
+def _is_nup_container(rom_path: Path) -> bool:
+    """True when `rom_path` opens as a NUP container (TOC and packages parse)."""
+    try:
+        from nup.read import NupReader
+        NupReader(str(rom_path)).close()
+    except Exception:
+        return False
+    return True
+
+
+def sword_chest_moved(patches: list[PatchRecord]) -> bool:
+    """True when the Kokiri Forest sword chest no longer holds the Kokiri Sword."""
+    return any(
+        p.scene == "KokiriForest"
+        and p.vanilla_item == SWORD_VANILLA_ITEM
+        and p.replacement_item != SWORD_VANILLA_ITEM
+        for p in patches
+    )
+
+
+def resolve_scene_files(scene: str) -> list[str]:
+    """Resolve a logical scene key to the real filenames present in the generated chest summary."""
+    project_root = Path(__file__).resolve().parents[2]
+    summary_path = project_root / "chest_locations_summary.json"
+    if summary_path.exists():
+        summary = load_summary_file(summary_path)
+        scene_index = build_scene_file_index(summary)
+        files = scene_index.get(scene, [])
+        if files:
+            return [PurePosixPath(path).name for path in files]
+    return [f"{scene}_Static.bcett.byml.zs"]
+
+
+def build_scene_patch_map(patches: list[PatchRecord]) -> dict[str, list[dict[str, object]]]:
+    """Group patch records by scene file and exact chest identity: room + logical chest index."""
+    grouped: dict[str, list[dict[str, object]]] = {}
+    for patch in patches:
+        scene_files = [patch.scene_file] if patch.scene_file else resolve_scene_files(patch.scene)
+        for scene_file in scene_files:
+            normalized_scene_file = PurePosixPath(scene_file).name if scene_file else None
+            if normalized_scene_file is None:
+                continue
+            grouped.setdefault(normalized_scene_file, []).append(
+                {
+                    "location_name": patch.location_name,
+                    "scene": patch.scene,
+                    "check_index": patch.check_index,
+                    "room_index": patch.room_index,
+                    "chest_order": patch.chest_order,
+                    "vanilla_item": patch.vanilla_item,
+                    "replacement_item": patch.replacement_item,
+                }
+            )
+    return grouped
+
+
+class RomPatcher:
+    """Applies PatchRecords to a copied NUP via NupChestPatcher.
+
+    Falls back to manifest-only mode when byte_offset is None on any record.
+    """
+
+    @staticmethod
+    def _resolve_zsdic_path(rom_path: Path) -> Path | None:
+        candidates = [
+            rom_path.with_name("ZsDic.pack"),
+            Path(__file__).resolve().parents[2] / "ZsDic.pack",
+        ]
+        for candidate in candidates:
+            if candidate.exists():
+                return candidate
+        return None
+
+    def apply(
+        self,
+        rom_path: Path,
+        patches: list[PatchRecord],
+        song_assignments: dict[str, str] | None = None,
+        skull_assignments: dict[int, str] | None = None,
+        shop_assignments: list[tuple[str, str, int]] | None = None,
+        event_assignments: dict[str, str] | None = None,
+        npc_assignments: dict[str, str] | None = None,
+        skip_intro: bool = False,
+    ) -> "PatchResult":
+        """Apply chest, song, skull-reward, event-item, NPC-grant and shop changes to a NUP copy, in place.
+
+        Shop items (shop_assignments: [(slot name, item, price)]) are applied first: adding
+        their packs grows the TOC and moves the package meta blocks, which is only proven on
+        an otherwise untouched NUP (emulator test), and it fails before writing anything when
+        the TOC has no room. The replace_file based patches that follow re-read the TOC for
+        every write, so they work on the grown NUP. Shop errors raise ShopError; the other
+        patches keep falling back to manifest-only mode unless shop items were already
+        written, in which case their error is raised.
+        """
+        if not rom_path.exists():
+            return PatchResult(
+                applied=0,
+                skipped=len(patches),
+                mode="manifest-only",
+                unresolved_locations=[p.location_name for p in patches],
+            )
+
+        from .gamedata_list import GAME_DATA_LIST, patch_gamedata_list
+        from .nup_chest_patcher import NupChestPatcher, NupPatchError
+        from .shop_soldout import DISPLAY_SHOP_FLOW, patch_kokiri_soldout
+        # Group patches by the real scene files and exact chest identity.
+        # byte_offset is not required here: the NUP scan resolves the real BYML offsets
+        # for each target room/chest when a valid NUP + ZsDic are present.
+        by_scene = build_scene_patch_map(patches)
+
+        # Load ZsDic (expected alongside the NUP, but may also live in the project root).
+        zsdic_path = self._resolve_zsdic_path(rom_path)
+        if zsdic_path is None:
+            return PatchResult(
+                applied=0,
+                skipped=len(patches),
+                mode="manifest-only",
+                unresolved_locations=["ZsDic.pack not found beside NUP or project root"],
+            )
+
+        zsdic = zsdic_path.read_bytes()
+        shop_actors: list[str] = []
+        if shop_assignments:
+            from .shop_slots import apply_shop_slots, shop_items_for
+            shop_items_for(shop_assignments)  # unknown slots / unsellable items raise ShopError
+            if _is_nup_container(rom_path):
+                shop_result = apply_shop_slots(rom_path, zsdic, shop_assignments)
+                shop_actors = [a.name for a in shop_result.actors]
+
+        patcher = NupChestPatcher(rom_path, zsdic)
+        applied = len(shop_actors)
+        try:
+            for scene_file, scene_patches in by_scene.items():
+                try:
+                    if not scene_patches:
+                        continue
+                    swap_map: dict[str, str] = {
+                        str(p["vanilla_item"]): str(p["replacement_item"]) for p in scene_patches
+                    }
+                    result = patcher.patch_scene(
+                        scene_file,
+                        swap_map,
+                        target_replacements=scene_patches,
+                    )
+                    applied += result.chests_patched
+                except NupPatchError:
+                    pass
+            if sword_chest_moved(patches):
+                patcher.replace_file(SWORD_EVENT_FLOW, skip_sword_demo)
+                applied += 1
+            if skip_intro:
+                patcher.replace_file(INTRO_EVENT_FLOW, skip_intro_demo)
+                applied += 1
+            for flow_file, new_song in (song_assignments or {}).items():
+                old_song = SONG_SLOTS[flow_file]
+                if new_song != old_song:
+                    patcher.replace_file(
+                        flow_file,
+                        lambda data, o=old_song, n=new_song: patch_bfevfl_song(data, o, n),
+                    )
+                    applied += 1
+            changed_skulls = {
+                n: item for n, item in (skull_assignments or {}).items() if item != SKULL_REWARDS[n]
+            }
+            if changed_skulls:
+                patcher.replace_file(SKULL_FLOW, lambda data: patch_skull_rewards(data, changed_skulls))
+                applied += 1
+            for flow_file, new_item in (event_assignments or {}).items():
+                old_item = EVENT_SLOTS[flow_file]
+                if new_item != old_item:
+                    patcher.replace_file(
+                        flow_file,
+                        lambda data, o=old_item, n=new_item: patch_event_item(data, o, n),
+                    )
+                    applied += 1
+            npc_changes: dict[str, dict[str, str]] = {}
+            for loc, new_item in (npc_assignments or {}).items():
+                slot = NPC_SLOTS[loc]
+                if new_item != slot.item:
+                    npc_changes.setdefault(slot.flow, {})[slot.item] = new_item
+            for flow_file, changes in npc_changes.items():
+                patcher.replace_file(flow_file, lambda data, c=changes: patch_npc_grants(data, c))
+                applied += 1
+            if npc_assignments:
+                # The Biggoron Sword is only obtainable from its randomized location, so the scrub's sale is removed.
+                patcher.replace_file(SCRUB_BIGGORON_FLOW, disable_scrub_biggoron_sale)
+                applied += 1
+            if event_assignments:
+                for flow_file in STONE_GATE_FLOWS:
+                    try:
+                        patcher.replace_file(
+                            flow_file,
+                            lambda data, f=flow_file: patch_stone_gates(data, f),
+                        )
+                        applied += 1
+                    except NupPatchError:
+                        pass
+            if shop_actors:
+                patcher.replace_file(GAME_DATA_LIST, patch_gamedata_list)
+                patcher.replace_file(DISPLAY_SHOP_FLOW, patch_kokiri_soldout)
+                applied += 1
+            patcher.update_resource_size_tables()
+        except Exception:
+            if shop_actors:
+                # The NUP already holds the shop items: "manifest-only" would hide a half-patched ROM.
+                raise
+            return PatchResult(
+                applied=0,
+                skipped=len(patches),
+                mode="manifest-only",
+                unresolved_locations=[p.location_name for p in patches],
+            )
+
+        return PatchResult(applied=applied, skipped=0, mode="binary", unresolved_locations=[],
+                           shop_actors=shop_actors)
+
+    def write_patch_manifest(self, patches: list[PatchRecord], out_path: Path) -> None:
+        payload = [
+            {
+                "location": p.location_name,
+                "scene": p.scene,
+                "check_type": p.check_type,
+                "check_index": p.check_index,
+                "vanilla_item": p.vanilla_item,
+                "replacement_item": p.replacement_item,
+                "item_id_hex": hex(p.item_id),
+            }
+            for p in patches
+        ]
+        out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+    def checksum(self, rom_path: Path) -> str:
+        h = hashlib.sha256()
+        with rom_path.open("rb") as f:
+            for chunk in iter(lambda: f.read(1 << 20), b""):
+                h.update(chunk)
+        return h.hexdigest()
+
+
+@dataclass(slots=True)
+class PatchResult:
+    applied: int
+    skipped: int
+    mode: str                       # "binary" or "manifest-only"
+    unresolved_locations: list[str]
+    shop_actors: list[str] = field(default_factory=list)  # Shop_Rando_* actors added

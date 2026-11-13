@@ -1,0 +1,21 @@
+# LostWood
+
+[regions.Root.exits]
+"LostWood" = "true"
+
+[regions."LostWood"]
+
+[regions."LostWood".locations]
+"Dm_Kokiri_0155 (event item)" = "is_child"
+"LostWood Dynamic room 0 #0 (TBox_Rupee_Purple)" = "is_adult"
+"LostWood_ScrubForestStageElder_SkullMaskFirst: Item_StickBag_Medium (npc item)" = "is_child and Deku_Sticks"
+"LostWood_ScrubForestStageElder_SkullMaskFirst: Item_StickBag_Large (npc item)" = "is_child and Deku_Sticks and Stick_Bag_Medium"
+"LostWood_ScrubForestStageElder_TrueMaskFirst: Item_NutBag_Medium (npc item)" = "is_child and Deku_Nuts"
+"LostWood_ScrubForestStageElder_TrueMaskFirst: Item_NutBag_Large (npc item)" = "is_child and Deku_Nuts and Nut_Bag_Medium"
+"Dm_LostWood_0040: Item_BulletBag_Medium (npc item)" = "is_child and Slingshot"
+"Dm_LostWood_0040: Item_BulletBag_Large (npc item)" = "is_child and Slingshot and Bullet_Bag_Medium"
+
+[regions."LostWood".skulltulas]
+"LW GS Bean Patch Near Bridge" = "is_child"  # original: can_plant_bugs and can_child_attack
+"LW GS Above Theater" = "is_adult and (Sarias_Song or Minuet_of_Forest)"  # original: is_adult and at_night and (here(can_plant_bean) or (logic_lost_woods_gs_bean and Hookshot and (Longshot or ...
+"LW GS Bean Patch Near Theater" = "is_child"  # original: can_plant_bugs and (can_child_attack or (shuffle_scrubs == 'off' and Deku_Shield))

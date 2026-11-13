@@ -1,0 +1,24 @@
+# InsideGanonCastle
+
+[regions.Root.exits]
+"InsideGanonCastle" = "is_adult and Forest_Temple_Clear and Fire_Temple_Clear and Water_Temple_Clear and Shadow_Temple_Clear and Spirit_Temple_Clear"
+
+[regions."InsideGanonCastle"]
+dungeon = true
+
+[regions."InsideGanonCastle".events]
+"Ganon_Defeated" = "is_adult and Bow and Megaton_Hammer and Longshot and Mirror_Shield and Golden_Gauntlets and Lens_of_Truth and Bombchus"
+
+[regions."InsideGanonCastle".locations]
+"InsideGanonCastle Dynamic room 12 #0 (TBox_Rupee_Blue)" = "true"
+"InsideGanonCastle Dynamic room 12 #1 (TBox_Rupee_Blue)" = "true"
+"InsideGanonCastle Dynamic room 12 #2 (TBox_Rupee_Blue)" = "true"
+"InsideGanonCastle Dynamic room 13 #0 (Item_Dungeon_SmallKey)" = "Lens_of_Truth"
+"InsideGanonCastle Dynamic room 5 #0 (Item_BombchuBundle_Small)" = "true"
+"InsideGanonCastle Dynamic room 8 #0 (TBox_ArrowBundle_Medium)" = "true"
+"InsideGanonCastle Static room 12 #0 (TBox_Rupee_Red)" = "true"
+"InsideGanonCastle Static room 13 #0 (TBox_Rupee_Green)" = "true"
+"InsideGanonCastle Static room 17 #0 (Item_ScrubBusinessSeed)" = "true"
+"InsideGanonCastle Static room 2 #0 (TBox_ArrowBundle_Medium)" = "true"
+"InsideGanonCastle Static room 24 #0 (Item_Dungeon_BossKey)" = "true"
+"InsideGanonCastle Static room 8 #0 (Item_Gauntlet_Gold)" = "Longshot"

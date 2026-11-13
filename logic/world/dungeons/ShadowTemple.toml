@@ -1,0 +1,34 @@
+# ShadowTemple
+
+[regions.Root.exits]
+"ShadowTemple" = "is_adult and Nocturne_of_Shadow and Lens_of_Truth and (Hover_Boots or Hookshot or Longshot)"
+
+[regions."ShadowTemple"]
+dungeon = true
+
+[regions."ShadowTemple".events]
+"Shadow_Temple_Clear" = "is_adult and Hover_Boots and (Hookshot or Longshot) and Bow and Zeldas_Lullaby and Lens_of_Truth and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))))"
+
+[regions."ShadowTemple".locations]
+"Dm_Awake_Shadow_Get (event item)" = "Shadow_Temple_Clear"
+"ShadowTemple Dynamic room 11 #0 (TBox_Rupee_Red)" = "true"
+"ShadowTemple Dynamic room 15 #0 (Item_ScrubBusinessSeed)" = "Lens_of_Truth"
+"ShadowTemple Dynamic room 19 #0 (Tbox_MagicJar_Large)" = "true"
+"ShadowTemple Static room 11 #0 (Item_Dungeon_SmallKey)" = "true"
+"ShadowTemple Static room 16 #0 (Item_Dungeon_SmallKey)" = "Lens_of_Truth"
+"ShadowTemple Static room 16 #0 (TBox_Rupee_Green)" = "true"
+"ShadowTemple Static room 19 #0 (Item_Dungeon_BossKey)" = "true"
+"ShadowTemple Static room 21 #0 (Item_Dungeon_SmallKey)" = "true"
+"ShadowTemple Static room 3 #0 (Item_Dungeon_Map)" = "true"
+"ShadowTemple Static room 31 #0 (TBox_Rupee_Red)" = "true"
+"ShadowTemple Static room 31 #1 (TBox_Rupee_Red)" = "Lens_of_Truth"
+"ShadowTemple Static room 4 #0 (Item_HoverBoot)" = "true"
+"ShadowTemple Static room 6 #0 (Item_Dungeon_SmallKey)" = "true"
+"ShadowTemple Static room 7 #0 (Item_Dungeon_Compass)" = "Hover_Boots"
+
+[regions."ShadowTemple".skulltulas]
+"Shadow Temple GS Invisible Blades Room" = "is_adult and Hover_Boots and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))))"  # original: True
+"Shadow Temple GS Falling Spikes Room" = "is_adult and Hover_Boots and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus)))) and (Hookshot or Longshot)"  # original: logic_shadow_umbrella_gs or Hookshot
+"Shadow Temple GS Single Giant Pot" = "is_adult and Hover_Boots and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus)))) and (Hookshot or Longshot)"  # original: (Silver_Rupee_Shadow_Temple_Invisible_Spikes, 5)
+"Shadow Temple GS Near Ship" = "is_adult and Hover_Boots and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus)))) and Longshot"  # original: Longshot
+"Shadow Temple GS Triple Giant Pot" = "is_adult and Hover_Boots and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus)))) and (Hookshot or Longshot) and Zeldas_Lullaby"  # original: True

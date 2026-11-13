@@ -1,0 +1,16 @@
+# DeathMountainTrail
+
+[regions.Root.exits]
+"DeathMountainTrail" = "is_adult or (Deku_Tree_Clear and Zeldas_Letter)"
+
+[regions."DeathMountainTrail"]
+
+[regions."DeathMountainTrail".locations]
+"DeathMountainTrail Dynamic room 0 #0 (Item_ScrubBusinessSeed)" = "true"
+"Npc_Goron_Biggoron_Adult: Item_Sword_Biggoron (npc item)" = "is_adult and Ice_Cavern_Clear and (Eponas_Song or Longshot) and ((Bomb_Bag and Goron_Bracelet) or Megaton_Hammer)"  # whole Biggoron chain: Kokiri, Kakariko, Gerudo, Lake Hylia, Zora, DMT gates
+
+[regions."DeathMountainTrail".skulltulas]
+"DMT GS Bean Patch" = "is_child and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))) or Goron_Bracelet)"  # original: can_plant_bugs and can_child_attack and (has_explosives or Progressive_Strength_Upgrade or (logic_dmt_soil_...
+"DMT GS Near Kak" = "((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))) or (is_adult and Megaton_Hammer))"  # original: can_blast_or_smash
+"DMT GS Above Dodongos Cavern" = "is_adult and Megaton_Hammer"  # original: is_adult and at_night and (Megaton_Hammer or logic_trail_gs_lower)
+"DMT GS Falling Rocks Path" = "is_adult and Megaton_Hammer"  # original: is_adult and at_night and (Megaton_Hammer or logic_trail_gs_upper)

@@ -1,0 +1,15 @@
+# LonLonRanch
+
+[regions.Root.exits]
+"LonLonRanch" = "is_adult or Deku_Tree_Clear"
+
+[regions."LonLonRanch"]
+
+[regions."LonLonRanch".locations]
+"Dm_MelodyGet_Epona" = "is_child and Zeldas_Lullaby"  # song: Epona's Song from Malon, Lon Lon Ranch
+
+[regions."LonLonRanch".skulltulas]
+"LLR GS Tree" = "is_child"  # original: is_child and can_bonk
+"LLR GS Rain Shed" = "is_child"  # original: is_child and at_night
+"LLR GS House Window" = "is_child and Boomerang"  # original: can_use(Boomerang) and at_night
+"LLR GS Back Wall" = "is_child and Boomerang"  # original: can_use(Boomerang) and at_night

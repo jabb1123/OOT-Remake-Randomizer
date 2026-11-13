@@ -1,0 +1,9 @@
+# OutsideGanonCastle
+
+[regions.Root.exits]
+"OutsideGanonCastle" = "is_adult"
+
+[regions."OutsideGanonCastle"]
+
+[regions."OutsideGanonCastle".skulltulas]
+"OGC GS" = "is_adult"  # original: True
