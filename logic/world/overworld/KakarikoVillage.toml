@@ -21,8 +21,8 @@
 "Kak GS Skulltula House" = "is_child"  # original: is_child and at_night
 "Kak GS Near Gate Guard" = "is_child"  # original: is_child and at_night
 "Kak GS Tree" = "is_child"  # original: is_child and at_night and can_bonk
-"Kak GS Watchtower" = "is_child and (Slingshot or (bombchus_in_logic and Bombchus))"  # original: is_child and at_night and (Slingshot or has_bombchus or (logic_kakariko_tower_gs and (Sticks or Kokiri_Swor...
-"Kak GS Above Impas House" = "(is_adult and (Hookshot or Longshot))"  # original: is_adult and at_night
+"Kak GS Watchtower" = "is_child and (Slingshot or has_bombchus)"  # original: is_child and at_night and (Slingshot or has_bombchus or (logic_kakariko_tower_gs and (Sticks or Kokiri_Swor...
+"Kak GS Above Impas House" = "(is_adult and has_hookshot)"  # original: is_adult and at_night
 
 # Adult Bazaar (shopsanity); the region and its slots are in Market.toml.
 [regions."KakarikoVillage".exits]

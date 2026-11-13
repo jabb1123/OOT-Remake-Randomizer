@@ -18,5 +18,5 @@
 "HyruleField Static room 0 #0 (TBox_Rupee_Red)" = "true"
 
 [regions."HyruleField".skulltulas]
-"HF GS Cow Grotto" = "Stone_of_Agony and ((is_child and Boomerang and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))))) or (is_adult and Megaton_Hammer and (Hookshot or Longshot)))"  # original: has_fire_source and (can_use(Hookshot) or can_use(Boomerang))
-"HF GS Near Kak Grotto" = "Stone_of_Agony and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))) or (is_adult and Megaton_Hammer)) and ((is_adult and (Hookshot or Longshot)) or (is_child and Boomerang))"  # original: can_use(Boomerang) or can_use(Hookshot)
+"HF GS Cow Grotto" = "Stone_of_Agony and ((is_child and Boomerang and has_explosives) or (is_adult and Megaton_Hammer and has_hookshot))"  # original: has_fire_source and (can_use(Hookshot) or can_use(Boomerang))
+"HF GS Near Kak Grotto" = "Stone_of_Agony and can_blast_or_smash and ((is_adult and has_hookshot) or (is_child and Boomerang))"  # original: can_use(Boomerang) or can_use(Hookshot)

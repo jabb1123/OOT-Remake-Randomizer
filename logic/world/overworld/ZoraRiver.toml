@@ -6,11 +6,11 @@
 [regions."ZoraRiver"]
 
 [regions."ZoraRiver".locations]
-"ZoraRiver Dynamic room 0 #0 (Item_ScrubBusinessSeed)" = "Song_of_Storms"
+"ZoraRiver Dynamic room 0 #0 (Item_ScrubBusinessSeed)" = "can_play(Song_of_Storms)"
 "MiniGame_Diving: Item_Scale_Silver (npc item)" = "true"
 
 [regions."ZoraRiver".skulltulas]
 "ZR GS Tree" = "is_child"  # original: is_child and can_child_attack and can_bonk
 "ZR GS Ladder" = "is_child"  # original: is_child and at_night and can_child_attack
-"ZR GS Near Raised Grottos" = "(is_adult and (Hookshot or Longshot))"  # original: can_use(Hookshot) and at_night
-"ZR GS Above Bridge" = "(is_adult and (Hookshot or Longshot))"  # original: can_use(Hookshot) and at_night
+"ZR GS Near Raised Grottos" = "(is_adult and has_hookshot)"  # original: can_use(Hookshot) and at_night
+"ZR GS Above Bridge" = "(is_adult and has_hookshot)"  # original: can_use(Hookshot) and at_night

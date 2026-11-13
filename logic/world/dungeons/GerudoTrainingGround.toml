@@ -1,7 +1,7 @@
 # GerudoTrainingGround
 
 [regions.Root.exits]
-"GerudoTrainingGround" = "is_adult and (Longshot or Eponas_Song)"
+"GerudoTrainingGround" = "is_adult and (Longshot or can_play(Eponas_Song))"
 
 [regions."GerudoTrainingGround"]
 dungeon = true
@@ -19,7 +19,7 @@ dungeon = true
 "GerudoTrainingGround Static room 4 #0 (Item_Dungeon_SmallKey)" = "true"
 "GerudoTrainingGround Static room 5 #0 (Item_Dungeon_SmallKey)" = "true"
 "GerudoTrainingGround Static room 7 #0 (Item_Dungeon_SmallKey)" = "true"
-"GerudoTrainingGround Static room 8 #0 (Item_Arrow_Ice)" = "is_adult and Song_of_Time and Iron_Boots and (Hover_Boots or Longshot) and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))))"
+"GerudoTrainingGround Static room 8 #0 (Item_Arrow_Ice)" = "is_adult and can_play(Song_of_Time) and Iron_Boots and (Hover_Boots or Longshot) and has_explosives"
 "GerudoTrainingGround Static room 8 #0 (Item_BombchuBundle_Small)" = "true"
 "GerudoTrainingGround Static room 8 #0 (Item_Dungeon_SmallKey)" = "true"
 "GerudoTrainingGround Static room 8 #0 (TBox_Rupee_Purple)" = "true"

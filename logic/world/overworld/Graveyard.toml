@@ -6,7 +6,7 @@
 [regions."Graveyard"]
 
 [regions."Graveyard".locations]
-"Dm_MelodyGet_Sun_03" = "Zeldas_Lullaby"  # song: Sun's Song from Royal Tomb
+"Dm_MelodyGet_Sun_03" = "can_play(Zeldas_Lullaby)"  # song: Sun's Song from Royal Tomb
 "Graveyard Dynamic room 0 #0 (TBox_Shield_Hylian)" = "true"
 "Graveyard Static room 0 #0 (Item_Hookshot)" = "is_adult"
 "Graveyard Static room 0 #0 (Obj_Heart_Piece)" = "true"

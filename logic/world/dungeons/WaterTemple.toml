@@ -1,13 +1,13 @@
 # WaterTemple
 
 [regions.Root.exits]
-"WaterTemple" = "is_adult and Zeldas_Lullaby and Iron_Boots and (Hookshot or Longshot)"
+"WaterTemple" = "is_adult and can_play(Zeldas_Lullaby) and Iron_Boots and has_hookshot"
 
 [regions."WaterTemple"]
 dungeon = true
 
 [regions."WaterTemple".events]
-"Water_Temple_Clear" = "is_adult and Longshot and (Hover_Boots or (Goron_Bracelet and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))))))"
+"Water_Temple_Clear" = "is_adult and Longshot and (Hover_Boots or (Goron_Bracelet and has_explosives))"
 
 [regions."WaterTemple".locations]
 "Dm_Awake_Water_Get (event item)" = "Water_Temple_Clear"
@@ -22,8 +22,8 @@ dungeon = true
 "WaterTemple Static room 8 #0 (Item_Dungeon_SmallKey)" = "true"
 
 [regions."WaterTemple".skulltulas]
-"Water Temple GS Central Pillar" = "is_adult and Iron_Boots and Zeldas_Lullaby and Longshot"  # original: ((Longshot or (logic_water_central_gs_fw and Hookshot and can_use(Farores_Wind))) and ((Small_Key_Water_Tem...
-"Water Temple GS Behind Gate" = "is_adult and Iron_Boots and Zeldas_Lullaby and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus)))) and (Hookshot or Longshot or Hover_Boots)"  # original: True
+"Water Temple GS Central Pillar" = "is_adult and Iron_Boots and can_play(Zeldas_Lullaby) and Longshot"  # original: ((Longshot or (logic_water_central_gs_fw and Hookshot and can_use(Farores_Wind))) and ((Small_Key_Water_Tem...
+"Water Temple GS Behind Gate" = "is_adult and Iron_Boots and can_play(Zeldas_Lullaby) and has_explosives and (Hookshot or Longshot or Hover_Boots)"  # original: True
 "Water Temple GS Near Boss Key Chest" = "is_adult and Iron_Boots and Longshot"  # original: True
 "Water Temple GS Falling Platform Room" = "is_adult and Longshot"  # original: can_use(Longshot) or (logic_water_falling_platform_gs_hookshot and can_use(Hookshot)) or (logic_water_falli...
-"Water Temple GS River" = "is_adult and (Hookshot or Longshot) and Song_of_Time and Iron_Boots"  # original: (Iron_Boots and (Zora_Tunic or logic_fewer_tunic_requirements)) or (logic_water_river_gs and Longshot and (...
+"Water Temple GS River" = "is_adult and has_hookshot and can_play(Song_of_Time) and Iron_Boots"  # original: (Iron_Boots and (Zora_Tunic or logic_fewer_tunic_requirements)) or (logic_water_river_gs and Longshot and (...

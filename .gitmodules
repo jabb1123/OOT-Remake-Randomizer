@@ -1,0 +1,3 @@
+[submodule "nup"]
+	path = nup
+	url = https://github.com/a55uka/nup.git

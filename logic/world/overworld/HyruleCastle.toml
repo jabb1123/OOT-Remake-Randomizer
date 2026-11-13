@@ -13,4 +13,4 @@
 
 [regions."HyruleCastle".skulltulas]
 "HC GS Tree" = "is_child"  # original: can_child_attack and can_bonk
-"HC GS Storms Grotto" = "is_child and Song_of_Storms and Stone_of_Agony and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus)))) and Boomerang"  # original: (can_blast_or_smash or (is_child and logic_castle_storms_gs)) and (can_use(Boomerang) or can_use(Hookshot))
+"HC GS Storms Grotto" = "is_child and can_play(Song_of_Storms) and Stone_of_Agony and has_explosives and Boomerang"  # original: (can_blast_or_smash or (is_child and logic_castle_storms_gs)) and (can_use(Boomerang) or can_use(Hookshot))

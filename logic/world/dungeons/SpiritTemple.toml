@@ -1,34 +1,34 @@
 # SpiritTemple
 
 [regions.Root.exits]
-"SpiritTemple" = "Requiem_of_Spirit or (is_adult and (Longshot or Eponas_Song) and (Longshot or Hover_Boots))"
+"SpiritTemple" = "can_play(Requiem_of_Spirit) or (is_adult and (Longshot or can_play(Eponas_Song)) and (Longshot or Hover_Boots))"
 
 [regions."SpiritTemple"]
 dungeon = true
 
 [regions."SpiritTemple".events]
-"Spirit_Temple_Clear" = "is_adult and (Silver_Gauntlets or Golden_Gauntlets) and Mirror_Shield and (Hookshot or Longshot) and Bow and Zeldas_Lullaby and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))))"
+"Spirit_Temple_Clear" = "is_adult and (Silver_Gauntlets or Golden_Gauntlets) and Mirror_Shield and has_hookshot and Bow and can_play(Zeldas_Lullaby) and has_explosives"
 
 [regions."SpiritTemple".locations]
 "Dm_Awake_Spirit_Get (event item)" = "Spirit_Temple_Clear"
 "SpiritTemple Dynamic room 2 #0 (TBox_Shield_Deku)" = "true"
-"SpiritTemple Static room 14 #0 (Item_Dungeon_Compass)" = "is_adult and (Silver_Gauntlets or Golden_Gauntlets) and (Hookshot or Longshot) and Zeldas_Lullaby"
+"SpiritTemple Static room 14 #0 (Item_Dungeon_Compass)" = "is_adult and (Silver_Gauntlets or Golden_Gauntlets) and has_hookshot and can_play(Zeldas_Lullaby)"
 "SpiritTemple Static room 16 #0 (Item_Dungeon_SmallKey)" = "true"
 "SpiritTemple Static room 18 #0 (Item_BombBundle_Small)" = "true"
-"SpiritTemple Static room 23 #0 (TBox_Rupee_Red)" = "is_adult and (Silver_Gauntlets or Golden_Gauntlets) and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus)))) and Lens_of_Truth"
-"SpiritTemple Static room 23 #1 (TBox_Rupee_Red)" = "is_adult and (Silver_Gauntlets or Golden_Gauntlets) and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus)))) and Lens_of_Truth"
+"SpiritTemple Static room 23 #0 (TBox_Rupee_Red)" = "is_adult and (Silver_Gauntlets or Golden_Gauntlets) and has_explosives and Lens_of_Truth"
+"SpiritTemple Static room 23 #1 (TBox_Rupee_Red)" = "is_adult and (Silver_Gauntlets or Golden_Gauntlets) and has_explosives and Lens_of_Truth"
 "SpiritTemple Static room 26 #0 (Item_Dungeon_SmallKey)" = "true"
 "SpiritTemple Static room 29 #0 (Item_Dungeon_BossKey)" = "true"
 "SpiritTemple Static room 31 #0 (Item_BombBundle_Small)" = "true"
 "SpiritTemple Static room 4 #0 (Item_Dungeon_SmallKey)" = "true"
 "SpiritTemple Static room 6 #0 (Item_BombchuBundle_Small)" = "true"
-"SpiritTemple Static room 7 #0 (Item_Dungeon_Map)" = "((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus)))) or (is_adult and (Silver_Gauntlets or Golden_Gauntlets))"
+"SpiritTemple Static room 7 #0 (Item_Dungeon_Map)" = "has_explosives or (is_adult and (Silver_Gauntlets or Golden_Gauntlets))"
 "SpiritTemple Static room 7 #0 (Item_Dungeon_SmallKey)" = "true"
 "SpiritTemple Static room 9 #0 (Item_Dungeon_SmallKey)" = "true"
 
 [regions."SpiritTemple".skulltulas]
 "Spirit Temple GS Metal Fence" = "is_child"  # original: Boomerang or (logic_spirit_fence_gs and Kokiri_Sword) or (((Silver_Rupee_Spirit_Temple_Child_Early_Torches,...
-"Spirit Temple GS Boulder Room" = "is_adult and (Silver_Gauntlets or Golden_Gauntlets) and (Bow or Hookshot or Longshot or (bombchus_in_logic and Bombchus)) and Song_of_Time"  # original: can_play(Song_of_Time)
+"Spirit Temple GS Boulder Room" = "is_adult and (Silver_Gauntlets or Golden_Gauntlets) and (Bow or Hookshot or Longshot or has_bombchus) and can_play(Song_of_Time)"  # original: can_play(Song_of_Time)
 "Spirit Temple GS Sun on Floor Room" = "is_child or (is_adult and (Silver_Gauntlets or Golden_Gauntlets))"  # original: (is_child and has_projectile(child) and (Small_Key_Spirit_Temple, 5)) or (is_adult and (has_projectile(adul...
 "Spirit Temple GS Lobby" = "is_adult and (Silver_Gauntlets or Golden_Gauntlets) and (Hookshot or Longshot or Hover_Boots)"  # original: (is_child and logic_spirit_lobby_gs and Boomerang and (Small_Key_Spirit_Temple, 5)) or (is_adult and (Hooks...
-"Spirit Temple GS Hall After Sun Block Room" = "(is_child and Boomerang and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))))) or (is_adult and (Silver_Gauntlets or Golden_Gauntlets) and (Hookshot or Longshot))"  # original: (is_child and Boomerang and (Small_Key_Spirit_Temple, 5)) or (is_adult and Hookshot and ((Small_Key_Spirit_...
+"Spirit Temple GS Hall After Sun Block Room" = "(is_child and Boomerang and has_explosives) or (is_adult and (Silver_Gauntlets or Golden_Gauntlets) and has_hookshot)"  # original: (is_child and Boomerang and (Small_Key_Spirit_Temple, 5)) or (is_adult and Hookshot and ((Small_Key_Spirit_...

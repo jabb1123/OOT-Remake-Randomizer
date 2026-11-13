@@ -4,9 +4,15 @@ The logic is either a single TOML file or a directory of them (logic/world/, one
 area). Directory files are loaded recursively in sorted path order and deep-merged; see
 `load_world_data` for the merge rules.
 
-Requirement strings are expressions over item names, events, ages and options:
+Requirement strings are expressions over item names, events, ages, options and helpers:
     "Hookshot and (Bow or Slingshot)"     "is_adult and Song_of_Time"     "Bombchus:2"
+    "has_explosives and can_play(Song_of_Storms)"
 `and` binds tighter than `or`. There is no `not`, so reachability only ever grows.
+
+Helpers are named requirements from the top-level `[helpers]` table, e.g.
+    has_bombs = "Bomb_Bag and lift_bombs"
+    "can_play(song)" = "has_ocarina and song"
+and are inlined wherever they are used.
 """
 
 from __future__ import annotations
@@ -33,7 +39,9 @@ AGES = ("child", "adult")
 KNOWN_OPTIONS = frozenset({"bombchus_in_logic"})
 
 _RAW_ACTOR = re.compile(r"^(Item|Obj|TBox|Tbox)_\w+$")
-_TOKEN = re.compile(r"\s*(?:(\()|(\))|([A-Za-z_][A-Za-z0-9_]*)(?::(\d+))?)")
+_TOKEN = re.compile(r"\s*(?:(\()|(\))|(,)|([A-Za-z_][A-Za-z0-9_]*)(?::(\d+))?)")
+_HELPER_KEY = re.compile(r"^\s*([A-Za-z_]\w*)\s*(?:\(\s*([A-Za-z_]\w*(?:\s*,\s*[A-Za-z_]\w*)*)?\s*\))?\s*$")
+_RESERVED = frozenset({"and", "or", "true", "false", "is_child", "is_adult"})
 
 
 class LogicError(ValueError):
@@ -77,6 +85,7 @@ def resolve_item(name: str) -> str | None:
 
 # AST nodes: ("const", bool) | ("name", text, count) | ("item", actor, count) | ("event", name)
 #            | ("age", age) | ("option", name) | ("and", [nodes]) | ("or", [nodes])
+#            | ("call", helper, [args])  (parsed only; resolving inlines the helper)
 Node = tuple
 
 
@@ -93,12 +102,14 @@ def parse_requirement(text: str) -> Node:
             tokens.append(("(", "", 0))
         elif m.group(2):
             tokens.append((")", "", 0))
+        elif m.group(3):
+            tokens.append((",", "", 0))
         else:
-            word = m.group(3)
-            if word in ("and", "or") and m.group(4) is None:
+            word = m.group(4)
+            if word in ("and", "or") and m.group(5) is None:
                 tokens.append((word, "", 0))
             else:
-                tokens.append(("name", word, int(m.group(4) or 1)))
+                tokens.append(("name", word, int(m.group(5) or 1)))
 
     i = 0
 
@@ -134,6 +145,18 @@ def parse_requirement(text: str) -> Node:
         if kind == "name":
             _, word, count = tokens[i]
             i += 1
+            if peek() == "(":
+                if count != 1:
+                    raise LogicError(f"helper call {word!r} cannot take a count in {text!r}")
+                i += 1
+                args = [parse_or()]
+                while peek() == ",":
+                    i += 1
+                    args.append(parse_or())
+                if peek() != ")":
+                    raise LogicError(f"missing ')' after arguments to {word!r} in {text!r}")
+                i += 1
+                return ("call", word, args)
             return ("name", word, count)
         raise LogicError(f"expected a name or '(' in {text!r}")
 
@@ -145,11 +168,37 @@ def parse_requirement(text: str) -> Node:
     return node
 
 
-def _resolve(node: Node, events: set[str], errors: list[str], where: str) -> Node:
+@dataclass(frozen=True)
+class Helper:
+    """A named requirement from `[helpers]`; `params` are its argument names."""
+    name: str
+    params: tuple[str, ...]
+    body: Node
+
+
+def _resolve(node: Node, events: set[str], errors: list[str], where: str,
+             helpers: dict[str, Helper] | None = None, env: dict[str, Node] | None = None,
+             stack: tuple[str, ...] = ()) -> Node:
+    helpers = helpers or {}
     kind = node[0]
     if kind in ("and", "or"):
-        return (kind, [_resolve(n, events, errors, where) for n in node[1]])
+        return (kind, [_resolve(n, events, errors, where, helpers, env, stack) for n in node[1]])
+    if kind == "call":
+        _, name, args = node
+        helper = helpers.get(name)
+        if helper is None:
+            errors.append(f"{where}: unknown helper {name!r}")
+            return ("const", False)
+        if len(args) != len(helper.params):
+            errors.append(f"{where}: helper {name!r} takes {len(helper.params)} argument(s), got {len(args)}")
+            return ("const", False)
+        resolved = [_resolve(a, events, errors, where, helpers, env, stack) for a in args]
+        return _expand(helper, resolved, events, errors, where, helpers, stack)
     _, word, count = node
+    if env and word in env:
+        if count != 1:
+            errors.append(f"{where}: helper parameter {word!r} cannot take a count")
+        return env[word]
     if word in ("true", "false"):
         return ("const", word == "true")
     if word in ("is_child", "is_adult"):
@@ -158,11 +207,97 @@ def _resolve(node: Node, events: set[str], errors: list[str], where: str) -> Nod
         return ("option", word)
     if word in events:
         return ("event", word)
+    if word in helpers:
+        helper = helpers[word]
+        if helper.params:
+            errors.append(f"{where}: helper {word!r} needs {len(helper.params)} argument(s)")
+            return ("const", False)
+        if count != 1:
+            errors.append(f"{where}: helper {word!r} cannot take a count")
+        return _expand(helper, [], events, errors, where, helpers, stack)
     actor = resolve_item(word)
     if actor is not None:
         return ("item", actor, count)
     errors.append(f"{where}: unknown name {word!r}")
     return ("const", False)
+
+
+def _expand(helper: Helper, args: list[Node], events: set[str], errors: list[str], where: str,
+            helpers: dict[str, Helper], stack: tuple[str, ...]) -> Node:
+    if helper.name in stack:  # only reachable through a cycle, which loading already reports
+        return ("const", False)
+    # Errors inside the body are reported once, when the helper itself is checked at load time.
+    return _resolve(helper.body, events, [], where, helpers, dict(zip(helper.params, args)), (*stack, helper.name))
+
+
+def _helper_refs(node: Node, helper: Helper, helpers: dict[str, Helper]) -> set[str]:
+    if node[0] in ("and", "or"):
+        return set().union(*(_helper_refs(n, helper, helpers) for n in node[1]))
+    if node[0] == "call":
+        found = {node[1]} if node[1] in helpers else set()
+        return found.union(*(_helper_refs(a, helper, helpers) for a in node[2]))
+    word = node[1]
+    return {word} if word in helpers and word not in helper.params else set()
+
+
+def _helper_cycles(helpers: dict[str, Helper]) -> list[list[str]]:
+    refs = {name: _helper_refs(h.body, h, helpers) for name, h in helpers.items()}
+    cycles: list[list[str]] = []
+    state: dict[str, int] = {}  # 1 = visiting, 2 = done
+
+    def visit(name: str, path: list[str]) -> None:
+        state[name] = 1
+        for nxt in sorted(refs[name]):
+            if state.get(nxt) == 1:
+                cycles.append(path[path.index(nxt):] + [nxt])
+            elif nxt not in state:
+                visit(nxt, path + [nxt])
+        state[name] = 2
+
+    for name in helpers:
+        if name not in state:
+            visit(name, [name])
+    return cycles
+
+
+def _compile_helpers(raw: dict, events: set[str], errors: list[str]) -> dict[str, Helper]:
+    helpers: dict[str, Helper] = {}
+    for key, text in raw.items():
+        where = f"helpers.{key}"
+        m = _HELPER_KEY.match(key)
+        if not m:
+            errors.append(f"{where}: name must look like `name` or `name(param, ...)`")
+            continue
+        name = m.group(1)
+        params = tuple(p.strip() for p in m.group(2).split(",")) if m.group(2) else ()
+        if name in helpers:
+            errors.append(f"{where}: helper {name!r} is defined twice")
+            continue
+        if name in _RESERVED or name in KNOWN_OPTIONS or name in events or resolve_item(name) is not None:
+            errors.append(f"{where}: {name!r} is already an item, event, option or keyword")
+            continue
+        if len(set(params)) != len(params):
+            errors.append(f"{where}: repeated parameter name")
+            continue
+        if not isinstance(text, str):
+            errors.append(f"{where}: requirement must be a string")
+            continue
+        try:
+            body = parse_requirement(text)
+        except LogicError as exc:
+            errors.append(f"{where}: {exc}")
+            continue
+        helpers[name] = Helper(name, params, body)
+    cycles = _helper_cycles(helpers)
+    for cycle in cycles:
+        errors.append(f"helpers.{cycle[0]}: helpers use each other in a loop ({' -> '.join(cycle)})")
+    if cycles:
+        return {}
+    # Check every body once (parameters stand in as `true`).
+    for helper in helpers.values():
+        env = {p: ("const", True) for p in helper.params}
+        _resolve(helper.body, events, errors, f"helpers.{helper.name}", helpers, env, (helper.name,))
+    return helpers
 
 
 def _items_in(node: Node) -> set[str]:
@@ -231,6 +366,7 @@ class World:
     token_locations: set[str] = field(default_factory=set)
     # Per-seed requirements AND-ed onto a location's own rule (e.g. a wallet for a shop price).
     extra_requirements: dict[str, Node] = field(default_factory=dict)
+    helpers: dict[str, Helper] = field(default_factory=dict)
 
     @property
     def referenced_items(self) -> set[str]:
@@ -255,7 +391,7 @@ class World:
                 raise LogicError(f"cannot add a requirement to {loc!r}: not listed in any region")
             if isinstance(req, str):
                 errors: list[str] = []
-                node = _resolve(parse_requirement(req), events, errors, f"extra requirement for {loc}")
+                node = _resolve(parse_requirement(req), events, errors, f"extra requirement for {loc}", self.helpers)
                 if errors:
                     raise LogicError("; ".join(errors))
             else:
@@ -354,6 +490,7 @@ def load_world_data(path: Path = DEFAULT_WORLD_PATH) -> tuple[dict, list[str]]:
 
     Merge rules for a directory of files:
       * `[settings]` may appear in only one file.
+      * `[helpers]` may be split across files; the same helper name in two files is an error.
       * Per region, the `exits` / `locations` / `events` / `skulltulas` tables are merged;
         the same key in two files is an error naming both files.
       * Scalar region flags (`dungeon`, `excluded`) may repeat but must agree.
@@ -364,7 +501,7 @@ def load_world_data(path: Path = DEFAULT_WORLD_PATH) -> tuple[dict, list[str]]:
     def show(file: Path) -> str:
         return file.relative_to(root).as_posix() if root else str(file)
 
-    merged: dict = {"regions": {}}
+    merged: dict = {"regions": {}, "helpers": {}}
     warnings: list[str] = []
     settings_from: Path | None = None
     origin: dict[tuple, Path] = {}
@@ -379,6 +516,16 @@ def load_world_data(path: Path = DEFAULT_WORLD_PATH) -> tuple[dict, list[str]]:
                     raise LogicError(f"[settings] is defined in both {show(settings_from)} and {show(file)}")
                 settings_from = file
                 merged["settings"] = value
+            elif top == "helpers":
+                if not isinstance(value, dict):
+                    raise LogicError(f"{show(file)}: 'helpers' must be a table")
+                for key, req in value.items():
+                    name = key.split("(", 1)[0].strip()
+                    prev = origin.get(("helpers", name))
+                    if prev is not None:
+                        raise LogicError(f"helper {name!r} is defined in both {show(prev)} and {show(file)}")
+                    origin[("helpers", name)] = file
+                    merged["helpers"][key] = req
             elif top == "regions":
                 if not isinstance(value, dict):
                     raise LogicError(f"{show(file)}: 'regions' must be a table")
@@ -426,13 +573,14 @@ def load_world(path: Path = DEFAULT_WORLD_PATH) -> World:
     for name in event_names:
         if resolve_item(name) is not None:
             errors.append(f"event {name!r} has the same name as an item")
+    helpers = _compile_helpers(data.get("helpers", {}), event_names, errors)
 
     def compile_req(text: object, where: str) -> Node:
         if not isinstance(text, str):
             errors.append(f"{where}: requirement must be a string")
             return ("const", False)
         try:
-            return _resolve(parse_requirement(text), event_names, errors, where)
+            return _resolve(parse_requirement(text), event_names, errors, where, helpers)
         except LogicError as exc:
             errors.append(f"{where}: {exc}")
             return ("const", False)
@@ -494,6 +642,7 @@ def load_world(path: Path = DEFAULT_WORLD_PATH) -> World:
         warnings=warnings,
         location_region=location_region,
         token_locations=token_locations,
+        helpers=helpers,
     )
 
     linked = {spawn for spawn in spawns.values()} | {t for r in regions.values() for t in r.exits}

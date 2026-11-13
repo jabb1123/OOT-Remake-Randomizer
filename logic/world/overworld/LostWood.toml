@@ -17,5 +17,5 @@
 
 [regions."LostWood".skulltulas]
 "LW GS Bean Patch Near Bridge" = "is_child"  # original: can_plant_bugs and can_child_attack
-"LW GS Above Theater" = "is_adult and (Sarias_Song or Minuet_of_Forest)"  # original: is_adult and at_night and (here(can_plant_bean) or (logic_lost_woods_gs_bean and Hookshot and (Longshot or ...
+"LW GS Above Theater" = "is_adult and (can_play(Sarias_Song) or can_play(Minuet_of_Forest))"  # original: is_adult and at_night and (here(can_plant_bean) or (logic_lost_woods_gs_bean and Hookshot and (Longshot or ...
 "LW GS Bean Patch Near Theater" = "is_child"  # original: can_plant_bugs and (can_child_attack or (shuffle_scrubs == 'off' and Deku_Shield))

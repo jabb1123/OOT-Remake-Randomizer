@@ -68,6 +68,76 @@ class RequirementTests(unittest.TestCase):
         self.assertTrue(any("Nowhere" in e for e in world.errors))
 
 
+class HelperTests(unittest.TestCase):
+    HELPERS = (
+        '[helpers]\n'
+        'has_ocarina = "Fairy_Ocarina or Ocarina_of_Time"\n'
+        '"can_play(song)" = "has_ocarina and song"\n'
+        'lift = "Goron_Bracelet or (is_adult and Silver_Gauntlets)"\n'
+        'has_bombs = "Bomb_Bag and lift"\n'
+        '[regions.Root.events]\nGoron_Bracelet = "false"\n'
+    )
+
+    def _check(self, text: str, items, age="child", events=()):
+        world = _world(text)
+        self.assertEqual(world.errors, [])
+        return evaluate(world.goal, Counter(items), set(events), age, {})
+
+    def test_plain_and_nested_helpers_inline(self):
+        text = self.HELPERS + '[settings]\ngoal = "has_bombs"\n'
+        self.assertFalse(self._check(text, ["Item_BombBag_Small"]))
+        self.assertTrue(self._check(text, ["Item_BombBag_Small"], events={"Goron_Bracelet"}))
+        self.assertFalse(self._check(text, ["Item_BombBag_Small", "Item_Gauntlet_Silver"], age="child"))
+        self.assertTrue(self._check(text, ["Item_BombBag_Small", "Item_Gauntlet_Silver"], age="adult"))
+
+    def test_helper_arguments_are_substituted(self):
+        text = self.HELPERS + '[settings]\ngoal = "can_play(Song_of_Storms or Zeldas_Lullaby)"\n'
+        self.assertFalse(self._check(text, ["Item_Melody_StormSong"]))
+        self.assertTrue(self._check(text, ["Item_Melody_StormSong", "Item_Ocarina_Fairy"]))
+        self.assertTrue(self._check(text, ["Item_Melody_ZeldaLullaby", "Item_Ocarina_Time"]))
+
+    def test_helper_items_count_as_progression(self):
+        world = _world(self.HELPERS + '[settings]\ngoal = "can_play(Song_of_Time)"\n')
+        self.assertTrue({"Item_Ocarina_Fairy", "Item_Ocarina_Time", "Item_Melody_TimeSong"} <= world.referenced_items)
+
+    def test_with_requirements_understands_helpers(self):
+        world = _world(self.HELPERS + '[regions.Root.locations]\nA = "true"\n')
+        seed = world.with_requirements({"A": "can_play(Song_of_Time)"})
+        self.assertNotIn("A", seed.explore({"A": None}).locations)
+        self.assertIn("A", seed.explore({"A": None}, extra_items=Counter(
+            {"Item_Ocarina_Fairy": 1, "Item_Melody_TimeSong": 1})).locations)
+
+    def test_helper_errors(self):
+        cases = {
+            '[helpers]\na = "b"\nb = "a"\n': "loop",
+            '[helpers]\na = "a"\n': "loop",
+            '[helpers]\nBow = "true"\n': "already an item",
+            '[helpers]\n"f(x)" = "x"\n[settings]\ngoal = "f"\n': "needs 1 argument",
+            '[helpers]\n"f(x)" = "x"\n[settings]\ngoal = "f(Bow, Hookshot)"\n': "takes 1 argument",
+            '[settings]\ngoal = "nope(Bow)"\n': "unknown helper",
+            '[helpers]\na = "Hookshoot"\n': "unknown name 'Hookshoot'",
+            '[helpers]\n"bad name" = "true"\n': "name must look like",
+        }
+        for text, expected in cases.items():
+            world = _world(text + '[regions.Root]\n')
+            self.assertTrue(any(expected in e for e in world.errors), (text, world.errors))
+
+    def test_comma_only_inside_calls(self):
+        with self.assertRaises(LogicError):
+            parse_requirement("Bow, Hookshot")
+        with self.assertRaises(LogicError):
+            parse_requirement("Bombchus:2(Bow)")
+
+    def test_split_files_reject_duplicate_helpers(self):
+        with tempfile.TemporaryDirectory() as d:
+            Path(d, "a.toml").write_text('[helpers]\nx = "true"\n[regions.Root]\n', encoding="utf-8")
+            Path(d, "b.toml").write_text('[helpers]\n"x(y)" = "y"\n', encoding="utf-8")
+            with self.assertRaises(LogicError) as ctx:
+                load_world(Path(d))
+            self.assertIn("a.toml", str(ctx.exception))
+            self.assertIn("b.toml", str(ctx.exception))
+
+
 class ExploreTests(unittest.TestCase):
     WORLD = """
 [settings]

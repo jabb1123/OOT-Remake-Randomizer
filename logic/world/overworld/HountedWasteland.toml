@@ -1,7 +1,7 @@
 # HountedWasteland
 
 [regions.Root.exits]
-"HountedWasteland" = "is_adult and (Longshot or Eponas_Song)"
+"HountedWasteland" = "is_adult and (Longshot or can_play(Eponas_Song))"
 
 [regions."HountedWasteland"]
 
@@ -9,4 +9,4 @@
 "HountedWasteland Static room 0 #0 (Item_ScrubBusinessSeed)" = "true"
 
 [regions."HountedWasteland".skulltulas]
-"Wasteland GS" = "is_adult and (Hover_Boots or Longshot) and (Hookshot or Longshot)"  # original: can_use(Hookshot) or can_use(Boomerang)
+"Wasteland GS" = "is_adult and (Hover_Boots or Longshot) and has_hookshot"  # original: can_use(Hookshot) or can_use(Boomerang)

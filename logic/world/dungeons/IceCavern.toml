@@ -1,7 +1,7 @@
 # IceCavern
 
 [regions.Root.exits]
-"IceCavern" = "is_adult and Zeldas_Lullaby"
+"IceCavern" = "is_adult and can_play(Zeldas_Lullaby)"
 
 [regions."IceCavern"]
 dungeon = true
@@ -14,9 +14,9 @@ dungeon = true
 "IceCavern Static room 6 #0 (Item_Dungeon_Compass)" = "true"
 
 [regions."IceCavern".events]
-"Ice_Cavern_Clear" = "is_adult and Zeldas_Lullaby"  # entry only: Blue Fire clause dropped (no bottle or Blue Fire in logic)
+"Ice_Cavern_Clear" = "is_adult and can_play(Zeldas_Lullaby)"  # entry only: Blue Fire clause dropped (no bottle or Blue Fire in logic)
 
 [regions."IceCavern".skulltulas]
-"Ice Cavern GS Spinning Scythe Room" = "((is_adult and (Hookshot or Longshot)) or (is_child and Boomerang))"  # original: can_use(Hookshot) or can_use(Boomerang)
-"Ice Cavern GS Heart Piece Room" = "((is_adult and (Hookshot or Longshot)) or (is_child and Boomerang))"  # original: can_use(Hookshot) or can_use(Boomerang)
-"Ice Cavern GS Push Block Room" = "((is_adult and (Hookshot or Longshot)) or (is_child and Boomerang))"  # original: can_use(Hookshot) or can_use(Boomerang) or (logic_ice_block_gs and can_use(Hover_Boots))
+"Ice Cavern GS Spinning Scythe Room" = "((is_adult and has_hookshot) or (is_child and Boomerang))"  # original: can_use(Hookshot) or can_use(Boomerang)
+"Ice Cavern GS Heart Piece Room" = "((is_adult and has_hookshot) or (is_child and Boomerang))"  # original: can_use(Hookshot) or can_use(Boomerang)
+"Ice Cavern GS Push Block Room" = "((is_adult and has_hookshot) or (is_child and Boomerang))"  # original: can_use(Hookshot) or can_use(Boomerang) or (logic_ice_block_gs and can_use(Hover_Boots))

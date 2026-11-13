@@ -1,13 +1,13 @@
 # ShadowTemple
 
 [regions.Root.exits]
-"ShadowTemple" = "is_adult and Nocturne_of_Shadow and Lens_of_Truth and (Hover_Boots or Hookshot or Longshot)"
+"ShadowTemple" = "is_adult and can_play(Nocturne_of_Shadow) and Lens_of_Truth and (Hover_Boots or Hookshot or Longshot)"
 
 [regions."ShadowTemple"]
 dungeon = true
 
 [regions."ShadowTemple".events]
-"Shadow_Temple_Clear" = "is_adult and Hover_Boots and (Hookshot or Longshot) and Bow and Zeldas_Lullaby and Lens_of_Truth and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))))"
+"Shadow_Temple_Clear" = "is_adult and Hover_Boots and has_hookshot and Bow and can_play(Zeldas_Lullaby) and Lens_of_Truth and has_explosives"
 
 [regions."ShadowTemple".locations]
 "Dm_Awake_Shadow_Get (event item)" = "Shadow_Temple_Clear"
@@ -27,8 +27,8 @@ dungeon = true
 "ShadowTemple Static room 7 #0 (Item_Dungeon_Compass)" = "Hover_Boots"
 
 [regions."ShadowTemple".skulltulas]
-"Shadow Temple GS Invisible Blades Room" = "is_adult and Hover_Boots and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))))"  # original: True
-"Shadow Temple GS Falling Spikes Room" = "is_adult and Hover_Boots and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus)))) and (Hookshot or Longshot)"  # original: logic_shadow_umbrella_gs or Hookshot
-"Shadow Temple GS Single Giant Pot" = "is_adult and Hover_Boots and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus)))) and (Hookshot or Longshot)"  # original: (Silver_Rupee_Shadow_Temple_Invisible_Spikes, 5)
-"Shadow Temple GS Near Ship" = "is_adult and Hover_Boots and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus)))) and Longshot"  # original: Longshot
-"Shadow Temple GS Triple Giant Pot" = "is_adult and Hover_Boots and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus)))) and (Hookshot or Longshot) and Zeldas_Lullaby"  # original: True
+"Shadow Temple GS Invisible Blades Room" = "is_adult and Hover_Boots and has_explosives"  # original: True
+"Shadow Temple GS Falling Spikes Room" = "is_adult and Hover_Boots and has_explosives and has_hookshot"  # original: logic_shadow_umbrella_gs or Hookshot
+"Shadow Temple GS Single Giant Pot" = "is_adult and Hover_Boots and has_explosives and has_hookshot"  # original: (Silver_Rupee_Shadow_Temple_Invisible_Spikes, 5)
+"Shadow Temple GS Near Ship" = "is_adult and Hover_Boots and has_explosives and Longshot"  # original: Longshot
+"Shadow Temple GS Triple Giant Pot" = "is_adult and Hover_Boots and has_explosives and has_hookshot and can_play(Zeldas_Lullaby)"  # original: True

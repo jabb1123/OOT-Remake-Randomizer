@@ -1,7 +1,7 @@
 # InsideJabuJabuBelly
 
 [regions.Root.exits]
-"InsideJabuJabuBelly" = "is_child and Deku_Tree_Clear and Zeldas_Lullaby and (Slingshot or Boomerang or (Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))))"
+"InsideJabuJabuBelly" = "is_child and Deku_Tree_Clear and can_play(Zeldas_Lullaby) and (Slingshot or Boomerang or has_explosives)"
 
 [regions."InsideJabuJabuBelly"]
 dungeon = true
@@ -17,6 +17,6 @@ dungeon = true
 
 [regions."InsideJabuJabuBelly".skulltulas]
 "Jabu Jabus Belly GS Water Switch Room" = "true"  # original: True
-"Jabu Jabus Belly GS Lobby Basement Lower" = "((is_adult and (Hookshot or Longshot)) or (is_child and Boomerang))"  # original: can_use(Boomerang) or can_use(Hookshot)
-"Jabu Jabus Belly GS Lobby Basement Upper" = "((is_adult and (Hookshot or Longshot)) or (is_child and Boomerang))"  # original: can_use(Boomerang) or can_use(Hookshot)
+"Jabu Jabus Belly GS Lobby Basement Lower" = "((is_adult and has_hookshot) or (is_child and Boomerang))"  # original: can_use(Boomerang) or can_use(Hookshot)
+"Jabu Jabus Belly GS Lobby Basement Upper" = "((is_adult and has_hookshot) or (is_child and Boomerang))"  # original: can_use(Boomerang) or can_use(Hookshot)
 "Jabu Jabus Belly GS Near Boss" = "is_child and Boomerang"  # original: can_use_projectile or can_use(Dins_Fire)

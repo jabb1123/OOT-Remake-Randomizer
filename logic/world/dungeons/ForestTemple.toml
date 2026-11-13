@@ -1,7 +1,7 @@
 # ForestTemple
 
 [regions.Root.exits]
-"ForestTemple" = "is_adult and (Hookshot or Longshot)"
+"ForestTemple" = "is_adult and has_hookshot"
 
 [regions."ForestTemple"]
 dungeon = true
@@ -25,7 +25,7 @@ dungeon = true
 
 [regions."ForestTemple".skulltulas]
 "Forest Temple GS First Room" = "true"  # original: (is_adult and (Hookshot or Bow or Bombs)) or (is_child and (Boomerang or Slingshot)) or has_bombchus or can...
-"Forest Temple GS Lobby" = "((is_adult and (Hookshot or Longshot)) or (is_child and Boomerang))"  # original: can_use(Hookshot) or can_use(Boomerang)
-"Forest Temple GS Level Island Courtyard" = "(is_adult and Longshot and (Song_of_Time or Bow or Hover_Boots)) or (is_adult and (Hookshot or Longshot) and (Hover_Boots or (Bow and (Goron_Bracelet or Silver_Gauntlets or Golden_Gauntlets))))"  # original: can_use(Longshot) or at('Forest Temple Outside Upper Ledge', can_use(Hookshot) or can_use(Boomerang))
-"Forest Temple GS Raised Island Courtyard" = "(is_adult and (Hookshot or Longshot) and (Song_of_Time or Bow or Hover_Boots)) or (is_adult and (Goron_Bracelet or Silver_Gauntlets or Golden_Gauntlets))"  # original: can_use(Hookshot) or (logic_forest_outdoor_east_gs and can_use(Boomerang)) or at('Forest Temple Falling Roo...
-"Forest Temple GS Basement" = "is_adult and Bow and (Goron_Bracelet or Silver_Gauntlets or Golden_Gauntlets) and (Hookshot or Longshot)"  # original: can_use(Hookshot) or can_use(Boomerang)
+"Forest Temple GS Lobby" = "((is_adult and has_hookshot) or (is_child and Boomerang))"  # original: can_use(Hookshot) or can_use(Boomerang)
+"Forest Temple GS Level Island Courtyard" = "(is_adult and Longshot and (can_play(Song_of_Time) or Bow or Hover_Boots)) or (is_adult and has_hookshot and (Hover_Boots or (Bow and has_strength)))"  # original: can_use(Longshot) or at('Forest Temple Outside Upper Ledge', can_use(Hookshot) or can_use(Boomerang))
+"Forest Temple GS Raised Island Courtyard" = "(is_adult and has_hookshot and (can_play(Song_of_Time) or Bow or Hover_Boots)) or (is_adult and has_strength)"  # original: can_use(Hookshot) or (logic_forest_outdoor_east_gs and can_use(Boomerang)) or at('Forest Temple Falling Roo...
+"Forest Temple GS Basement" = "is_adult and Bow and has_strength and has_hookshot"  # original: can_use(Hookshot) or can_use(Boomerang)

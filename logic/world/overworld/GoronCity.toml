@@ -6,7 +6,7 @@
 [regions."GoronCity"]
 
 [regions."GoronCity".events]
-"Goron_Bracelet" = "is_child and Zeldas_Lullaby and Sarias_Song"
+"Goron_Bracelet" = "is_child and can_play(Zeldas_Lullaby) and can_play(Sarias_Song)"
 
 [regions."GoronCity".locations]
 "GoronCity Dynamic room 0 #0 (TBox_Rupee_Blue)" = "true"
@@ -17,13 +17,13 @@
 "GoronCity Static room 0 #0 (TBox_Rupee_Purple)" = "true"
 
 [regions."GoronCity".skulltulas]
-"GC GS Boulder Maze" = "is_child and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))))"  # original: is_child and has_explosives
+"GC GS Boulder Maze" = "is_child and has_explosives"  # original: is_child and has_explosives
 "GC GS Center Platform" = "is_adult"  # original: is_adult
 
 # Goron Shop (shopsanity). Opening it: child with explosives or strength, adult by stopping
 # the rolling Goron (explosives, strength or bow); OoT Randomizer's 'GC Shop' rule without Din's Fire.
 [regions."GoronCity".exits]
-"GoronShop" = "(is_child and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))) or Goron_Bracelet)) or (is_adult and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))) or Goron_Bracelet or Silver_Gauntlets or Golden_Gauntlets or Bow))"
+"GoronShop" = "has_explosives or has_strength or (is_adult and Bow)"
 
 [regions."GoronShop".locations]
 "Goron Shop Slot 0" = "true"  # vanilla: Shop_Heart

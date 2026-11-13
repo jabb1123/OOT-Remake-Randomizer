@@ -1,7 +1,7 @@
 # BottomOfTheWell
 
 [regions.Root.exits]
-"BottomOfTheWell" = "is_child and Deku_Tree_Clear and Song_of_Storms"
+"BottomOfTheWell" = "is_child and Deku_Tree_Clear and can_play(Song_of_Storms)"
 
 [regions."BottomOfTheWell"]
 dungeon = true
@@ -15,10 +15,10 @@ dungeon = true
 "BottomOfTheWell Dynamic room 1 #1 (TBox_Rupee_Red)" = "true"
 "BottomOfTheWell Dynamic room 1 #2 (TBox_Rupee_Blue)" = "true"
 "BottomOfTheWell Dynamic room 11 #0 (Item_ScrubBusinessSeed)" = "true"
-"BottomOfTheWell Dynamic room 2 #0 (TBox_Rupee_Purple)" = "Zeldas_Lullaby and Lens_of_Truth"
-"BottomOfTheWell Dynamic room 9 #0 (Item_Dungeon_Map)" = "(Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))) or Goron_Bracelet"
+"BottomOfTheWell Dynamic room 2 #0 (TBox_Rupee_Purple)" = "can_play(Zeldas_Lullaby) and Lens_of_Truth"
+"BottomOfTheWell Dynamic room 9 #0 (Item_Dungeon_Map)" = "has_explosives or Goron_Bracelet"
 "BottomOfTheWell Static room 6 #0 (TBox_Shield_Deku)" = "true"
-"BottomOfTheWell Static room 8 #0 (Item_GlassTruth)" = "Zeldas_Lullaby and Kokiri_Sword"
+"BottomOfTheWell Static room 8 #0 (Item_GlassTruth)" = "can_play(Zeldas_Lullaby) and Kokiri_Sword"
 
 [regions."BottomOfTheWell".skulltulas]
 "Bottom of the Well GS West Inner Room" = "Lens_of_Truth and Boomerang"  # original: Boomerang

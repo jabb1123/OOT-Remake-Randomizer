@@ -11,5 +11,5 @@
 "DeathMountainCrater Static room 0 #0 (TBox_Rupee_Purple)" = "true"
 
 [regions."DeathMountainCrater".skulltulas]
-"DMC GS Crate" = "is_child and ((Bomb_Bag and (Goron_Bracelet or (bombchus_in_logic and Bombchus))))"  # original: is_child and can_child_attack and can_break_heated_crate
-"DMC GS Bean Patch" = "is_child and Bolero_of_Fire"  # original: can_plant_bugs and can_child_attack
+"DMC GS Crate" = "is_child and has_explosives"  # original: is_child and can_child_attack and can_break_heated_crate
+"DMC GS Bean Patch" = "is_child and can_play(Bolero_of_Fire)"  # original: can_plant_bugs and can_child_attack
