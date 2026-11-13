@@ -45,9 +45,9 @@ def _raw(name: str) -> bytes:
 
 
 class SlotTableTest(unittest.TestCase):
-    def test_nine_flows_with_unique_vanilla_items(self):
-        self.assertEqual(len(EVENT_SLOTS), 9)
-        self.assertEqual(len(set(EVENT_SLOTS.values())), 9)
+    def test_ten_flows_with_unique_vanilla_items(self):
+        self.assertEqual(len(EVENT_SLOTS), 10)
+        self.assertEqual(len(set(EVENT_SLOTS.values())), 10)
 
     def test_flow_names_are_bfevfl_zs(self):
         for flow in EVENT_SLOTS:

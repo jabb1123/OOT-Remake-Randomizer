@@ -9,9 +9,13 @@
 "Market GS Guard House" = "is_child"  # original: is_child and can_break_crate
 
 [regions."Market".locations]
-"MiniGame_BombchuBowling: Item_BombBag_Medium (npc item)" = "Bomb_Bag"
-"MiniGame_BombchuBowling: Item_BombBag_Large (npc item)" = "Bomb_Bag and Bomb_Bag_Medium"
-"MiniGame_BombchuBowling: Item_BombchuBundle_Medium (npc item)" = "true"
+"MiniGame_BombchuBowling: Item_BombBag_Medium (npc item)" = "Bomb_Bag and moving_time"
+"MiniGame_BombchuBowling: Item_BombBag_Large (npc item)" = "Bomb_Bag and Bomb_Bag_Medium and moving_time"
+"MiniGame_BombchuBowling: Item_BombchuBundle_Medium (npc item)" = "moving_time"
+# Shooting gallery as child: the 2nd bullet bag upgrade. The flow always pays this slot out
+# (npc_grants.PROGRESSIVE_BRANCHES), so the Medium bag is not needed first.
+"MiniGame_HitTarget: Item_BulletBag_Large (npc item)" = "is_child and Slingshot"
+"SubEvent_FindRichard: Obj_Heart_Piece (npc item)" = "is_child and moving_time"
 
 [regions."Market".exits]
 "Bazaar" = "is_child"

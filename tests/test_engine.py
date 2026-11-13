@@ -66,6 +66,51 @@ class SongShuffleTests(unittest.TestCase):
         n = struct.unpack_from("<H", out, ptr)[0]
         self.assertEqual(out[ptr + 2:ptr + 2 + n], b"Item_Melody_ZeldaLullaby")
 
+    def test_patch_bfevfl_songs_swaps_chain_in_one_pass(self):
+        from oot_randomizer.songs import patch_bfevfl_songs
+
+        strings = [b"Item_Melody_StormSong", b"Item_Melody_TimeSong"]
+        body = bytearray(b"BFEVFL\x00\x00" + b"\x00" * 0x18)
+        body += b"\x00" * 16  # two pointer slots at 0x20 and 0x28
+        offs = []
+        for s in strings:
+            offs.append(len(body))
+            body += struct.pack("<H", len(s)) + s + b"\x00"
+            while len(body) % 8:
+                body.append(0)
+        for i, off in enumerate(offs):
+            struct.pack_into("<Q", body, 0x20 + 8 * i, off)
+        relt_off = len(body)
+        relt = bytearray(b"RELT" + struct.pack("<II", relt_off, 1) + b"\x00" * 4)
+        relt += struct.pack("<QIIII", 0, 0, relt_off, 0, 0)
+        data = body + relt
+        struct.pack_into("<I", data, 0x18, relt_off)
+        struct.pack_into("<I", data, 0x1C, len(data))
+
+        out = patch_bfevfl_songs(
+            bytes(data),
+            {"Item_Melody_StormSong": "Item_Melody_TimeSong", "Item_Melody_TimeSong": "Item_Melody_StormSong"},
+        )
+        for ptr_slot, expected in [(0x20, b"Item_Melody_TimeSong"), (0x28, b"Item_Melody_StormSong")]:
+            ptr = struct.unpack_from("<Q", out, ptr_slot)[0]
+            n = struct.unpack_from("<H", out, ptr)[0]
+            self.assertEqual(out[ptr + 2:ptr + 2 + n], expected)
+        new_relt = struct.unpack_from("<I", out, 0x18)[0]
+        self.assertEqual(out[new_relt:new_relt + 4], b"RELT")
+        self.assertEqual(struct.unpack_from("<I", out, 0x1C)[0], len(out))
+
+    def test_patch_bfevfl_songs_rejects_missing_song(self):
+        from oot_randomizer.songs import patch_bfevfl_songs
+
+        body = bytearray(b"BFEVFL\x00\x00" + b"\x00" * 0x18)
+        relt_off = len(body)
+        relt = bytearray(b"RELT" + struct.pack("<II", relt_off, 0) + b"\x00" * 4)
+        data = body + relt
+        struct.pack_into("<I", data, 0x18, relt_off)
+        struct.pack_into("<I", data, 0x1C, len(data))
+        with self.assertRaises(ValueError):
+            patch_bfevfl_songs(bytes(data), {"Item_Melody_StormSong": "Item_Melody_TimeSong"})
+
 
 class ChestShuffleTests(unittest.TestCase):
     def test_restbl_entry_lookup_by_crc_and_name(self):

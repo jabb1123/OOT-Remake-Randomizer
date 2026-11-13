@@ -13,20 +13,24 @@
 has_ocarina = "Fairy_Ocarina or Ocarina_of_Time"
 "can_play(song)" = "has_ocarina and song"
 
+# --- Complex Logic Checks -------------------------------------------------------------------
+has_adult = "can_play(Song_of_Time) and Kokiris_Emerald and Goron_Ruby and Zora_Sapphire"
+moving_time = "is_child and Alarm_Cucco"
+
 # --- Strength and explosives -------------------------------------------------------------
-# Gauntlets only work for adult Link; the Goron Bracelet event carries over to both ages.
-has_strength = "Goron_Bracelet or (is_adult and (Silver_Gauntlets or Golden_Gauntlets))"
+# The Goron Bracelet event carries over to both ages.
+has_strength = "Goron_Bracelet or (Silver_Gauntlets or Golden_Gauntlets)"
 # Picking up and throwing bombs (bomb bag bombs or bomb flowers) needs strength.
-lift_bombs = "has_strength"
-has_bombs = "Bomb_Bag and lift_bombs"
+has_bombs = "Bomb_Bag and has_strength"
 # Bombchus are set down, not lifted, so they only need the Bomb Bag.
 has_bombchus = "bombchus_in_logic and Bomb_Bag and Bombchus"
 has_explosives = "has_bombs or has_bombchus"
 can_blast_or_smash = "has_explosives or (is_adult and Megaton_Hammer)"
 
 # --- Weapons and tools -------------------------------------------------------------------
+has_weapon = "((has_hookshot or Megaton_Hammer) and is_adult) or (is_child and Slingshot) or (is_child and Kokiri_Sword)"
 has_hookshot = "Hookshot or Longshot"
-# Slingshot (child) or Bow (adult): eye switches, targets and anything that needs a projectile.
-can_shoot = "(is_child and Slingshot) or (is_adult and Bow)"
+# Slingshot or Boomerang (child) or Bow (adult): eye switches, targets and other projectile checks.
+can_shoot = "(is_child and (Slingshot or Boomerang)) or (is_adult and Bow)"
 # Any ranged attack for the current age, boomerang and hookshot included.
 ranged_weapon = "(is_child and (Slingshot or Boomerang)) or (is_adult and (Bow or has_hookshot))"

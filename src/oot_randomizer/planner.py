@@ -6,8 +6,9 @@ which guarantees the final seed is completable. Everything else is placed afterw
 
 House of Skulltula rewards share the chest pool, but only accept items an NPC can hand over.
 Picked shop slots (shopsanity) share it too, but only accept items a shop can sell, each item
-at most once; they are stocked first, still by assumed fill. Every picked slot adds one rupee
-filler to the pool, which only chests accept. A slot's price adds a wallet requirement to it
+at most once; they are stocked first, still by assumed fill. Loose overworld heart pieces are
+also stocked first and accept any pickupable item, repeats allowed. Every picked slot adds one
+rupee filler to the pool, which only chests accept. A slot's price adds a wallet requirement to it
 through World.with_requirements. Gold Skulltula locations always keep their token.
 """
 
@@ -19,11 +20,12 @@ from dataclasses import dataclass, field
 
 from .engine import UNSHUFFLED_ITEMS, ChestSlot
 from .event_items import EVENT_SLOTS, event_location_name
+from .heart_pickups import HEART_LOCATIONS, can_pickup
 from .item_ids import MAJOR_ITEM_ACTORS
 from .npc_grants import NPC_SLOTS
 from .shop_slots import (
     DEFAULT_PRICE_RANGE,
-    FILLER_ITEMS,
+    SHOP_FILLER_ITEMS,
     SHOP_LOCATIONS,
     can_sell,
     combine_requirements,
@@ -57,6 +59,8 @@ class PlanOptions:
     shop_price_range: tuple[int, int] = DEFAULT_PRICE_RANGE
     # Most distinct shop actors the ROM's TOC can take (None = unchecked).
     max_shop_actors: int | None = None
+    # Loose overworld heart pieces become locations that accept any pickupable item.
+    shuffle_heart_pieces: bool = True
 
 
 @dataclass
@@ -69,6 +73,7 @@ class Plan:
     npc_assignments: dict[str, str] = field(default_factory=dict)  # NPC location -> item actor
     skull_assignments: dict[int, str] = field(default_factory=dict)  # token count -> item
     shop_assignments: list[tuple[str, str, int]] = field(default_factory=list)  # (slot, item, price)
+    heart_assignments: list[tuple[str, str]] = field(default_factory=list)  # (heart slot, item)
     # Per-seed rules (shop prices) to apply with World.with_requirements when replaying the seed.
     extra_requirements: dict[str, str] = field(default_factory=dict)
 
@@ -80,7 +85,7 @@ class PlanningError(RuntimeError):
 def known_locations(slots: list[ChestSlot]) -> set[str]:
     return ({s.name for s in slots} | {song_location_name(f) for f in SONG_SLOTS}
             | {event_location_name(f) for f in EVENT_SLOTS} | set(NPC_SLOTS)
-            | set(SKULL_LOCATIONS) | set(SHOP_LOCATIONS))
+            | set(SKULL_LOCATIONS) | set(SHOP_LOCATIONS) | set(HEART_LOCATIONS))
 
 
 def shop_requirements(shop_assignments: list[tuple[str, str, int]]) -> dict[str, str]:
@@ -167,18 +172,28 @@ def plan_seed(seed: int, slots: list[ChestSlot], world: World | None, options: P
     prices: dict[str, int] = {}
     for slot in picked:
         prices[slot.name] = rng.choice(prices_allowed)
-        pool.append((rng.choice(FILLER_ITEMS), "chest"))
+        pool.append((rng.choice(SHOP_FILLER_ITEMS), "chest"))
         open_locations["chest"].append(slot.name)
     shop_locs = frozenset(prices)
+    # Loose heart pieces: every piece the world lists (or all, without a world) is a location.
+    # Drawn after the shops so the shop picks don't change when hearts are off.
+    heart_names: list[str] = []
+    if options.shuffle_heart_pieces:
+        heart_allowed = (set(world.location_region) - excluded) & HEART_LOCATIONS if world else HEART_LOCATIONS
+        heart_names = sorted(heart_allowed)
+        for name in heart_names:
+            pool.append((rng.choice(SHOP_FILLER_ITEMS), "chest"))
+            open_locations["chest"].append(name)
+    heart_locs = frozenset(heart_names)
     extra = shop_requirements([(n, "", p) for n, p in prices.items()])
     seed_world = world.with_requirements(extra) if (world is not None and extra) else world
 
     for attempt in range(1, options.max_attempts + 1):
-        placed = _try_fill(rng, seed_world, dict(fixed), pool, open_locations, options, shop_locs)
+        placed = _try_fill(rng, seed_world, dict(fixed), pool, open_locations, options, shop_locs, heart_locs)
         if placed is None:
             continue
         # Item rules (Bomb Bag for bombs) are only known once the fill has placed the items.
-        item_rules = {slot.name: rule for slot in picked if (rule := item_requirement(placed[slot.name]))}
+        item_rules = {loc: rule for loc in [*prices, *heart_names] if (rule := item_requirement(placed[loc]))}
         requirements = combine_requirements(extra, item_rules)
         check_world = world.with_requirements(requirements) if (world is not None and requirements) else world
         unreachable: list[str] = []
@@ -203,6 +218,7 @@ def plan_seed(seed: int, slots: list[ChestSlot], world: World | None, options: P
             unreachable=unreachable,
             skull_assignments={n: placed[skull_location_name(n)] for n in SKULL_REWARDS},
             shop_assignments=shop_assignments,
+            heart_assignments=[(name, placed[name]) for name in heart_names],
             extra_requirements=requirements,
         )
     raise PlanningError(
@@ -219,6 +235,7 @@ def _try_fill(
     open_locations: dict[str, list[str]],
     options: PlanOptions,
     shop_locs: frozenset[str] = frozenset(),
+    heart_locs: frozenset[str] = frozenset(),
 ) -> dict[str, str] | None:
     progression_names = world.referenced_items if world else set()
     progression = [e for e in pool if e[0] in progression_names]
@@ -237,6 +254,8 @@ def _try_fill(
             return False
         if loc in shop_locs and (not can_sell(item) or item in in_shops):
             return False
+        if loc in heart_locs and not can_pickup(item):
+            return False
         return not (item in _MAJORS and loc in dungeon_of and dungeon_of[loc] in dungeons_with_major)
 
     def place(loc: str, item: str) -> None:
@@ -246,11 +265,12 @@ def _try_fill(
         if item in _MAJORS and loc in dungeon_of:
             dungeons_with_major.add(dungeon_of[loc])
 
-    # Shop slots accept the fewest items, so stock them first from the whole pool. A
+    # Shop and heart slots accept the fewest items, so stock them first from the whole pool. A
     # progression item still needs the slot reachable without it (assumed fill).
-    shops = [loc for loc in open_locations["chest"] if loc in shop_locs and loc not in placed]
-    rng.shuffle(shops)
-    for loc in shops:
+    stock_first = [loc for loc in open_locations["chest"]
+                   if (loc in shop_locs or loc in heart_locs) and loc not in placed]
+    rng.shuffle(stock_first)
+    for loc in stock_first:
         choices = [(progression, i) for i, (item, group) in enumerate(progression)
                    if group == "chest" and allowed(loc, item)]
         choices += [(rest, i) for i, (item, group) in enumerate(rest) if group == "chest" and allowed(loc, item)]

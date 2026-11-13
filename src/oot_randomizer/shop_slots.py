@@ -35,6 +35,12 @@ SHOP_ITEM_WHITELIST: tuple[str, ...] = (
     "Shop_Armor_",
     "Shop_Heart",
 )
+# Per-shop additions to SHOP_ITEM_WHITELIST. The Goron Shop's bottle and bomb-bundle shelves are
+# randomizable: their location access is already gated by the Goron Shop region, and the planner
+# adds the bomb-bag rule to any bomb item placed there.
+SHOP_EXTRA_ELIGIBLE: dict[str, tuple[str, ...]] = {
+    "Goron Shop": ("Shop_Bottle_RedPotion", "Shop_Bottle_Bug", "Shop_BombBundle_"),
+}
 # Excluded slots (vanilla gates them behind an upgrade, a bottle or a side quest, or they need
 # magic); widen SHOP_ITEM_WHITELIST after in-game testing:
 #   Bazaar       1 Shop_MagicJar_Small (magic), 2 Shop_DekuSeedBundle_02 (seeds),
@@ -44,8 +50,6 @@ SHOP_ITEM_WHITELIST: tuple[str, ...] = (
 #                6 Shop_Bottle_Bug, 7 Shop_Bottle_Fish                               (bottle)
 #   Bombchu Shop 0-7 Shop_BombchuBundle_01..08                                       (bombchus)
 #   Mask Shop    0-7 Shop_Mask_*                                                     (mask quest)
-#   Goron Shop   1 Shop_Bottle_RedPotion, 2 Shop_Bottle_Bug (bottle),
-#                4-7 Shop_BombBundle_01..04 (bombs: bomb bag)
 #   Zora Shop    0 Shop_Bottle_RedPotion, 1 Shop_Bottle_GreenPotion, 2 Shop_Bottle_Bug,
 #                6 Shop_Bottle_Fish (bottle), 4/5/7 Shop_ArrowBundle_01..03 (arrows: bow)
 
@@ -53,6 +57,9 @@ MAX_SHOP_SLOTS_PER_SHOP = 4
 PRICE_STEP = 5
 DEFAULT_PRICE_RANGE = (10, 200)
 FILLER_ITEMS = ("TBox_Rupee_Blue", "TBox_Rupee_Red")
+# Pool entries added for each new shop or heart slot. They must be sellable so they can stock those
+# slots; the pool would otherwise have fewer sellable items than shop + heart slots.
+SHOP_FILLER_ITEMS = ("Item_BombBundle_Small", "Item_DekuStickBundle_Small")
 
 # Wallet capacity is 99 / 200 / 500 rupees.
 MEDIUM_WALLET_PRICE = 100
@@ -201,7 +208,7 @@ class ShopSlot:
         # Seed shelves are only randomized in the Kokiri Shop (the Bazaar seed slot is not in logic).
         if self.vanilla.startswith("Shop_DekuSeedBundle_") and self.shop != "Kokiri Shop":
             return False
-        return self.vanilla.startswith(SHOP_ITEM_WHITELIST)
+        return self.vanilla.startswith(SHOP_ITEM_WHITELIST + SHOP_EXTRA_ELIGIBLE.get(self.shop, ()))
 
     @property
     def scene_files(self) -> list[str]:
@@ -308,11 +315,15 @@ def pick_shop_slots(rng: random.Random, per_shop: int,
 # ROM side
 # ---------------------------------------------------------------------------
 
-def _toc_entry_bytes(item_actor: str) -> int:
+def _toc_name_bytes(actor_name: str) -> int:
     from nup import format as F
-    filename = actor_pack_path(shop_actor_name(item_actor)).rsplit("/", 1)[-1]
+    filename = actor_pack_path(actor_name).rsplit("/", 1)[-1]
     # file record + child index + name in the string pool (an upper bound: names may be reused)
     return F.FILE_SIZE + 4 + len(filename.encode("utf-8"))
+
+
+def _toc_entry_bytes(item_actor: str) -> int:
+    return _toc_name_bytes(shop_actor_name(item_actor))
 
 
 _MAX_ITEM_NAME = max(SHOP_ITEM_PACKS, key=len)
@@ -325,17 +336,26 @@ def shop_actor_capacity(nup_path: str | Path) -> int:
     return max(0, (free - 15) // _toc_entry_bytes(_MAX_ITEM_NAME))
 
 
-def check_toc_room(nup_path: str | Path, item_actors: Iterable[str]) -> None:
-    """Raise ShopError when the packs for `item_actors` may not fit in the TOC."""
+def check_toc_names(nup_path: str | Path, actor_names: Iterable[str]) -> None:
+    """Raise ShopError when the new packs named `actor_names` may not fit in the TOC."""
     from .nup_files import toc_space
-    items = sorted(set(item_actors))
-    need = sum(_toc_entry_bytes(i) for i in items)
+    names = sorted(set(actor_names))
+    need = sum(_toc_name_bytes(n) for n in names)
     need = (need + 15) & ~15
     free = toc_space(nup_path)["free_bytes_after_meta_move"]
     if need > free:
         raise ShopError(
-            f"{len(items)} shop actors need up to {need} TOC bytes but only {free} are free before "
-            f"the blob region; lower shop_slots_per_shop (about {shop_actor_capacity(nup_path)} actors fit)")
+            f"{len(names)} new actors need up to {need} TOC bytes but only {free} are free before "
+            f"the blob region; use fewer shop slots or heart pickups")
+
+
+def check_toc_room(nup_path: str | Path, item_actors: Iterable[str]) -> None:
+    """Raise ShopError when the shop packs for `item_actors` may not fit in the TOC."""
+    try:
+        check_toc_names(nup_path, [shop_actor_name(i) for i in item_actors])
+    except ShopError as exc:
+        raise ShopError(
+            f"{exc}; lower shop_slots_per_shop (about {shop_actor_capacity(nup_path)} actors fit)") from None
 
 
 def shop_items_for(assignments: Iterable[tuple[str, str, int]]) -> list[tuple[str, int, list[Shelf]]]:

@@ -11,6 +11,7 @@
 "GerudoValley Dynamic room 0 #0 (TBox_Rupee_Red)" = "is_adult and can_play(Song_of_Storms) and Lens_of_Truth and (can_play(Eponas_Song) or Longshot)"
 "GerudoValley Dynamic room 0 #1 (TBox_Rupee_Red)" = "is_adult and Megaton_Hammer and (can_play(Eponas_Song) or Longshot)"
 "GerudoValley Static room 0 #0 (Obj_Heart_Piece)" = "true"
+"GerudoValley Heart Piece 1" = "true"  # loose Obj_GerudoValley_Heart_Piece, both ages
 
 [regions."GerudoValley".skulltulas]
 "GV GS Small Bridge" = "is_child and Boomerang"  # original: can_use(Boomerang) and at_night

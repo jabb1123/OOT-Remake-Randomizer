@@ -6,10 +6,12 @@
 [regions."HyruleCastle"]
 
 [regions."HyruleCastle".events]
-"Zeldas_Letter" = "true"  # Zelda gives the letter in the castle; not randomized, gates the Kakariko/Death Mountain route for children
 
 [regions."HyruleCastle".locations]
-"Dm_MelodyGet_Zelda" = "is_child"  # song: Zelda's Lullaby from Impa, Hyrule Castle courtyard
+"Goto_HyruleCastle: Item_WeirdEgg (npc item)" = "is_child"
+"Dm_MelodyGet_Zelda" = "is_child and Alarm_Cucco"  # song: Zelda's Lullaby from Impa, Hyrule Castle courtyard
+"Dm_HrlCastle_0050: Item_ZeldaLetter (npc item)" = "is_child and Alarm_Cucco"  # Zelda gives the letter in the castle; not randomized, gates the Kakariko/Death Mountain route for children
+
 
 [regions."HyruleCastle".skulltulas]
 "HC GS Tree" = "is_child"  # original: can_child_attack and can_bonk

@@ -21,6 +21,8 @@ class RandomizerConfig:
     one_major_per_dungeon: bool = False
     # Shopsanity: shop shelf slots randomized per shop (0 = off, max 4).
     shop_slots_per_shop: int = 2
+    # Loose overworld heart pieces hold randomized pickupable items.
+    shuffle_heart_pieces: bool = True
     skip_intro: bool = False
     output_path: str | None = None
     item_pool_limit: int = 12

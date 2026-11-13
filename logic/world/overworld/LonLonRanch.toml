@@ -1,7 +1,7 @@
 # LonLonRanch
 
 [regions.Root.exits]
-"LonLonRanch" = "is_adult or Deku_Tree_Clear"
+"LonLonRanch" = "is_adult or Deku_Tree_Clear or has_bombs"
 
 [regions."LonLonRanch"]
 

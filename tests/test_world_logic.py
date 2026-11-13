@@ -75,7 +75,7 @@ class HelperTests(unittest.TestCase):
         '"can_play(song)" = "has_ocarina and song"\n'
         'lift = "Goron_Bracelet or (is_adult and Silver_Gauntlets)"\n'
         'has_bombs = "Bomb_Bag and lift"\n'
-        '[regions.Root.events]\nGoron_Bracelet = "false"\n'
+        '[regions.Root.exits]\n'
     )
 
     def _check(self, text: str, items, age="child", events=()):
@@ -86,7 +86,7 @@ class HelperTests(unittest.TestCase):
     def test_plain_and_nested_helpers_inline(self):
         text = self.HELPERS + '[settings]\ngoal = "has_bombs"\n'
         self.assertFalse(self._check(text, ["Item_BombBag_Small"]))
-        self.assertTrue(self._check(text, ["Item_BombBag_Small"], events={"Goron_Bracelet"}))
+        self.assertTrue(self._check(text, ["Item_BombBag_Small", "Item_Gauntlet_Goron"]))
         self.assertFalse(self._check(text, ["Item_BombBag_Small", "Item_Gauntlet_Silver"], age="child"))
         self.assertTrue(self._check(text, ["Item_BombBag_Small", "Item_Gauntlet_Silver"], age="adult"))
 
@@ -279,6 +279,7 @@ class ShippedWorldTests(unittest.TestCase):
             placed |= {skull_location_name(n): i for n, i in plan.skull_assignments.items()}
             placed |= {loc: TOKEN_ITEM for loc in self.world.token_locations}
             placed |= {loc: item for loc, item, _ in plan.shop_assignments}
+            placed |= dict(plan.heart_assignments)
             world = self.world.with_requirements(plan.extra_requirements)
             res = world.explore(placed, options.logic_options)
             self.assertTrue(world.goal_met(res), f"seed {seed}")

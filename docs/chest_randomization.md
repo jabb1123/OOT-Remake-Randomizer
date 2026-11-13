@@ -1,0 +1,67 @@
+# Chest Randomization
+
+This is the process for finding chests in the NUP, turning them into randomizable slots, and patching the shuffled items back in. Chests are the base case for item randomization; NPC grants and event items follow the same pattern with different patch targets (see [adding_npc_grants.md](./adding_npc_grants.md)).
+
+## Pipeline
+
+### 1. Scan the scene files
+
+Each placement file (`*.bcett.byml`, with Child and Adult variants) is decompressed and walked by `_walk_byml_chests` in [nup_chest_patcher.py](../src/oot_randomizer/nup_chest_patcher.py). It finds every `Obj_TBox_A_01` and `Obj_TBox_A_02` actor and records:
+
+- the room index,
+- the vanilla `Drop__DropActor` item,
+- the byte offset of the item's string-table index.
+
+The results go into `chest_locations_summary.json` at the project root. The `scan` command reports NUP structure but does not write this summary. The script that generates the summary has not been confirmed; check before regenerating it.
+
+### 2. Merge into slots
+
+`load_chest_slots` in [engine.py](../src/oot_randomizer/engine.py) combines the Child and Adult copies of a chest into one `ChestSlot`:
+
+- `targets` lists each `(scene_file, chest_order)` pair that the slot patches.
+- `ages` reports whether the chest is child-only, adult-only, or both, based on the file name.
+- `scene` is the logic region key (the scene prefix, e.g. `KokiriForest`).
+
+### 3. Add logic
+
+`logic template` generates a starter file from the slots, with one `[regions.X.locations]` entry per chest. Set each chest's requirement by hand under `logic\world\`. Chests in the unknown-area region keep their vanilla items until confirmed reachable.
+
+### 4. Shuffle
+
+`shuffle_chest_items` assigns items to reachable slots. `build_shuffle_patches` turns each assignment into a `PatchRecord` carrying the `chest_order`. The plan is exposed as `plan.chest_assignments` in [randomizer.py](../src/oot_randomizer/randomizer.py).
+
+### 5. Patch
+
+[patcher.py](../src/oot_randomizer/patcher.py) groups patches by scene file and chest identity (room plus order). `NupChestPatcher` then:
+
+1. Rewrites the `Drop__DropActor` string index in the BYML.
+2. Recompresses the file.
+3. Appends a new extent to the NUP copy.
+4. Updates the TOC entry, the RESTBL sizes, and the superblock.
+
+The Kokiri Forest sword chest is a special case: [chest_events.py](../src/oot_randomizer/chest_events.py) handles its demo.
+
+### 6. Verify
+
+1. `python -m oot_randomizer.cli logic check`
+2. Chest-related tests: `test_location_mapper` and `test_world_logic`.
+3. Playtest. Confirm the chest gives the right item and that Child and Adult versions match.
+
+## Loose heart pieces
+
+The loose overworld `Obj_Heart_Piece` pickups (not chests) are randomized as pickupable items, the same set shops can sell. They are handled by [heart_pickups.py](../src/oot_randomizer/heart_pickups.py).
+
+- **Slots:** 13 physical pieces, listed in `_HEART_TARGETS`. Each has a `Heart Piece N` logic location in its region TOML. Child and Adult copies are merged into one slot. [scan_loose_hearts.py](../scripts/scan_loose_hearts.py) produces the reference list in `loose_heart_pieces.json`.
+- **Patching:** each distinct item gets a clone actor, `Obj_HeartRando_<item>`, built from the `Obj_Heart_Piece` template with the item's model and pouch content. Only the Gyaml string index in the scene changes. Actor positions are kept. The clones are added through the same path as shopsanity (`apply_shop_items`).
+- **Planning:** the planner draws heart items after shop items. Each heart slot adds a rupee filler to the chest pool. Fillers can only go in chests, and heart slots only accept pickupable items.
+- **Logic:** the rules are placeholders. Adjust them in the region TOMLs.
+- **Disable:** `--no-heart-shuffle` on the CLI, or `shuffle_heart_pieces = false` in the config.
+- **Not included:** the Goron large-pot drop (`EventGoronLargePotDropPrize`), dungeon heart containers, and the Market minigame rewards.
+
+## Pitfalls
+
+- **Slot identity depends on scan order.** The `#k` in a slot name counts duplicate room and drop pairs in scan order. Regenerating the summary with a different order can renumber slots, and existing logic entries would then point at the wrong chest.
+- **Child and Adult copies must change together.** A slot has several targets for this reason.
+- **The patch changes file size.** New drop strings go into the BYML string table, so the RESTBL sizes and TOC must be updated, not just the bytes at one offset.
+- **Dynamic nodes can be shared.** `dynamic_offset` may be shared between actors, so do not edit it per chest.
+- **Unknown drops are skipped.** Chests with no room index or no drop name are ignored by `load_chest_slots`.

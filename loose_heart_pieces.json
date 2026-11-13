@@ -1,0 +1,312 @@
+[
+  {
+    "name": "DeathMountainCrater Heart Piece 1",
+    "scene": "DeathMountainCrater",
+    "ages": [
+      "adult",
+      "child"
+    ],
+    "translate": [
+      -17.500003814697266,
+      127.15058135986328,
+      3.9499969482421875
+    ],
+    "targets": [
+      {
+        "scene_file": "DeathMountainCrater_Adult_Static.bcett.byml.zs",
+        "actor_index": 10
+      },
+      {
+        "scene_file": "DeathMountainCrater_Child_Static.bcett.byml.zs",
+        "actor_index": 10
+      }
+    ]
+  },
+  {
+    "name": "DeathMountainCrater Heart Piece 2",
+    "scene": "DeathMountainCrater",
+    "ages": [
+      "adult",
+      "child"
+    ],
+    "translate": [
+      -0.5,
+      116.77326965332031,
+      32.34000015258789
+    ],
+    "targets": [
+      {
+        "scene_file": "DeathMountainCrater_Adult_Static.bcett.byml.zs",
+        "actor_index": 9
+      },
+      {
+        "scene_file": "DeathMountainCrater_Child_Static.bcett.byml.zs",
+        "actor_index": 9
+      }
+    ]
+  },
+  {
+    "name": "DeathMountainTrail Heart Piece 1",
+    "scene": "DeathMountainTrail",
+    "ages": [
+      "adult",
+      "child"
+    ],
+    "translate": [
+      -39.66063690185547,
+      122.2122802734375,
+      -26.000682830810547
+    ],
+    "targets": [
+      {
+        "scene_file": "DeathMountainTrail_Adult_Static.bcett.byml.zs",
+        "actor_index": 34
+      },
+      {
+        "scene_file": "DeathMountainTrail_Child_Static.bcett.byml.zs",
+        "actor_index": 34
+      }
+    ]
+  },
+  {
+    "name": "DesertColossus Heart Piece 1",
+    "scene": "DesertColossus",
+    "ages": [
+      "adult",
+      "child"
+    ],
+    "translate": [
+      -137.13226318359375,
+      103.49292755126953,
+      10.506491661071777
+    ],
+    "targets": [
+      {
+        "scene_file": "DesertColossus_Adult_Static.bcett.byml.zs",
+        "actor_index": 67
+      },
+      {
+        "scene_file": "DesertColossus_Child_Static.bcett.byml.zs",
+        "actor_index": 67
+      }
+    ]
+  },
+  {
+    "name": "GerudoValley Heart Piece 1",
+    "scene": "GerudoValley",
+    "ages": [
+      "adult",
+      "child"
+    ],
+    "translate": [
+      4.853181838989258,
+      59.16404342651367,
+      -78.1605224609375
+    ],
+    "targets": [
+      {
+        "scene_file": "GerudoValley_Adult_Static.bcett.byml.zs",
+        "actor_index": 24
+      },
+      {
+        "scene_file": "GerudoValley_Child_Static.bcett.byml.zs",
+        "actor_index": 18
+      }
+    ]
+  },
+  {
+    "name": "Graveyard Heart Piece 1",
+    "scene": "Graveyard",
+    "ages": [
+      "adult",
+      "child"
+    ],
+    "translate": [
+      -16.614957809448242,
+      108.01932525634766,
+      -8.912455558776855
+    ],
+    "targets": [
+      {
+        "scene_file": "Graveyard_Adult_Static.bcett.byml.zs",
+        "actor_index": 237
+      },
+      {
+        "scene_file": "Graveyard_Child_Static.bcett.byml.zs",
+        "actor_index": 237
+      }
+    ]
+  },
+  {
+    "name": "HyruleField Heart Piece 1",
+    "scene": "HyruleField",
+    "ages": [
+      "adult"
+    ],
+    "translate": [
+      -180.58221435546875,
+      163.0877227783203,
+      424.9727478027344
+    ],
+    "targets": [
+      {
+        "scene_file": "HyruleField_Adult_Static.bcett.byml.zs",
+        "actor_index": 1733
+      }
+    ]
+  },
+  {
+    "name": "HyruleField Heart Piece 2",
+    "scene": "HyruleField",
+    "ages": [
+      "child"
+    ],
+    "translate": [
+      -157.15353393554688,
+      150.9308319091797,
+      266.4433288574219
+    ],
+    "targets": [
+      {
+        "scene_file": "HyruleField_Child_Static.bcett.byml.zs",
+        "actor_index": 1495
+      }
+    ]
+  },
+  {
+    "name": "KakarikoVillage Heart Piece 1",
+    "scene": "KakarikoVillage",
+    "ages": [
+      "adult",
+      "child"
+    ],
+    "translate": [
+      -44.06813430786133,
+      107.9712142944336,
+      112.00200653076172
+    ],
+    "targets": [
+      {
+        "scene_file": "KakarikoVillage_Adult_Alternative_Static.bcett.byml.zs",
+        "actor_index": 41
+      },
+      {
+        "scene_file": "KakarikoVillage_Adult_Static.bcett.byml.zs",
+        "actor_index": 41
+      },
+      {
+        "scene_file": "KakarikoVillage_Child_Static.bcett.byml.zs",
+        "actor_index": 41
+      }
+    ]
+  },
+  {
+    "name": "KakarikoVillage Heart Piece 2",
+    "scene": "KakarikoVillage",
+    "ages": [
+      "adult",
+      "child"
+    ],
+    "translate": [
+      1.4819145202636719,
+      108.9048080444336,
+      37.5221061706543
+    ],
+    "targets": [
+      {
+        "scene_file": "KakarikoVillage_Adult_Alternative_Static.bcett.byml.zs",
+        "actor_index": 40
+      },
+      {
+        "scene_file": "KakarikoVillage_Adult_Static.bcett.byml.zs",
+        "actor_index": 40
+      },
+      {
+        "scene_file": "KakarikoVillage_Child_Static.bcett.byml.zs",
+        "actor_index": 40
+      }
+    ]
+  },
+  {
+    "name": "ZoraFountain Heart Piece 1",
+    "scene": "ZoraFountain",
+    "ages": [
+      "adult"
+    ],
+    "translate": [
+      56.85418701171875,
+      70.92938995361328,
+      -27.409893035888672
+    ],
+    "targets": [
+      {
+        "scene_file": "ZoraFountain_Adult_Static.bcett.byml.zs",
+        "actor_index": 128
+      }
+    ]
+  },
+  {
+    "name": "ZoraFountain Heart Piece 2",
+    "scene": "ZoraFountain",
+    "ages": [
+      "adult"
+    ],
+    "translate": [
+      84.96427154541016,
+      103.14527130126953,
+      -34.7976188659668
+    ],
+    "targets": [
+      {
+        "scene_file": "ZoraFountain_Adult_Static.bcett.byml.zs",
+        "actor_index": 127
+      }
+    ]
+  },
+  {
+    "name": "ZoraRiver Heart Piece 1",
+    "scene": "ZoraRiver",
+    "ages": [
+      "adult",
+      "child"
+    ],
+    "translate": [
+      -3.9942941665649414,
+      111.42150115966797,
+      -34.297489166259766
+    ],
+    "targets": [
+      {
+        "scene_file": "ZoraRiver_Adult_Static.bcett.byml.zs",
+        "actor_index": 40
+      },
+      {
+        "scene_file": "ZoraRiver_Child_Static.bcett.byml.zs",
+        "actor_index": 40
+      }
+    ]
+  },
+  {
+    "name": "ZoraRiver Heart Piece 2",
+    "scene": "ZoraRiver",
+    "ages": [
+      "adult",
+      "child"
+    ],
+    "translate": [
+      99.4913101196289,
+      120.10099792480469,
+      -61.73397445678711
+    ],
+    "targets": [
+      {
+        "scene_file": "ZoraRiver_Adult_Static.bcett.byml.zs",
+        "actor_index": 39
+      },
+      {
+        "scene_file": "ZoraRiver_Child_Static.bcett.byml.zs",
+        "actor_index": 39
+      }
+    ]
+  }
+]

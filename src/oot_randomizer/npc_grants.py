@@ -17,13 +17,19 @@ from dataclasses import dataclass
 
 _HAND_OVER_SUBFLOW = "NpcCommon_HandOver_NpcToPlayer_NoDisplay"
 _HAND_OVER_KEY = "ReveiveItem"
-_GET_IN_EVENT_SUBFLOWS = frozenset({
-    "GetInEvent_NotTurn",
-    "GetInEvent_NotTurn_PosCamera",
-    "GetInEvent_NotLookatObjectTurnOff",
-    "GetInEvent_NotTurn_NotNpc",
-    "GetInEventItemSwordBiggoron",  # Dm_SY_GetInEvent/GetInEventItemSwordBiggoron (stored without the flow prefix)
-})
+_GET_IN_EVENT_SUBFLOWS = frozenset(
+    {
+        "GetInEvent_Goron",
+        "GetInEvent_GreatFairyDin",
+        "GetInEvent_Zeldaletter",
+        "GetInEvent_NotTurn",
+        "GetInEvent_NotTurn_PosCamera",
+        "GetInEvent_NotLookatObjectTurnOff",
+        "GetInEvent_NotTurn_NotNpc",
+        "GetInEventItemSwordBiggoron",  # Dm_SY_GetInEvent/GetInEventItemSwordBiggoron (stored without the flow prefix)
+        "SimpleShopSub_Scrub_Business_OneTime",  # Enemy_Scrub_Business_Common bag sales (ActorName is the bag)
+    }
+)
 _GET_IN_EVENT_KEY = "ActorName"
 
 
@@ -34,11 +40,12 @@ class NpcSlot:
 
 
 # (flow file, vanilla item). A flow can grant several items, so locations are per (flow, item).
+# The Lost Woods scrub target and the Market shooting gallery are one-time, progressive bullet
+# bag grants (Medium if the Medium bag is not owned yet, else Large). Only one branch of each is
+# kept (see PROGRESSIVE_BRANCHES): Lost Woods is the 1st upgrade, the Market gallery the 2nd.
 _NPC_GRANTS: tuple[tuple[str, str], ...] = (
-    ("MiniGame_HitTarget.bfevfl.zs", "Item_BulletBag_Medium"),
     ("MiniGame_HitTarget.bfevfl.zs", "Item_BulletBag_Large"),
     ("MiniGame_HitTarget.bfevfl.zs", "Item_Quiver_Medium"),
-    ("MiniGame_HitTarget.bfevfl.zs", "Item_Quiver_Large"),
     ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombBag_Medium"),
     ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombBag_Large"),
     ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombchuBundle_Medium"),
@@ -50,9 +57,16 @@ _NPC_GRANTS: tuple[tuple[str, str], ...] = (
     ("LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl.zs", "Item_StickBag_Large"),
     ("LostWood_ScrubForestStageElder_TrueMaskFirst.bfevfl.zs", "Item_NutBag_Medium"),
     ("LostWood_ScrubForestStageElder_TrueMaskFirst.bfevfl.zs", "Item_NutBag_Large"),
+    ("Enemy_Scrub_Business_Common.bfevfl.zs", "Item_StickBag_Large"),
+    ("Enemy_Scrub_Business_Common.bfevfl.zs", "Item_NutBag_Large"),
     ("Dm_LostWood_0040.bfevfl.zs", "Item_BulletBag_Medium"),
-    ("Dm_LostWood_0040.bfevfl.zs", "Item_BulletBag_Large"),
     ("Npc_Goron_Biggoron_Adult.bfevfl.zs", "Item_Sword_Biggoron"),
+    ("SubEvent_FindRichard.bfevfl.zs", "Obj_Heart_Piece"),
+    ("Npc_SkullKid_Child_02.bfevfl.zs", "Obj_Heart_Piece"),
+    ("Dm_Goron_0030.bfevfl.zs", "Item_Gauntlet_Goron"),
+    ("Dm_FairyFountain_Din.bfevfl.zs", "Item_DinFire"),
+    ("Goto_HyruleCastle.bfevfl.zs", "Item_WeirdEgg"),
+    ("Dm_HrlCastle_0050.bfevfl.zs", "Item_ZeldaLetter"),
 )
 
 # Friendly names usable in logic requirements (the logic uses the Medium/Large forms).
@@ -71,6 +85,10 @@ NPC_ITEM_DISPLAY_NAMES: dict[str, str] = {
     "Item_NutBag_Medium": "Nut Bag Medium",
     "Item_NutBag_Large": "Nut Bag Large",
     "Item_Sword_Biggoron": "Biggoron Sword",
+    "Item_Gauntlet_Goron": "Goron_Bracelet",
+    "Item_DinFire": "Dins Fire",
+    "Item_WeirdEgg": "Alarm_Cucco",
+    "Item_ZeldaLetter": "Zeldas_Letter",
 }
 
 
@@ -139,6 +157,99 @@ def patch_npc_grants(data: bytes, changes: dict[str, str]) -> bytes:
 def patch_npc_grant(data: bytes, old_item: str, new_item: str) -> bytes:
     """Repoint the grant of `old_item` to `new_item` in one NPC flow."""
     return patch_npc_grants(data, {old_item: new_item})
+
+
+@dataclass(frozen=True)
+class ProgressiveBranch:
+    switch: str  # SwitchEvent that picks the Medium or Large grant
+    keep: str  # grant event every case is pointed at
+    keep_item: str  # vanilla item of `keep` (that location's slot)
+
+
+# Each switch asks "is the Medium bag already owned?"; every case is pointed at `keep`, so the
+# grant no longer depends on where the randomized Medium bag was found.
+PROGRESSIVE_BRANCHES: dict[str, tuple[ProgressiveBranch, ...]] = {
+    "Dm_LostWood_0040.bfevfl.zs": (
+        ProgressiveBranch("Event83", "Event30", "Item_BulletBag_Medium"),
+    ),
+    "MiniGame_HitTarget.bfevfl.zs": (
+        ProgressiveBranch("Event70", "Event378", "Item_BulletBag_Large"),
+    ),
+    "LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl.zs": (
+        ProgressiveBranch("Event30", "Event29", "Item_StickBag_Medium"),
+    ),
+    "LostWood_ScrubForestStageElder_TrueMaskFirst.bfevfl.zs": (
+        ProgressiveBranch("Event30", "Event2", "Item_NutBag_Medium"),
+    ),
+    # Business Scrub bag sales: the Medium sales are removed, so each switch pins the Large bag.
+    "Enemy_Scrub_Business_Common.bfevfl.zs": (
+        ProgressiveBranch("Event319", "Event317", "Item_StickBag_Large"),
+        ProgressiveBranch("Event323", "Event318", "Item_NutBag_Large"),
+    ),
+}
+
+# (flow file) -> (source event, case key, old target, new target). Re-points one switch case, for
+# gates that lead into a removed grant rather than into a progressive switch.
+CASE_REROUTES: dict[str, tuple[tuple[str, int, str, str], ...]] = {
+    # IsGet.Item_DekuStick true used to skip the pouch check and sell the Medium stick bag.
+    "Enemy_Scrub_Business_Common.bfevfl.zs": (
+        ("Event554", 1, "Event555", "Event319"),
+    ),
+}
+
+
+def fix_progressive_branches(data: bytes, flow_file: str) -> bytes:
+    """Point every case of the flow's progressive bag switches at the kept grant.
+
+    Returns the input unchanged when already patched. Raises ValueError if the switch or the
+    kept grant event is missing or is not the expected kind.
+    """
+    from evfl import EventFlow
+    from evfl.event import SubFlowEvent, SwitchEvent
+
+    flow = EventFlow()
+    flow.read(data)
+    by_name = {event.name: event for event in flow.flowchart.events}
+    changed = False
+    for branch in PROGRESSIVE_BRANCHES[flow_file]:
+        switch, keep = by_name.get(branch.switch), by_name.get(branch.keep)
+        if (
+            switch is None
+            or not isinstance(switch.data, SwitchEvent)
+            or not switch.data.cases
+        ):
+            raise ValueError(f"{flow_file}: {branch.switch} is not a switch")
+        grant_subflows = _GET_IN_EVENT_SUBFLOWS | {_HAND_OVER_SUBFLOW}
+        if (
+            keep is None
+            or not isinstance(keep.data, SubFlowEvent)
+            or keep.data.entry_point_name not in grant_subflows
+        ):
+            raise ValueError(f"{flow_file}: {branch.keep} is not an item grant")
+        if not any(case.v is keep for case in switch.data.cases.values()):
+            raise ValueError(
+                f"{flow_file}: {branch.switch} does not lead to {branch.keep}"
+            )
+        for case in switch.data.cases.values():
+            if case.v is not keep:
+                case.v = keep
+                changed = True
+    for source, key, old_target, new_target in CASE_REROUTES.get(flow_file, ()):
+        switch = by_name.get(source)
+        if switch is None or not isinstance(switch.data, SwitchEvent) or key not in switch.data.cases:
+            raise ValueError(f"{flow_file}: {source} has no case {key}")
+        case = switch.data.cases[key]
+        if case.v is by_name.get(new_target):
+            continue
+        if case.v is not by_name.get(old_target):
+            raise ValueError(f"{flow_file}: {source} case {key} does not lead to {old_target}")
+        case.v = by_name[new_target]
+        changed = True
+    if not changed:
+        return data
+    out = io.BytesIO()
+    flow.write(out)
+    return out.getvalue()
 
 
 SCRUB_BIGGORON_FLOW = "Enemy_Scrub_Business_Dream.bfevfl.zs"

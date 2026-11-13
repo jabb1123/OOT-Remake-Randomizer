@@ -7,10 +7,6 @@
 # TODO: Track down chest in LH
 
 [regions."LakeHylia".locations]
-"MiniGame_HitTarget: Item_BulletBag_Medium (npc item)" = "Slingshot"
-"MiniGame_HitTarget: Item_BulletBag_Large (npc item)" = "Slingshot and Bullet_Bag_Medium"
-"MiniGame_HitTarget: Item_Quiver_Medium (npc item)" = "Bow"
-"MiniGame_HitTarget: Item_Quiver_Large (npc item)" = "Bow and Quiver_Medium"
 "MiniGame_Fishing: Item_Scale_Gold (npc item)" = "true"
 
 [regions."LakeHylia".skulltulas]

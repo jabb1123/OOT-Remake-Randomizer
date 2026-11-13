@@ -18,8 +18,8 @@ Only these parameters change. Model, LOD and XLink references keep the vanilla a
 
 | Flow | Vanilla item | Logic region | Logic (summary) |
 | --- | --- | --- | --- |
-| MiniGame_HitTarget (Bullseye) | Bullet Bag Medium / Large | LakeHylia | Slingshot (Large also needs Bullet Bag Medium) |
-| MiniGame_HitTarget (Bullseye) | Quiver Medium / Large | LakeHylia | Bow (Large also needs Quiver Medium) |
+| MiniGame_HitTarget (Shooting Gallery, child) | Bullet Bag Large (2nd upgrade) | Market | child + Slingshot (flow forced to this slot, see below) |
+| MiniGame_HitTarget (Shooting Gallery, adult) | Quiver Medium | KakarikoVillage | adult + Bow |
 | MiniGame_BombchuBowling | Bomb Bag Medium / Large | Market | Bomb Bag (Large also needs Bomb Bag Medium) |
 | MiniGame_BombchuBowling | Bombchu Bundle Medium | Market | true |
 | MiniGame_Fishing | Golden Scale | LakeHylia | true |
@@ -27,8 +27,9 @@ Only these parameters change. Model, LOD and XLink references keep the vanilla a
 | Minigame_HorsebackArchery | Quiver Medium / Large | GerudoFortress | adult + Bow (Large also needs Quiver Medium) |
 | LostWood_ScrubForestStageElder_SkullMaskFirst | Stick Bag Medium / Large | LostWood | child + Deku Sticks (Large also needs Stick Bag Medium) |
 | LostWood_ScrubForestStageElder_TrueMaskFirst | Nut Bag Medium / Large | LostWood | child + Deku Nuts (Large also needs Nut Bag Medium) |
-| Dm_LostWood_0040 | Bullet Bag Medium / Large | LostWood | child + Slingshot (Large also needs Bullet Bag Medium) |
-| Npc_Goron_Biggoron_Adult | Biggoron Sword | DeathMountainTrail | adult, Ice_Cavern_Clear, (Eponas_Song or Longshot), ((Bomb_Bag and Goron_Bracelet) or Megaton_Hammer) |
+| Enemy_Scrub_Business_Common (Business Scrub bag sales) | Stick Bag Large / Nut Bag Large | LostWood | child + Deku Sticks (stick), child + Deku Nuts + Bomb Bag (nut) |
+| Dm_LostWood_0040 (Lost Woods scrub target) | Bullet Bag Medium (1st upgrade) | LostWood | child + Slingshot (flow forced to this slot, see below) |
+| Npc_Goron_Biggoron_Adult | Biggoron Sword | DeathMountainTrail | adult, Ice_Cavern_Clear, (can_play(Eponas_Song) or Longshot), (has_bombs or Megaton_Hammer) |
 
 The Biggoron row is the final reward of the Biggoron chain. The chain itself stays fixed (Option A).
 Only the item handed over at the end is randomized. Its logic is the union of the chain gates:
@@ -45,9 +46,58 @@ The base requirements (child/adult, Bow, Slingshot, Deku Sticks/Nuts) are design
 for Stage A, not values read from the game. The region assignments come from memory of the
 game's layout; no repo data confirms them. The repo has no scene mapping for these flows.
 
-Talon's milk (`Minigame_FindOutCucco`) is excluded: its grant is a bottle item. The Lake
-Hylia child shop flow `Npc_Hylia_019_Shop_Child` is the Bullseye NPC. `Npc_Hylia_067_Shop_Child`
+Talon's milk (`Minigame_FindOutCucco`) is excluded: its grant is a bottle item.
+`MiniGame_HitTarget` is the shooting gallery: its flags are `MiniGame_HitTarget_HrlCity_*`
+(Market, child) and `MiniGame_HitTarget_Kakariko_*` (Kakariko, adult). `Npc_Hylia_067_Shop_Child`
 (bowling) is not in the NUP index, so bowling is analyzed from `MiniGame_BombchuBowling` only.
+
+## Progressive bullet bag games
+
+The Lost Woods scrub target and the Market shooting gallery each pay out once (flags
+`LostWood_HitTargetOfDekuScrub_FirstClear` and `MiniGame_HitTarget_HrlCity_Get_BulletBag`).
+Which prize they give depends on whether the Medium bullet bag is already owned. In these
+bool and pouch switches, case 0 is "true":
+
+| Flow | Switch | Case 0 (Medium owned) | Case 1 (not owned) | Kept |
+| --- | --- | --- | --- | --- |
+| Dm_LostWood_0040 | Event83 `IsGet.Item_BulletBag_Medium` | Event17, Large | Event30, Medium | Event30 |
+| MiniGame_HitTarget | Event70 pouch `Item_BulletBag_Medium` | Event378, Large | Event241, Medium | Event378 |
+
+With randomized items, the branch taken would depend on where the real Medium bag was found,
+so one of each game's two slots would never pay out. `fix_progressive_branches` points both
+cases of each switch at the kept grant (`PROGRESSIVE_BRANCHES` in `npc_grants.py`), so Lost
+Woods is always the 1st upgrade slot and the Market gallery always the 2nd. The other two
+slots are not locations, and their grant events become unreachable. The patch runs whenever
+NPC items are shuffled. `Dm_LostWood_0040` Event38 (which bag model to show) is cosmetic and is
+left alone.
+
+## Business Scrub bag sales
+
+`Enemy_Scrub_Business_Common` sells the stick and nut bags for 40 rupees each. Each sale is a
+`SimpleShopSub_Scrub_Business_OneTime` node whose `ActorName` is the bag granted. The Medium
+bag sales were removed. Each bag switch now pins the Large sale:
+
+| Switch | Case 0 (Medium owned) | Case 1 (not owned) | Kept |
+| --- | --- | --- | --- |
+| Event319 `PouchSystemActor.EventQueryIsExistInPouch` Stick Bag Medium | Event317, Stick Bag Large | Event322, Stick Bag Medium | Event317 |
+| Event323 `PouchSystemActor.EventQueryIsExistInPouch` Nut Bag Medium | Event318, Nut Bag Large | Event326, Nut Bag Medium | Event318 |
+
+`Event554` (`IsGet.Item_DekuStick`) used to send a player who already has the Deku Stick
+straight to the Medium stick sale (Event555). Its true case is now re-pointed to Event319, so
+both paths go through the pinned switch (`CASE_REROUTES` in `npc_grants.py`). Event322, Event326
+and Event555 become unreachable.
+
+Both Large bags are randomized locations in `LostWood`. The stick bag needs child and Deku
+Sticks. The nut bag needs child, Deku Nuts and Bomb Bag. The Large bags no longer need a
+Medium bag, because the Medium sale is gone from the scrub. The Lost Woods scrub's own
+Medium and Large bags stay as they were.
+
+The scrub's flow is shared by every Business Scrub instance that loads
+`Enemy_Scrub_Business_Common`. The randomized bags therefore show up in every such scrub, not only
+the Lost Woods one. Confirm in-game whether the other scrubs also sell bags.
+
+The shelf still shows the vanilla bag names and models, and the `Scrub_Business_TempItemName_00`
+string checks (Event314 to Event316) still compare against the vanilla Medium names. Test in-game.
 
 ## Biggoron Business Scrub sale (Stage B)
 
@@ -58,13 +108,14 @@ Knife sale (Event45, 300 rupees) is kept. The patch is applied only when NPC ite
 
 ## Gates not converted (for Stage B)
 
-These checks read the game's own state, so Stage A leaves them alone. They need a decision
-when the granted item moves.
+These checks read the game's own state and are left alone. They need a decision when the
+granted item moves. `Dm_LostWood_0040` Event83 and the shooting gallery's Event70 are handled
+by the progressive bullet bag fix above.
 
-- `Dm_LostWood_0040`: `Event83` checks `IsGet.Item_BulletBag_Medium`.
 - Pouch queries (`PouchSystemActor.EventQueryIsExistInPouch`) for upgrade and base items:
-  Bullseye (Event70, Event181), bowling (Event76, Event3), horseback (Event99),
-  scrub elder (Event30), Dm_LostWood (Event38).
+  shooting gallery quivers (Event181: Medium owned picks the Large grant, the same
+  progressive pattern as the bullet bags), bowling (Event76, Event3), horseback (Event99),
+  scrub elder (Event30), Dm_LostWood (Event38, cosmetic).
 - Scrub bools: `LostWood_ScrubForestStage_SkullMaskEventLaunched` and
   `LostWood_ScrubForestStage_TrueMaskEventLaunched`. These gate whether the scrub grant replays.
 
@@ -73,9 +124,8 @@ when the granted item moves.
 - Planner pool group `npc`, `PlanOptions.shuffle_npc_items` (default `True`).
 - CLI `--no-npc-items` keeps the vanilla NPC items. These locations are not majors for
   `one_major_per_dungeon`, the same as event items.
-- Logic check: 18 NPC locations. The vanilla goal is reachable, and 349 of 349 locations are
-  reachable. The Kokiri Static rupee is an unlisted known location, so the logic check reports
-  348 of 349 listed.
+- Logic check: 16 NPC locations. The vanilla goal is reachable, and 347 of 347 locations are
+  listed and reachable.
 
 ## Unverified in-game
 
@@ -84,7 +134,8 @@ when the granted item moves.
   granted through `GetInEventItemSwordBiggoron` may equip or behave oddly. Test in-game.
 - The scrub sale reroute. Check that the Business Scrub no longer offers the 1000-rupee
   Biggoron Sword, and that the Giant's Knife sale still works.
-- Whether the Bullseye NPC grant is `MiniGame_HitTarget` (assumed from "deku bullseye game").
+- The progressive bullet bag fix: Lost Woods should always give its slot item, and the Market
+  gallery its slot item, whether or not the real Medium bullet bag is owned.
 - The region assignments and `true` gates for fishing, diving and bowling.
 - The base-item requirements (see above).
 - Whether a moved upgrade is handled correctly by the pouch gates and scrub bools above.

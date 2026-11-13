@@ -9,6 +9,7 @@ from pathlib import Path
 from .config import RandomizerConfig
 from .engine import SeedEngine, build_shuffle_patches, load_default_slots
 from .event_items import EVENT_SLOTS, event_location_name
+from .heart_pickups import HEART_SLOTS, heart_actor_name
 from .npc_grants import NPC_SLOTS
 from .logic import LogicEngine
 from .nup_parser import parse_nup_header, NupHeader
@@ -181,6 +182,7 @@ class OOTRandomizer:
         npc_assignments: dict[str, str] = {}
         skull_assignments: dict[int, str] = {}
         shop_assignments: list[tuple[str, str, int]] = []
+        heart_assignments: list[tuple[str, str]] = []
         logic_report: dict[str, object] = {"enabled": False}
         if slots:
             world = self._load_world(slots)
@@ -201,6 +203,7 @@ class OOTRandomizer:
                 logic_options={"bombchus_in_logic": self.config.bombchus_in_logic},
                 shop_slots_per_shop=self.config.shop_slots_per_shop,
                 max_shop_actors=max_shop_actors,
+                shuffle_heart_pieces=self.config.shuffle_heart_pieces,
             )
             try:
                 plan = plan_seed(seed, slots, world, options)
@@ -212,6 +215,7 @@ class OOTRandomizer:
             npc_assignments = {loc: i for loc, i in plan.npc_assignments.items() if i != NPC_SLOTS[loc].item}
             skull_assignments = {n: i for n, i in plan.skull_assignments.items() if i != SKULL_REWARDS[n]}
             shop_assignments = plan.shop_assignments
+            heart_assignments = plan.heart_assignments
             if world is not None:
                 logic_report = {
                     "enabled": True,
@@ -259,6 +263,16 @@ class OOTRandomizer:
                 }
                 for name, item, price in plan.shop_assignments
             ]
+            placements += [
+                {
+                    "location": name,
+                    "vanilla_item": "Obj_Heart_Piece",
+                    "item": item,
+                    "heart_actor": heart_actor_name(item),
+                    "scene_files": [shelf.scene for shelf in HEART_SLOTS[name].shelves],
+                }
+                for name, item in plan.heart_assignments
+            ]
         else:
             engine_placements = SeedEngine(self.config.logic).generate(seed, item_order)
             patch_records = [p.patch for p in engine_placements]
@@ -279,9 +293,10 @@ class OOTRandomizer:
             patch_result = patcher.apply(output_path, patch_records, song_assignments, skull_assignments,
                                          shop_assignments, event_assignments=event_assignments,
                                          npc_assignments=npc_assignments,
-                                         skip_intro=self.config.skip_intro)
+                                         skip_intro=self.config.skip_intro,
+                                         heart_assignments=heart_assignments)
         except ShopError as exc:
-            raise RomValidationError(f"Shop items could not be applied: {exc}") from exc
+            raise RomValidationError(f"Shop or heart items could not be applied: {exc}") from exc
         except OSError as exc:
             raise RomValidationError(
                 f"Patching {output_path} failed: {exc}. Another program (e.g. an emulator scanning "

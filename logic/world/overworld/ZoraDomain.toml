@@ -1,7 +1,7 @@
 # ZoraDomain
 
 [regions.Root.exits]
-"ZoraDomain" = "(is_adult or Deku_Tree_Clear) and can_play(Zeldas_Lullaby) or (Item_Scale_Silver or Item_Scale_Gold)"
+"ZoraDomain" = "(is_adult or Deku_Tree_Clear or has_bombs) and can_play(Zeldas_Lullaby) or (Item_Scale_Silver or Item_Scale_Gold)"
 
 [regions."ZoraDomain"]
 

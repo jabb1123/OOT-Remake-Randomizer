@@ -1,20 +1,18 @@
 # GoronCity
 
 [regions.Root.exits]
-"GoronCity" = "is_adult or Deku_Tree_Clear"
+"GoronCity" = "is_adult or Deku_Tree_Clear or has_bombs"
 
 [regions."GoronCity"]
 
-[regions."GoronCity".events]
-"Goron_Bracelet" = "is_child and can_play(Zeldas_Lullaby) and can_play(Sarias_Song)"
-
 [regions."GoronCity".locations]
-"GoronCity Dynamic room 0 #0 (TBox_Rupee_Blue)" = "true"
-"GoronCity Dynamic room 0 #0 (TBox_Rupee_Purple)" = "true"
-"GoronCity Dynamic room 0 #0 (TBox_Rupee_Red)" = "true"
-"GoronCity Dynamic room 0 #1 (TBox_Rupee_Blue)" = "true"
-"GoronCity Static room 0 #0 (TBox_Rupee_Green)" = "true"
-"GoronCity Static room 0 #0 (TBox_Rupee_Purple)" = "true"
+"GoronCity Dynamic room 0 #0 (TBox_Rupee_Blue)" = "has_explosives"
+"GoronCity Dynamic room 0 #0 (TBox_Rupee_Purple)" = "is_adult and Silver_Gauntlets"
+"GoronCity Dynamic room 0 #0 (TBox_Rupee_Red)" = "is_adult and Megaton_Hammer"
+"GoronCity Dynamic room 0 #1 (TBox_Rupee_Blue)" = "has_explosives"
+"GoronCity Static room 0 #0 (TBox_Rupee_Green)" = "is_adult and has_hookshot"
+"GoronCity Static room 0 #0 (TBox_Rupee_Purple)" = "is_adult and has_hookshot"
+"Dm_Goron_0030: Item_Gauntlet_Goron (npc item)" = "is_child and can_play(Zeldas_Lullaby) and can_play(Sarias_Song)"
 
 [regions."GoronCity".skulltulas]
 "GC GS Boulder Maze" = "is_child and has_explosives"  # original: is_child and has_explosives
@@ -26,5 +24,11 @@
 "GoronShop" = "has_explosives or has_strength or (is_adult and Bow)"
 
 [regions."GoronShop".locations]
-"Goron Shop Slot 0" = "true"  # vanilla: Shop_Heart
-"Goron Shop Slot 3" = "true"  # vanilla: Shop_Armor_Goron
+"Goron Shop Slot 0" = "has_bombs"  # vanilla: Shop_Heart
+"Goron Shop Slot 1" = "has_bombs"  # vanilla: Shop_Bottle_RedPotion
+"Goron Shop Slot 2" = "has_bombs"  # vanilla: Shop_Bottle_Bug
+"Goron Shop Slot 3" = "has_bombs and Item_Wallet_Large"  # vanilla: Shop_Armor_Goron
+"Goron Shop Slot 4" = "has_bombs"  # vanilla: Shop_BombBundle_01
+"Goron Shop Slot 5" = "has_bombs"  # vanilla: Shop_BombBundle_02
+"Goron Shop Slot 6" = "has_bombs"  # vanilla: Shop_BombBundle_03
+"Goron Shop Slot 7" = "has_bombs"  # vanilla: Shop_BombBundle_04

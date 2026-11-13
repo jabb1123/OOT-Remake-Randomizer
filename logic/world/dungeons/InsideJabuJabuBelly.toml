@@ -7,13 +7,13 @@
 dungeon = true
 
 [regions."InsideJabuJabuBelly".events]
-"Jabu_Jabu_Clear" = "is_child and Boomerang"
+"Jabu_Jabu_Clear" = "is_child and Boomerang and has_weapon"
 
 [regions."InsideJabuJabuBelly".locations]
 "InsideJabuJabuBelly Static room 12 #0 (Item_Dungeon_Compass)" = "Boomerang"
-"InsideJabuJabuBelly Static room 13 #0 (TBox_Rupee_Red)" = "true"
-"InsideJabuJabuBelly Static room 14 #0 (Item_Dungeon_Map)" = "Boomerang"
-"InsideJabuJabuBelly Static room 9 #0 (Item_Boomerang)" = "true"
+"InsideJabuJabuBelly Static room 13 #0 (TBox_Rupee_Red)" = "Boomerang"
+"InsideJabuJabuBelly Static room 14 #0 (Item_Dungeon_Map)" = "can_shoot"
+"InsideJabuJabuBelly Static room 9 #0 (Item_Boomerang)" = "can_shoot"
 
 [regions."InsideJabuJabuBelly".skulltulas]
 "Jabu Jabus Belly GS Water Switch Room" = "true"  # original: True

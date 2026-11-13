@@ -25,6 +25,8 @@ from oot_randomizer.shop_slots import (
     FILLER_ITEMS,
     MEDIUM_WALLET_RULE,
     LARGE_WALLET_RULE,
+    SHOP_EXTRA_ELIGIBLE,
+    SHOP_FILLER_ITEMS,
     SHOP_ITEM_PACKS,
     SHOP_ITEM_WHITELIST,
     SHOP_LOCATIONS,
@@ -78,7 +80,7 @@ class SlotTableTests(unittest.TestCase):
         self.assertEqual(by_shop, {
             "Kokiri Shop": [0, 1, 2, 3, 4, 5, 6, 7],
             "Bazaar": [0, 5, 6, 7],
-            "Goron Shop": [0, 3],
+            "Goron Shop": [0, 1, 2, 3, 4, 5, 6, 7],
             "Zora Shop": [3],
         })
         self.assertEqual(SHOP_LOCATIONS, frozenset(SHOP_SLOTS))
@@ -90,9 +92,10 @@ class SlotTableTests(unittest.TestCase):
         for name, slot in ALL_SHOP_SLOTS.items():
             self.assertEqual(name, f"{slot.shop} Slot {slot.index}")
             seed = slot.vanilla.startswith("Shop_DekuSeedBundle_")
-            self.assertEqual(slot.eligible, slot.vanilla.startswith(SHOP_ITEM_WHITELIST) and (slot.shop == "Kokiri Shop" or not seed), name)
+            allowed = SHOP_ITEM_WHITELIST + SHOP_EXTRA_ELIGIBLE.get(slot.shop, ())
+            self.assertEqual(slot.eligible, slot.vanilla.startswith(allowed) and (slot.shop == "Kokiri Shop" or not seed), name)
             excluded_kinds = ("Shop_Arrow", "Shop_Bomb", "Shop_Bottle", "Shop_Mask", "Shop_MagicJar")
-            if slot.vanilla.startswith(excluded_kinds):
+            if slot.vanilla.startswith(excluded_kinds) and slot.shop != "Goron Shop":
                 self.assertFalse(slot.eligible, name)
 
     def test_shelves_cover_every_scene_copy(self):
@@ -160,6 +163,7 @@ class SellAndPriceTests(unittest.TestCase):
                      "Item_EventObject_Base", "Item_Nonexistent"):
             self.assertFalse(can_sell(item), item)
         self.assertFalse(any(can_sell(f) for f in FILLER_ITEMS))
+        self.assertTrue(all(can_sell(f) for f in SHOP_FILLER_ITEMS))
 
     def test_item_requirement_bombs_need_bomb_bag(self):
         for item in ("Item_Bomb", "Item_BombBundle_Small", "Item_Bombchu", "Item_BombchuBundle_Small"):
@@ -310,6 +314,7 @@ def _placed(plan, world) -> dict[str, str]:
     placed |= {skull_location_name(n): item for n, item in plan.skull_assignments.items()}
     placed |= {loc: TOKEN_ITEM for loc in world.token_locations}
     placed |= {loc: item for loc, item, _ in plan.shop_assignments}
+    placed |= dict(plan.heart_assignments)
     return placed
 
 
@@ -359,7 +364,7 @@ class ToyShopPlanningTests(unittest.TestCase):
 
     def test_small_pool_caps_shop_slots(self):
         for seed in range(10):
-            plan = plan_seed(seed, tsk.SLOTS, None, PlanOptions(shop_slots_per_shop=4))
+            plan = plan_seed(seed, tsk.SLOTS, None, PlanOptions(shop_slots_per_shop=4, shuffle_heart_pieces=False))
             items = [item for _, item, _ in plan.shop_assignments]
             self.assertTrue(all(can_sell(i) for i in items))
             self.assertEqual(len(items), len(set(items)))
@@ -394,7 +399,8 @@ class ShippedShopPlanningTests(unittest.TestCase):
                 self.assertTrue(10 <= price <= 200 and price % 5 == 0, (seed, name, price))
             expected = combine_requirements(
                 shop_requirements(plan.shop_assignments),
-                {name: item_requirement(item) for name, item, _ in plan.shop_assignments if item_requirement(item)})
+                {name: item_requirement(item) for name, item, _ in plan.shop_assignments if item_requirement(item)}
+                | {name: item_requirement(item) for name, item in plan.heart_assignments if item_requirement(item)})
             self.assertEqual(plan.extra_requirements, expected)
             for name, item, price in plan.shop_assignments:
                 if price_requirement(price):
@@ -403,16 +409,17 @@ class ShippedShopPlanningTests(unittest.TestCase):
                     self.assertIn(item_requirement(item), plan.extra_requirements[name])
 
     def test_fillers_only_in_chests_and_counts_balance(self):
-        fillers = Counter(FILLER_ITEMS)
+        # Each new shop or heart slot adds one pool entry (SHOP_FILLER_ITEMS); nothing else is added.
+        fillers = set(SHOP_FILLER_ITEMS)
         expected = Counter(s.vanilla_item for s in self.slots) + Counter(SKULL_REWARDS.values())
         for seed, plan in self.plans.items():
             chest_items = Counter(i for _, i in plan.chest_assignments)
-            others = Counter(plan.skull_assignments.values()) + Counter(i for _, i, _ in plan.shop_assignments)
-            self.assertFalse(set(others) & set(fillers), seed)
+            others = (Counter(plan.skull_assignments.values()) + Counter(i for _, i, _ in plan.shop_assignments)
+                      + Counter(i for _, i in plan.heart_assignments))
             total = chest_items + others
             added = total - expected
-            self.assertEqual(sum(added.values()), len(plan.shop_assignments), seed)
-            self.assertTrue(set(added) <= set(fillers), (seed, added))
+            self.assertEqual(sum(added.values()), len(plan.shop_assignments) + len(plan.heart_assignments), seed)
+            self.assertTrue(set(added) <= fillers, (seed, added))
             self.assertEqual(expected - total, Counter(), seed)
 
     def test_planned_seeds_are_beatable_with_price_rules(self):
@@ -427,7 +434,8 @@ class ShippedShopPlanningTests(unittest.TestCase):
     def test_disabled(self):
         expected = sorted([s.vanilla_item for s in self.slots] + list(SKULL_REWARDS.values()))
         for seed in range(5):
-            plan = plan_seed(seed, self.slots, self.world, PlanOptions(shop_slots_per_shop=0))
+            plan = plan_seed(seed, self.slots, self.world,
+                             PlanOptions(shop_slots_per_shop=0, shuffle_heart_pieces=False))
             self.assertEqual(plan.shop_assignments, [])
             self.assertEqual(plan.extra_requirements, {})
             self.assertEqual(sorted([i for _, i in plan.chest_assignments] + list(plan.skull_assignments.values())),
@@ -439,7 +447,7 @@ class ShippedShopPlanningTests(unittest.TestCase):
         for seed in range(8):
             plan = plan_seed(seed, self.slots, self.world, PlanOptions(shop_slots_per_shop=4, one_major_per_dungeon=True))
             per_shop = Counter(SHOP_SLOTS[n].shop for n, _, _ in plan.shop_assignments)
-            self.assertEqual(per_shop, {"Kokiri Shop": 4, "Bazaar": 4, "Goron Shop": 2, "Zora Shop": 1})
+            self.assertEqual(per_shop, {"Kokiri Shop": 4, "Bazaar": 4, "Goron Shop": 4, "Zora Shop": 1})
             placed = _placed(plan, self.world)
             per_dungeon = Counter(dungeon_of[l] for l, i in placed.items() if l in dungeon_of and i in majors)
             self.assertTrue(all(n <= 1 for n in per_dungeon.values()), per_dungeon)

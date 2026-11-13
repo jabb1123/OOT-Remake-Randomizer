@@ -2,7 +2,7 @@
 
 ## Approach
 
-Event items are granted by cutscene flows (bfevfl files) rather than by actors placed in the scene. Phase 1 shuffles the nine grant flows among the nine event items: five medallions, Kokiri's Emerald, Goron's Ruby, and the two ocarinas.
+Event items are granted by cutscene flows (bfevfl files) rather than by actors placed in the scene. Phase 1 shuffles the ten grant flows among the ten event items: five medallions, Kokiri's Emerald, Goron's Ruby, Zora's Sapphire, and the two ocarinas.
 
 Only the grant and display parameters change. These are the `ActorName` / `Actor` values on:
 
@@ -24,10 +24,11 @@ Patching uses `evfl` (`EventFlow.read` / `write`), not byte edits. `patch_event_
 | Dm_Awake_Spirit_Get | Item_Medal_Spirit |
 | Dm_Kokiri_0130 | Item_Stone_Forest |
 | Dm_DeathMtTrail_0025 | Item_Stone_Fire |
+| Dm_ZoraFountain_0030 | Item_Stone_Water |
 | Dm_Kokiri_0155 | Item_Ocarina_Fairy (two params) |
 | Dm_MelodyGet_Time | Item_Ocarina_Time (two params; also a song flow) |
 
-Zora's Sapphire (`Dm_InsideJabu_Jabu_0030`, `Item_Stone_Water`) is excluded because its grant flow is not confirmed.
+The Zora's Sapphire grant is `Item_Stone_Water` in `Dm_ZoraFountain_0030` (Event158). Its raw flow is in the fixtures used by `test_event_items`.
 
 ## Planner and logic
 
@@ -37,7 +38,7 @@ Zora's Sapphire (`Dm_InsideJabu_Jabu_0030`, `Item_Stone_Water`) is excluded beca
 
 ## Verified
 
-- evfl round trip of all nine raw flows is byte-equal when nothing is changed.
+- evfl round trip of all ten raw flows is byte-equal when nothing is changed.
 - `patch_event_item` is idempotent and a no-op when old == new.
 - Patched flows parse and round-trip; song and event patches compose on `Dm_MelodyGet_Time`.
 - `logic check`: 331/331 locations reachable on the vanilla goal.
@@ -54,9 +55,9 @@ The Temple of Time door and Darunia's Fire-stone branch read `Get_StoneOfFire_Is
 
 The patch is idempotent, leaves the file unchanged when the query is absent, and is byte-equal when nothing matches. It runs in `RomPatcher.apply` when at least one event item moved, and it is applied via `replace_file`, so it composes with other patches to the same flow.
 
-Left unchanged: the Water bool (`Get_StoneOfWater`, Zora's Sapphire is not shuffled); `SageOf*_IsCompleted_Exp`; `DoorOfTime_IsAfter_*`; and the Forest and Fire has-stone gates in `Dm_SY_BancChange_EscapeDungeon`, `Dm_SY_BancChangeArrive`, and Kokiri dialog. Those remain bool-based and may still misbehave after a stone moves.
+The Water bool (`Get_StoneOfWater_IsCompleted_Exp`) is converted in `DoorOfTime.bfevfl.zs` (Event39 and Event56) to a pouch query for `Item_Stone_Water`, the same as Fire. Other Water-bool users are left unchanged: `Dm_SY_BancChange_EscapeDungeon`, `Dm_SY_Ocarina_SariaSong`, `SubEvent_GetEponaSong`, and several `Npc_Zora_*` dialogs. Also left unchanged: `SageOf*_IsCompleted_Exp`; `DoorOfTime_IsAfter_*`; and the Forest and Fire has-stone gates in `Dm_SY_BancChange_EscapeDungeon`, `Dm_SY_BancChangeArrive`, and Kokiri dialog. Those remain bool-based and may still misbehave after a stone moves.
 
-Logic: `logic\world\overworld\TempleOfTime.toml` now requires `(is_adult or Deku_Tree_Clear) and Kokiris_Emerald and Goron_Ruby`. The logic identifiers are `Kokiris_Emerald` and `Goron_Ruby`. The DoorOfTime script checks only Fire and Water, so the logic is stricter than the door script for the Emerald. Vanilla logic still reports 331/331 reachable.
+Logic: `logic\world\overworld\TempleOfTime.toml` now requires `(is_adult or Deku_Tree_Clear) and Kokiris_Emerald and Goron_Ruby and Zora_Sapphire`. The logic identifiers are `Kokiris_Emerald`, `Goron_Ruby`, and `Zora_Sapphire`. The DoorOfTime script checks Fire and Water only, so the logic is stricter than the door script for the Emerald.
 
 ## Unverified in-game risks
 
@@ -65,4 +66,4 @@ Logic: `logic\world\overworld\TempleOfTime.toml` now requires `(is_adult or Deku
 - Forest and Fire has-stone gates that are still bool-based (see Stone gates).
 - Nothing has been run in an emulator.
 - Boss hearts are not started.
-- Zora's Sapphire grant flow is not confirmed.
+- Zora's Sapphire: the grant flow is decoded. The event location `Dm_ZoraFountain_0030 (event item)` is listed in `ZoraFountain.toml` as `is_child and Jabu_Jabu_Clear`, based on the vanilla warp flow, not in-game. The Water door gate is a pouch check and is untested in-game.

@@ -2,10 +2,12 @@
 #
 # The logic is split into one file per area:
 #   _settings.toml          [settings] only (this file)
+#   _helpers.toml           [helpers]: shared requirement groups (has_bombs, can_play(song), ...)
 #   overworld/<Region>.toml overworld areas
 #   dungeons/<Region>.toml  regions marked dungeon = true
 # Every *.toml under logic/world/ is loaded recursively in sorted path order and deep-merged:
 #   * [settings] may appear in only one file.
+#   * [helpers] may be split across files, but each helper name is defined once.
 #   * Per region, the exits / locations / events / skulltulas tables are merged across files;
 #     the same key defined in two files is an error that names both files.
 #   * Scalar flags (dungeon, excluded) may be repeated but must agree.
@@ -25,6 +27,9 @@
 #   "Hookshot and (Bow or Slingshot)".  Also available: is_child, is_adult, true, false,
 #   event names, `Item:N` for counts, and the option bombchus_in_logic.
 # Items accept friendly names (Hookshot, Bow, Zeldas_Lullaby) or actor names (Item_Range_Bow).
+# Helpers from _helpers.toml work like names, and some take arguments:
+#   "has_explosives and can_play(Song_of_Storms)"
+# Use can_play(<song>) whenever a song is played; a bare song name only means "learned".
 #
 # Starter rules are simplified vanilla Ocarina of Time requirements; refine as needed.
 # Locations left as "true" only need their region to be reachable.

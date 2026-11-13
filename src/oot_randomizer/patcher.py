@@ -16,15 +16,23 @@ from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 
 from .chest_events import SWORD_EVENT_FLOW, SWORD_VANILLA_ITEM, skip_sword_demo
-from .cutscene_skips import INTRO_EVENT_FLOW, skip_intro_demo
+from .cutscene_skips import INTRO_EVENT_FLOW, skip_intro_cutscene
+from .kokiri_blocker import MIDO_BLOCKER_FLOW, clear_mido_blocker
 from .event_items import EVENT_SLOTS, patch_event_item
-from .npc_grants import NPC_SLOTS, SCRUB_BIGGORON_FLOW, disable_scrub_biggoron_sale, patch_npc_grants
+from .npc_grants import (
+    NPC_SLOTS,
+    PROGRESSIVE_BRANCHES,
+    SCRUB_BIGGORON_FLOW,
+    disable_scrub_biggoron_sale,
+    fix_progressive_branches,
+    patch_npc_grants,
+)
 from .item_ids import resolve_actor_name
 from .location_mapper import build_scene_file_index, load_summary_file
 from .locations import OOTLocation
 from .skulltula_rewards import SKULL_FLOW, SKULL_REWARDS, patch_skull_rewards
 from .stone_gates import STONE_GATE_FLOWS, patch_stone_gates
-from .songs import SONG_SLOTS, patch_bfevfl_song
+from .songs import OCARINA_LEARN_FLOW, SONG_SLOTS, patch_bfevfl_song, patch_bfevfl_songs
 
 
 def _legacy_item_id(actor_name: str) -> int:
@@ -158,15 +166,17 @@ class RomPatcher:
         event_assignments: dict[str, str] | None = None,
         npc_assignments: dict[str, str] | None = None,
         skip_intro: bool = False,
+        heart_assignments: list[tuple[str, str]] | None = None,
     ) -> "PatchResult":
-        """Apply chest, song, skull-reward, event-item, NPC-grant and shop changes to a NUP copy, in place.
+        """Apply chest, song, skull-reward, event-item, NPC-grant, shop and heart changes to a NUP copy, in place.
 
-        Shop items (shop_assignments: [(slot name, item, price)]) are applied first: adding
-        their packs grows the TOC and moves the package meta blocks, which is only proven on
-        an otherwise untouched NUP (emulator test), and it fails before writing anything when
-        the TOC has no room. The replace_file based patches that follow re-read the TOC for
-        every write, so they work on the grown NUP. Shop errors raise ShopError; the other
-        patches keep falling back to manifest-only mode unless shop items were already
+        Shop items (shop_assignments: [(slot name, item, price)]) and heart pickups
+        (heart_assignments: [(heart slot, item)]) are applied first: adding their packs grows
+        the TOC and moves the package meta blocks, which is only proven on an otherwise
+        untouched NUP (emulator test), and it fails before writing anything when the TOC has
+        no room for both. The replace_file based patches that follow re-read the TOC for
+        every write, so they work on the grown NUP. Shop and heart errors raise ShopError; the
+        other patches keep falling back to manifest-only mode unless new packs were already
         written, in which case their error is raised.
         """
         if not rom_path.exists():
@@ -197,15 +207,25 @@ class RomPatcher:
 
         zsdic = zsdic_path.read_bytes()
         shop_actors: list[str] = []
-        if shop_assignments:
-            from .shop_slots import apply_shop_slots, shop_items_for
-            shop_items_for(shop_assignments)  # unknown slots / unsellable items raise ShopError
+        heart_actors: list[str] = []
+        if shop_assignments or heart_assignments:
+            from .heart_pickups import apply_heart_pickups, heart_pack_names
+            from .shop_slots import apply_shop_slots, check_toc_names, shop_items_for
+            from .shops import shop_actor_name
+            # Unknown slots, unsellable items and bad heart items raise ShopError before any write.
+            shop_names = [shop_actor_name(item) for item, _, _ in shop_items_for(shop_assignments or [])]
+            heart_names = heart_pack_names(heart_assignments or [])
             if _is_nup_container(rom_path):
-                shop_result = apply_shop_slots(rom_path, zsdic, shop_assignments)
-                shop_actors = [a.name for a in shop_result.actors]
+                check_toc_names(rom_path, shop_names + heart_names)
+                if shop_assignments:
+                    shop_result = apply_shop_slots(rom_path, zsdic, shop_assignments)
+                    shop_actors = [a.name for a in shop_result.actors]
+                if heart_assignments:
+                    heart_result = apply_heart_pickups(rom_path, zsdic, heart_assignments)
+                    heart_actors = [a.name for a in heart_result.actors]
 
         patcher = NupChestPatcher(rom_path, zsdic)
-        applied = len(shop_actors)
+        applied = len(shop_actors) + len(heart_actors)
         try:
             for scene_file, scene_patches in by_scene.items():
                 try:
@@ -226,8 +246,14 @@ class RomPatcher:
                 patcher.replace_file(SWORD_EVENT_FLOW, skip_sword_demo)
                 applied += 1
             if skip_intro:
-                patcher.replace_file(INTRO_EVENT_FLOW, skip_intro_demo)
+                patcher.replace_file(INTRO_EVENT_FLOW, skip_intro_cutscene)
                 applied += 1
+            try:
+                patcher.replace_file(MIDO_BLOCKER_FLOW, clear_mido_blocker)
+                applied += 1
+            except NupPatchError:
+                pass  # flow absent from this NUP (e.g. test fixtures); the retail NUP always has it
+            song_changes: dict[str, str] = {}
             for flow_file, new_song in (song_assignments or {}).items():
                 old_song = SONG_SLOTS[flow_file]
                 if new_song != old_song:
@@ -235,7 +261,17 @@ class RomPatcher:
                         flow_file,
                         lambda data, o=old_song, n=new_song: patch_bfevfl_song(data, o, n),
                     )
+                    song_changes[old_song] = new_song
                     applied += 1
+            if song_changes:
+                # The learning branch of the Ocarina flow grants each vanilla song itself, in
+                # addition to the per-song flow above. Repoint those grants to the randomized
+                # song so the player receives exactly one song per location.
+                patcher.replace_file(
+                    OCARINA_LEARN_FLOW,
+                    lambda data: patch_bfevfl_songs(data, song_changes),
+                )
+                applied += 1
             changed_skulls = {
                 n: item for n, item in (skull_assignments or {}).items() if item != SKULL_REWARDS[n]
             }
@@ -262,6 +298,10 @@ class RomPatcher:
                 # The Biggoron Sword is only obtainable from its randomized location, so the scrub's sale is removed.
                 patcher.replace_file(SCRUB_BIGGORON_FLOW, disable_scrub_biggoron_sale)
                 applied += 1
+                # Progressive bullet bag games always pay out the one slot the logic keeps.
+                for flow_file in PROGRESSIVE_BRANCHES:
+                    patcher.replace_file(flow_file, lambda data, f=flow_file: fix_progressive_branches(data, f))
+                    applied += 1
             if event_assignments:
                 for flow_file in STONE_GATE_FLOWS:
                     try:
@@ -278,8 +318,8 @@ class RomPatcher:
                 applied += 1
             patcher.update_resource_size_tables()
         except Exception:
-            if shop_actors:
-                # The NUP already holds the shop items: "manifest-only" would hide a half-patched ROM.
+            if shop_actors or heart_actors:
+                # The NUP already holds the new packs: "manifest-only" would hide a half-patched ROM.
                 raise
             return PatchResult(
                 applied=0,
@@ -289,7 +329,7 @@ class RomPatcher:
             )
 
         return PatchResult(applied=applied, skipped=0, mode="binary", unresolved_locations=[],
-                           shop_actors=shop_actors)
+                           shop_actors=shop_actors, heart_actors=heart_actors)
 
     def write_patch_manifest(self, patches: list[PatchRecord], out_path: Path) -> None:
         payload = [
@@ -321,3 +361,4 @@ class PatchResult:
     mode: str                       # "binary" or "manifest-only"
     unresolved_locations: list[str]
     shop_actors: list[str] = field(default_factory=list)  # Shop_Rando_* actors added
+    heart_actors: list[str] = field(default_factory=list)  # Obj_HeartRando_* actors added

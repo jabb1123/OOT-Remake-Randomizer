@@ -115,20 +115,24 @@ def resolve_actor_name(item_name: str) -> str:
     return ITEM_ACTOR_BY_DISPLAY.get(item_name, item_name)
 
 # Major progression items (not consumables, not keys)
-MAJOR_ITEM_ACTORS: frozenset[str] = frozenset([
-    "Item_Range_SlingShot",
-    "Item_Range_Bow",
-    "Item_Boomerang",
-    "Item_Hookshot",
-    "Item_Longshot",
-    "Item_Arrow_Ice",
-    "Item_GlassTruth",
-    "Item_Hammer",
-    "Item_HeavyBoot",
-    "Item_HoverBoot",
-    "Item_Gauntlet_Silver",
-    "Item_Gauntlet_Gold",
-    "Item_Shield_Mirror",
-    "Item_Sword_Kokiri",
-    "Item_BombBag_Small",
-])
+MAJOR_ITEM_ACTORS: frozenset[str] = frozenset(
+    [
+        "Item_Range_SlingShot",
+        "Item_Range_Bow",
+        "Item_Boomerang",
+        "Item_Hookshot",
+        "Item_Longshot",
+        "Item_Arrow_Ice",
+        "Item_GlassTruth",
+        "Item_Hammer",
+        "Item_HeavyBoot",
+        "Item_HoverBoot",
+        "Item_Gauntlet_Silver",
+        "Item_Gauntlet_Gold",
+        "Item_Shield_Mirror",
+        "Item_Sword_Kokiri",
+        "Item_BombBag_Small",
+        "Item_WeirdEgg",
+        "Item_ZeldaLetter",
+    ]
+)

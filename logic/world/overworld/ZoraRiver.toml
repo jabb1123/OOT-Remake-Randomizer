@@ -1,11 +1,13 @@
 # ZoraRiver
 
 [regions.Root.exits]
-"ZoraRiver" = "is_adult or Deku_Tree_Clear"
+"ZoraRiver" = "is_adult or Deku_Tree_Clear or has_bombs"
 
 [regions."ZoraRiver"]
 
 [regions."ZoraRiver".locations]
+"ZoraRiver Heart Piece 1" = "true"  # loose Obj_Heart_Piece, both ages
+"ZoraRiver Heart Piece 2" = "true"  # loose Obj_Heart_Piece, both ages
 "ZoraRiver Dynamic room 0 #0 (Item_ScrubBusinessSeed)" = "can_play(Song_of_Storms)"
 "MiniGame_Diving: Item_Scale_Silver (npc item)" = "true"
 

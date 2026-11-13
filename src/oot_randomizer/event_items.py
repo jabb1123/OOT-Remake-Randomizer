@@ -22,6 +22,7 @@ EVENT_SLOTS: dict[str, str] = {
     "Dm_Awake_Spirit_Get.bfevfl.zs": "Item_Medal_Spirit",
     "Dm_Kokiri_0130.bfevfl.zs": "Item_Stone_Forest",
     "Dm_DeathMtTrail_0025.bfevfl.zs": "Item_Stone_Fire",
+    "Dm_ZoraFountain_0030.bfevfl.zs": "Item_Stone_Water",
     "Dm_Kokiri_0155.bfevfl.zs": "Item_Ocarina_Fairy",
     "Dm_MelodyGet_Time.bfevfl.zs": "Item_Ocarina_Time",
 }
@@ -35,6 +36,7 @@ EVENT_ITEM_DISPLAY_NAMES: dict[str, str] = {
     "Item_Medal_Spirit": "Spirit Medallion",
     "Item_Stone_Forest": "Kokiris_Emerald",
     "Item_Stone_Fire": "Goron_Ruby",
+    "Item_Stone_Water": "Zora_Sapphire",
     "Item_Ocarina_Fairy": "Fairy Ocarina",
     "Item_Ocarina_Time": "Ocarina of Time",
 }

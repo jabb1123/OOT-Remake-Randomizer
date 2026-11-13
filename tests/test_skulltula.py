@@ -170,7 +170,7 @@ class SkullPlanningTests(unittest.TestCase):
 
     def test_without_world(self):
         for seed in range(10):
-            plan = plan_seed(seed, SLOTS, None, PlanOptions())
+            plan = plan_seed(seed, SLOTS, None, PlanOptions(shuffle_heart_pieces=False))
             self.assertTrue(all(can_hand_over(i) for i in plan.skull_assignments.values()))
 
 

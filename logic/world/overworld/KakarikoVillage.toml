@@ -1,15 +1,20 @@
 # KakarikoVillage
 
 [regions.Root.exits]
-"KakarikoVillage" = "is_adult or Deku_Tree_Clear"
+"KakarikoVillage" = "is_adult or Deku_Tree_Clear or has_bombs"
 
 [regions."KakarikoVillage"]
 
 [regions."KakarikoVillage".locations]
+"KakarikoVillage Heart Piece 1" = "is_adult"  # loose Obj_Heart_Piece, both ages
+"KakarikoVillage Heart Piece 2" = "has_bombs"  # loose Obj_Heart_Piece, both ages
 "Dm_MelodyGet_Storm" = "is_adult"  # song: Song of Storms from Windmill
 "Dm_MelodyGet_Shadow" = "is_adult and Forest_Temple_Clear and Fire_Temple_Clear and Water_Temple_Clear"  # song: Nocturne of Shadow from Sheik, Kakariko
 "KakarikoVillage Dynamic room 0 #0 (TBox_Rupee_Blue)" = "true"
-"KakarikoVillage Dynamic room 0 #0 (TBox_Rupee_Purple)" = "is_adult"
+"KakarikoVillage Dynamic room 0 #0 (TBox_Rupee_Purple)" = "is_adult and has_hookshot"
+# Shooting gallery as adult (MiniGame_HitTarget, Kakariko flags). Still progressive in-game:
+# it pays out one quiver slot per playthrough, see docs\npc_grants.md.
+"MiniGame_HitTarget: Item_Quiver_Medium (npc item)" = "is_adult and Bow"
 "House of Skulltula Reward 10" = "Gold_Skulltula_Token:10"  # vanilla: Adult's Wallet
 "House of Skulltula Reward 20" = "Gold_Skulltula_Token:20"  # vanilla: Stone of Agony
 "House of Skulltula Reward 30" = "Gold_Skulltula_Token:30"  # vanilla: Giant's Wallet

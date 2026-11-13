@@ -40,7 +40,9 @@ def build_parser() -> argparse.ArgumentParser:
     rand.add_argument("--shop-slots", type=int, default=2, choices=range(0, 5), metavar="N",
                       help="Shop shelf slots per shop that hold randomized items (0-4, 0 = off; default 2)")
     rand.add_argument("--skip-intro", action="store_true",
-                      help="Skip the Kokiri Forest wake-up cutscene at the start of a new game")
+                      help="Skip the opening Introduction cutscene (Kokiri Forest wake-up) at the start of a new game")
+    rand.add_argument("--no-heart-shuffle", action="store_true",
+                      help="Keep the loose overworld heart pieces as vanilla hearts (they are randomized by default)")
 
     # --- logic sub-command ---
     lg = sub.add_parser("logic", help="Create or check the world logic file")
@@ -79,6 +81,7 @@ def _cmd_randomize(args: argparse.Namespace) -> None:
         bombchus_in_logic=not args.no_bombchus_in_logic,
         one_major_per_dungeon=args.one_major_per_dungeon,
         shop_slots_per_shop=args.shop_slots,
+        shuffle_heart_pieces=not args.no_heart_shuffle,
         skip_intro=args.skip_intro,
     )
     result = OOTRandomizer(config).randomize(args.rom)
@@ -104,6 +107,7 @@ def _cmd_randomize(args: argparse.Namespace) -> None:
 def _cmd_logic(args: argparse.Namespace) -> int:
     from .engine import load_default_slots
     from .event_items import EVENT_SLOTS, event_location_name
+    from .heart_pickups import HEART_LOCATIONS
     from .logic_template import build_template
     from .npc_grants import NPC_SLOTS
     from .planner import known_locations
@@ -156,6 +160,7 @@ def _cmd_logic(args: argparse.Namespace) -> int:
     vanilla |= {loc: TOKEN_ITEM for loc in world.token_locations}
     # Shop slots keep their vanilla shelf item, which is not an item actor in the logic.
     vanilla |= {loc: None for loc in SHOP_SLOTS}
+    vanilla |= {loc: None for loc in HEART_LOCATIONS}  # loose heart pieces hold no logic item
     vanilla |= VANILLA_SHOP_LOGIC_ITEMS
     options = {"bombchus_in_logic": True}
     result = world.explore(vanilla, options)

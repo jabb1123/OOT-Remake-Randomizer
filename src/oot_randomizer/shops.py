@@ -657,6 +657,12 @@ def set_shelf_item(bcett_bytes: bytes, actor_index_or_match: Selector, new_gyaml
     if len(indices) > 1 and not allow_multiple:
         raise ShopError(f"{len(indices)} shop actors match {actor_index_or_match!r} "
                         f"(indices {indices}); pass allow_multiple=True or an index")
+    return set_actor_gyaml(bcett_bytes, indices, new_gyaml, changed=changed)
+
+
+def set_actor_gyaml(bcett_bytes: bytes, indices: Sequence[int], new_gyaml: str, *,
+                    changed: list[int] | None = None) -> bytes:
+    """Set the Gyaml of the Actors[i] entries in `indices` to `new_gyaml` (no name checks)."""
     buf = bytearray(bcett_bytes)
     strings, slots = _actor_gyaml_slots(buf)
     if new_gyaml not in strings:
@@ -789,12 +795,16 @@ def _find_by_name(r: Any, romfs_dir: int, filename: str) -> list[int]:
 def apply_shop_items(nup_path: str | Path, zsdic_bytes: bytes,
                      items: Sequence[tuple[str, int, Any]], *,
                      template: str = DEFAULT_TEMPLATE,
-                     package_index: int | None = None) -> ShopApplyResult:
+                     package_index: int | None = None,
+                     name_for: Callable[[str], str] = shop_actor_name,
+                     set_actor: Callable[..., bytes] = set_shelf_item) -> ShopApplyResult:
     """Put custom shop items on shelves in a NUP, in place.
 
     items: [(item_actor, price, shelf_selector)], where shelf_selector is a Shelf, a
     (scene, select[, allow_multiple]) tuple or a list of them; `scene` is the bcett file name
     (e.g. "KokiriForest_Child_Static.bcett.byml.zs") and is patched in every package copy.
+    name_for gives each clone's actor name; set_actor(bytes, select, name, allow_multiple=,
+    changed=) writes it into a scene (the heart pickups use their own placement check).
 
     Everything is read and validated first. Then, in order: (1) new packs are added with
     add_files (it rewrites the whole TOC and may relocate meta blocks, so it runs before
@@ -833,7 +843,8 @@ def apply_shop_items(nup_path: str | Path, zsdic_bytes: bytes,
         actors: list[ShopActor] = []
         for item, price, _ in plan:
             actors.append(build_shop_actor(read_file, item, price, template=template, dicts=dicts,
-                                           read_raw=read_raw, rsdb_tables=target_tables))
+                                           read_raw=read_raw, rsdb_tables=target_tables,
+                                           name=name_for(item)))
         names = [a.name for a in actors]
         if len(set(names)) != len(names):
             raise ShopError(f"duplicate shop items: {names}")
@@ -845,7 +856,7 @@ def apply_shop_items(nup_path: str | Path, zsdic_bytes: bytes,
             for kind, (fn, fi) in rsdb[p.index].items():
                 data = _decompress(r.read_file(fi), dicts)
                 for item, price, _ in plan:
-                    build_rsdb_rows({kind: data}, template, item, shop_actor_name(item), price)
+                    build_rsdb_rows({kind: data}, template, item, name_for(item), price)
         scene_edits: dict[str, list[tuple[Shelf, str]]] = {}
         for (item, _, shelves), actor in zip(plan, actors):
             for shelf in shelves:
@@ -857,7 +868,7 @@ def apply_shop_items(nup_path: str | Path, zsdic_bytes: bytes,
             for fi in copies:
                 data = _decompress(r.read_file(fi), dicts)
                 for shelf, new_name in edits:
-                    data = set_shelf_item(data, shelf.select, new_name, allow_multiple=shelf.allow_multiple)
+                    data = set_actor(data, shelf.select, new_name, allow_multiple=shelf.allow_multiple)
 
     result = ShopApplyResult(package_index=target, package_reason=reason, actors=actors)
 
@@ -879,7 +890,7 @@ def apply_shop_items(nup_path: str | Path, zsdic_bytes: bytes,
         def transform(data: bytes) -> bytes:
             rows = []
             for item, price, _ in plan:
-                rows.append(build_rsdb_rows({kind: data}, template, item, shop_actor_name(item), price)[kind])
+                rows.append(build_rsdb_rows({kind: data}, template, item, name_for(item), price)[kind])
             return add_rsdb_rows(data, rows)
         return transform
 
@@ -896,8 +907,8 @@ def apply_shop_items(nup_path: str | Path, zsdic_bytes: bytes,
         def transform(data: bytes, edits=edits, per_copy=per_copy) -> bytes:
             changed: list[int] = []
             for shelf, new_name in edits:
-                data = set_shelf_item(data, shelf.select, new_name,
-                                      allow_multiple=shelf.allow_multiple, changed=changed)
+                data = set_actor(data, shelf.select, new_name,
+                                 allow_multiple=shelf.allow_multiple, changed=changed)
             per_copy.append(changed)
             return data
 

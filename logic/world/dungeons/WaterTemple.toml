@@ -1,7 +1,7 @@
 # WaterTemple
 
 [regions.Root.exits]
-"WaterTemple" = "is_adult and can_play(Zeldas_Lullaby) and Iron_Boots and has_hookshot"
+"WaterTemple" = "is_adult and Iron_Boots and has_hookshot"
 
 [regions."WaterTemple"]
 dungeon = true

@@ -18,11 +18,12 @@ from evfl.event import SwitchEvent
 STONE_BOOL_ITEMS: dict[str, str] = {
     "Get_StoneOfForest_IsCompleted_Exp": "Item_Stone_Forest",
     "Get_StoneOfFire_IsCompleted_Exp": "Item_Stone_Fire",
+    "Get_StoneOfWater_IsCompleted_Exp": "Item_Stone_Water",
 }
 
 # flow file name -> stone bools whose gates in that flow are converted
 STONE_GATE_FLOWS: dict[str, frozenset[str]] = {
-    "DoorOfTime.bfevfl.zs": frozenset({"Get_StoneOfFire_IsCompleted_Exp"}),
+    "DoorOfTime.bfevfl.zs": frozenset({"Get_StoneOfFire_IsCompleted_Exp", "Get_StoneOfWater_IsCompleted_Exp"}),
     "Dm_Goron_0028.bfevfl.zs": frozenset({"Get_StoneOfFire_IsCompleted_Exp"}),
 }
 

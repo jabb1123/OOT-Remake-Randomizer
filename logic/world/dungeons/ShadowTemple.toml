@@ -1,7 +1,7 @@
 # ShadowTemple
 
 [regions.Root.exits]
-"ShadowTemple" = "is_adult and can_play(Nocturne_of_Shadow) and Lens_of_Truth and (Hover_Boots or Hookshot or Longshot)"
+"ShadowTemple" = "can_play(Nocturne_of_Shadow) and Dins_Fire"
 
 [regions."ShadowTemple"]
 dungeon = true

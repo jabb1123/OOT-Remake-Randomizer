@@ -7,6 +7,7 @@ from evfl.event import SwitchEvent
 
 from oot_randomizer.engine import load_default_slots
 from oot_randomizer.event_items import EVENT_SLOTS, event_location_name
+from oot_randomizer.npc_grants import NPC_SLOTS
 from oot_randomizer.planner import known_locations
 from oot_randomizer.shop_slots import VANILLA_SHOP_LOGIC_ITEMS
 from oot_randomizer.skulltula_rewards import SKULL_REWARDS, TOKEN_ITEM, skull_location_name
@@ -54,17 +55,17 @@ class StoneGateTableTest(unittest.TestCase):
         for flow in STONE_GATE_FLOWS:
             self.assertTrue(flow.endswith(".bfevfl.zs"), flow)
 
-    def test_only_stone_bools_are_mapped_and_water_is_excluded(self):
+    def test_only_stone_bools_are_mapped(self):
         self.assertEqual(
             STONE_BOOL_ITEMS,
             {
                 "Get_StoneOfForest_IsCompleted_Exp": "Item_Stone_Forest",
                 "Get_StoneOfFire_IsCompleted_Exp": "Item_Stone_Fire",
+                "Get_StoneOfWater_IsCompleted_Exp": "Item_Stone_Water",
             },
         )
         for bools in STONE_GATE_FLOWS.values():
             self.assertTrue(bools <= set(STONE_BOOL_ITEMS))
-            self.assertNotIn(WATER_BOOL, bools)
 
     def test_unknown_flow_is_a_no_op(self):
         data = b"not a flow"
@@ -86,13 +87,13 @@ class RawStoneGateFlowTest(unittest.TestCase):
         self.assertIn(("PouchSystemActor", "EventQueryIsExistInPouch",
                        {"Actor": "Item_Stone_Fire", "Num": 1}), patched)
 
-    def test_water_bool_is_untouched(self):
+    def test_door_of_time_water_gates_become_pouch_queries(self):
         raw = _raw(RAW_DOOR)
-        before = [s for s in _switches(_load(raw)) if s[2].get("GameDataName") == WATER_BOOL]
-        after = [s for s in _switches(_load(patch_stone_gates(raw, "DoorOfTime.bfevfl.zs")))
-                 if s[2].get("GameDataName") == WATER_BOOL]
-        self.assertTrue(before)
-        self.assertEqual(before, after)
+        self.assertIn(WATER_BOOL, [p.get("GameDataName") for _, _, p in _switches(_load(raw))])
+        patched = _switches(_load(patch_stone_gates(raw, "DoorOfTime.bfevfl.zs")))
+        self.assertNotIn(WATER_BOOL, [p.get("GameDataName") for _, _, p in patched])
+        self.assertIn(("PouchSystemActor", "EventQueryIsExistInPouch",
+                       {"Actor": "Item_Stone_Water", "Num": 1}), patched)
 
     def test_goron_fire_gate_becomes_pouch_query(self):
         raw = _raw(RAW_GORON)
@@ -120,6 +121,7 @@ def _vanilla_placements(slots) -> dict[str, str]:
     placed |= {event_location_name(f): item for f, item in EVENT_SLOTS.items()}
     placed |= {skull_location_name(n): i for n, i in SKULL_REWARDS.items()}
     placed |= VANILLA_SHOP_LOGIC_ITEMS
+    placed |= {loc: slot.item for loc, slot in NPC_SLOTS.items()}
     return placed
 
 
@@ -145,6 +147,14 @@ class TempleStoneLogicTest(unittest.TestCase):
 
     def test_temple_needs_goron_ruby(self):
         placed = {k: v for k, v in self.placed.items() if k != event_location_name("Dm_DeathMtTrail_0025.bfevfl.zs")}
+        self.assertNotIn("TempleOfTime", self._reached(placed))
+
+    def test_temple_needs_zora_sapphire(self):
+        placed = {
+            k: v
+            for k, v in self.placed.items()
+            if k != event_location_name("Dm_ZoraFountain_0030.bfevfl.zs")
+        }
         self.assertNotIn("TempleOfTime", self._reached(placed))
 
 

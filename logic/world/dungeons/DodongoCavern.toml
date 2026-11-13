@@ -1,25 +1,25 @@
 # DodongoCavern
 
 [regions.Root.exits]
-"DodongoCavern" = "(is_adult or Deku_Tree_Clear) and lift_bombs"  # throw a bomb flower to trigger the entrance cutscene
+"DodongoCavern" = "(is_adult or Deku_Tree_Clear) and has_strength"  # throw a bomb flower to trigger the entrance cutscene
 
 [regions."DodongoCavern"]
 dungeon = true
 
 [regions."DodongoCavern".events]
-"Dodongos_Cavern_Clear" = "is_child and has_bombs and ranged_weapon"
+"Dodongos_Cavern_Clear" = "is_child and has_bombs and ranged_weapon and has_weapon"
 
 [regions."DodongoCavern".locations]
 "Dm_DeathMtTrail_0025 (event item)" = "Dodongos_Cavern_Clear"
 "DodongoCavern Dynamic room 1 #0 (Item_Dungeon_Map)" = "true"
 "DodongoCavern Dynamic room 1 #0 (TBox_Rupee_Blue)" = "true"
-"DodongoCavern Dynamic room 1 #0 (TBox_Shield_Deku)" = "true"
-"DodongoCavern Dynamic room 10 #0 (Item_ScrubBusinessSeed)" = "true"
+"DodongoCavern Dynamic room 1 #0 (TBox_Shield_Deku)" = "has_bombs and can_shoot"
+"DodongoCavern Dynamic room 10 #0 (Item_ScrubBusinessSeed)" = "has_bombs"
 "DodongoCavern Dynamic room 13 #0 (TBox_Shield_Deku)" = "true"
 "DodongoCavern Static room 11 #0 (Item_Dungeon_Compass)" = "true"
-"DodongoCavern Static room 13 #0 (Item_BombBag_Small)" = "(is_child and Slingshot) or (is_adult and Bow)"
-"DodongoCavern Static room 16 #0 (Item_ScrubBusinessSeed)" = "(is_child and Slingshot) or (is_adult and Bow)"
-"DodongoCavern Static room 5 #0 (TBox_Rupee_Red)" = "true"
+"DodongoCavern Static room 13 #0 (Item_BombBag_Small)" = "can_shoot"
+"DodongoCavern Static room 16 #0 (Item_ScrubBusinessSeed)" = "can_shoot"
+"DodongoCavern Static room 5 #0 (TBox_Rupee_Red)" = "has_weapon"
 
 [regions."DodongoCavern".skulltulas]
 "Dodongos Cavern GS Side Room Near Lower Lizalfos" = "true"  # original: is_adult or has_explosives or Sticks or Slingshot or Boomerang or Kokiri_Sword

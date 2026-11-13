@@ -6,7 +6,10 @@
 [regions."ZoraFountain"]
 
 [regions."ZoraFountain".locations]
+"ZoraFountain Heart Piece 1" = "is_adult"  # loose Obj_Heart_Piece, adult copy only
+"ZoraFountain Heart Piece 2" = "is_adult"  # loose Obj_Heart_Piece, adult copy only
 "ZoraFountain Dynamic room 0 #0 (TBox_Rupee_Purple)" = "is_adult"
+"Dm_ZoraFountain_0030 (event item)" = "is_child and Jabu_Jabu_Clear"  # Ruto's Zora's Sapphire cutscene, after Jabu-Jabu's Belly
 
 [regions."ZoraFountain".skulltulas]
 "ZF GS Tree" = "is_child"  # original: is_child and can_bonk

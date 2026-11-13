@@ -1,7 +1,7 @@
 # TempleOfTime
 
 [regions.Root.exits]
-"TempleOfTime" = "(is_adult or Deku_Tree_Clear) and Kokiris_Emerald and Goron_Ruby"
+"TempleOfTime" = "(is_adult or Deku_Tree_Clear) and Kokiris_Emerald and Goron_Ruby and Zora_Sapphire"
 
 [regions."TempleOfTime"]
 

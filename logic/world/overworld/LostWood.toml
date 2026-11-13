@@ -12,8 +12,10 @@
 "LostWood_ScrubForestStageElder_SkullMaskFirst: Item_StickBag_Large (npc item)" = "is_child and Deku_Sticks and Stick_Bag_Medium"
 "LostWood_ScrubForestStageElder_TrueMaskFirst: Item_NutBag_Medium (npc item)" = "is_child and Deku_Nuts"
 "LostWood_ScrubForestStageElder_TrueMaskFirst: Item_NutBag_Large (npc item)" = "is_child and Deku_Nuts and Nut_Bag_Medium"
+"Enemy_Scrub_Business_Common: Item_StickBag_Large (npc item)" = "is_child and Deku_Sticks"
+"Enemy_Scrub_Business_Common: Item_NutBag_Large (npc item)" = "is_child and Deku_Nuts and Bomb_Bag"
 "Dm_LostWood_0040: Item_BulletBag_Medium (npc item)" = "is_child and Slingshot"
-"Dm_LostWood_0040: Item_BulletBag_Large (npc item)" = "is_child and Slingshot and Bullet_Bag_Medium"
+"Npc_SkullKid_Child_02: Obj_Heart_Piece (npc item)" = "is_child and has_ocarina"
 
 [regions."LostWood".skulltulas]
 "LW GS Bean Patch Near Bridge" = "is_child"  # original: can_plant_bugs and can_child_attack

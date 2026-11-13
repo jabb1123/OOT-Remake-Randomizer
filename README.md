@@ -46,9 +46,10 @@ oot-randomizer --rom "/path/to/The Legend of Zelda Ocarina of Time   U2.0.0.nup"
 Placement logic lives in `logic/world/`, one TOML file per area:
 
 - `_settings.toml` — `[settings]` only, plus a header documenting the format
+- `_helpers.toml` — `[helpers]`: named requirement groups shared by every file, such as `has_strength`, `has_bombs`, `has_explosives`, `has_hookshot`, `can_shoot`, `ranged_weapon` and `can_play(song)` (ocarina plus song). A helper is used like an item name, and `name(param)` helpers take arguments. Helpers can use other helpers, but not in a loop.
 - `overworld/<Region>.toml` and `dungeons/<Region>.toml` — each file adds its own `[regions.Root.exits]` entry, then the region's flags, events, locations and Gold Skulltulas
 
-Every `*.toml` is loaded recursively in sorted path order and deep-merged. The same key in two files is an error, `dungeon`/`excluded` flags must agree, and `[settings]` may appear only once. `--logic-file` (randomize) and `--file` (`logic check`) accept either this directory or a single TOML file. For example, `oot-randomizer logic template` writes a single-file starter to `logic/world_template.toml`.
+Every `*.toml` is loaded recursively in sorted path order and deep-merged. The same key in two files is an error, `dungeon`/`excluded` flags must agree, `[settings]` may appear only once, and each helper name may be defined only once. `--logic-file` (randomize) and `--file` (`logic check`) accept either this directory or a single TOML file. For example, `oot-randomizer logic template` writes a single-file starter to `logic/world_template.toml`.
 
 ## Shopsanity
 
@@ -56,7 +57,7 @@ Every `*.toml` is loaded recursively in sorted path order and deep-merged. The s
 
 ## Intro cutscene
 
-`--skip-intro` (`RandomizerConfig.skip_intro`, off by default) removes the Kokiri Forest wake-up cutscene that plays at the start of a new game. The `Dm_Kokiri_0030` timeline is unlinked from the `Opening_Introduction` chain of `OpeningEvent.bfevfl`, so the game continues through its normal post-cutscene path. The loading transition (`Dm_Kokiri_0000`, entry point `Opening_LoadingKokiriForest`) is left alone because it gates the scene load. The patch is in `src/oot_randomizer/cutscene_skips.py`.
+`--skip-intro` (`RandomizerConfig.skip_intro`, off by default) skips the whole opening Introduction cutscene at the start of a new game. In `OpeningEvent.bfevfl`, the `Opening_Introduction` setup event (`Event9`) is redirected to the skip-check's skip branch (`Event24`, the same path the game takes when the player presses skip). The staging, the Meet_DekuTree challenge, and the `Dm_Kokiri_0030` wake-up demo become unreachable. The loading transition (`Dm_Kokiri_0000`, entry point `Opening_LoadingKokiriForest`) is left alone because it gates the scene load. The patch is in `src/oot_randomizer/cutscene_skips.py`.
 
 ## Recommended next implementation phases
 

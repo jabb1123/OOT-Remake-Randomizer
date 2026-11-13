@@ -35,7 +35,7 @@ SCENE_ENTRY: dict[str, str] = {
     "ZoraDomain": "(is_adult or Deku_Tree_Clear) and Zeldas_Lullaby",
     "ZoraFountain": "(is_adult or Deku_Tree_Clear) and Zeldas_Lullaby",
     "InsideJabuJabuBelly": "is_child and Deku_Tree_Clear and Zeldas_Lullaby",
-    "HyruleCastle": "is_child and Deku_Tree_Clear",
+    "HyruleCastle": "is_child and Deku_Tree_Clear and",
     "BottomOfTheWell": "is_child and Deku_Tree_Clear and Song_of_Storms",
     "IceCavern": "is_adult and Zeldas_Lullaby",
     "ForestTemple": "is_adult and Hookshot",
@@ -51,17 +51,30 @@ SCENE_ENTRY: dict[str, str] = {
     "BossRushIntervalRoom": "true",
 }
 
-DUNGEONS = frozenset({
-    "InsideTheDekuTree", "DodongoCavern", "InsideJabuJabuBelly", "ForestTemple", "FireTemple",
-    "WaterTemple", "ShadowTemple", "SpiritTemple", "BottomOfTheWell", "IceCavern",
-    "GerudoTrainingGround", "InsideGanonCastle",
-})
+DUNGEONS = frozenset(
+    {
+        "InsideTheDekuTree",
+        "DodongoCavern",
+        "InsideJabuJabuBelly",
+        "ForestTemple",
+        "FireTemple",
+        "WaterTemple",
+        "ShadowTemple",
+        "SpiritTemple",
+        "BottomOfTheWell",
+        "IceCavern",
+        "GerudoTrainingGround",
+        "InsideGanonCastle",
+    }
+)
 # Unknown remake-only area; chests here keep their vanilla items until confirmed reachable.
 EXCLUDED = frozenset({"BossRushIntervalRoom"})
 
 EVENTS: dict[str, dict[str, str]] = {
     "InsideTheDekuTree": {"Deku_Tree_Clear": "is_child and Kokiri_Sword and Slingshot"},
-    "DodongoCavern": {"Dodongos_Cavern_Clear": "is_child and (Bomb_Bag or (Zeldas_Lullaby and Sarias_Song))"},
+    "DodongoCavern": {
+        "Dodongos_Cavern_Clear": "is_child and (Bomb_Bag or (Zeldas_Lullaby and Sarias_Song))"
+    },
     "InsideJabuJabuBelly": {"Jabu_Jabu_Clear": "is_child and Boomerang"},
     "TempleOfTime": {
         "Time_Travel": "is_child and Song_of_Time and Deku_Tree_Clear and Dodongos_Cavern_Clear and Jabu_Jabu_Clear",
@@ -70,7 +83,9 @@ EVENTS: dict[str, dict[str, str]] = {
     "FireTemple": {"Fire_Temple_Clear": "Megaton_Hammer"},
     "WaterTemple": {"Water_Temple_Clear": "Longshot"},
     "ShadowTemple": {"Shadow_Temple_Clear": "Hover_Boots and Bow"},
-    "SpiritTemple": {"Spirit_Temple_Clear": "is_adult and Silver_Gauntlets and Mirror_Shield and Hookshot"},
+    "SpiritTemple": {
+        "Spirit_Temple_Clear": "is_adult and Silver_Gauntlets and Mirror_Shield and Hookshot"
+    },
     "InsideGanonCastle": {"Ganon_Defeated": "Bow"},
     "IceCavern": {"Ice_Cavern_Clear": "is_adult and Zeldas_Lullaby"},
 }
@@ -80,38 +95,95 @@ SKULL_REGION = "KakarikoVillage"
 
 # flow file -> (region, requirement, who teaches it in vanilla)
 SONG_LOCATIONS: dict[str, tuple[str, str, str]] = {
-    "Dm_MelodyGet_Zelda.bfevfl.zs": ("HyruleCastle", "is_child", "Impa, Hyrule Castle courtyard"),
-    "Dm_MelodyGet_Saria.bfevfl.zs": ("SacredForestMeadow", "is_child", "Saria, Sacred Forest Meadow"),
+    "Dm_MelodyGet_Zelda.bfevfl.zs": (
+        "HyruleCastle",
+        "is_child",
+        "Impa, Hyrule Castle courtyard",
+    ),
+    "Dm_MelodyGet_Saria.bfevfl.zs": (
+        "SacredForestMeadow",
+        "is_child",
+        "Saria, Sacred Forest Meadow",
+    ),
     # The remake's Epona flow checks the Fire and Water stones; Water needs Zora's Domain.
-    "Dm_MelodyGet_Epona.bfevfl.zs": ("LonLonRanch", "is_child and Zeldas_Lullaby", "Malon, Lon Lon Ranch"),
-    "Dm_MelodyGet_Sun_03.bfevfl.zs": ("Graveyard", "is_child and Zeldas_Lullaby", "Royal Tomb"),
+    "Dm_MelodyGet_Epona.bfevfl.zs": (
+        "LonLonRanch",
+        "is_child and Zeldas_Lullaby",
+        "Malon, Lon Lon Ranch",
+    ),
+    "Dm_MelodyGet_Sun_03.bfevfl.zs": (
+        "Graveyard",
+        "is_child and Zeldas_Lullaby",
+        "Royal Tomb",
+    ),
     "Dm_MelodyGet_Time.bfevfl.zs": (
         "HyruleField",
         "is_child and Zeldas_Lullaby and Deku_Tree_Clear and Dodongos_Cavern_Clear and Jabu_Jabu_Clear",
         "Zelda at the moat, after all three stones",
     ),
     "Dm_MelodyGet_Storm.bfevfl.zs": ("KakarikoVillage", "is_adult", "Windmill"),
-    "Dm_MelodyGet_Forest.bfevfl.zs": ("SacredForestMeadow", "is_adult", "Sheik, Sacred Forest Meadow"),
-    "Dm_MelodyGet_Fire.bfevfl.zs": ("DeathMountainCrater", "is_adult", "Sheik, Death Mountain Crater"),
+    "Dm_MelodyGet_Forest.bfevfl.zs": (
+        "SacredForestMeadow",
+        "is_adult",
+        "Sheik, Sacred Forest Meadow",
+    ),
+    "Dm_MelodyGet_Fire.bfevfl.zs": (
+        "DeathMountainCrater",
+        "is_adult",
+        "Sheik, Death Mountain Crater",
+    ),
     "Dm_MelodyGet_Water.bfevfl.zs": ("IceCavern", "is_adult", "Sheik, Ice Cavern"),
-    "Dm_MelodyGet_Spilit.bfevfl.zs": ("DesertColossus", "is_adult", "Sheik, Desert Colossus"),
+    "Dm_MelodyGet_Spilit.bfevfl.zs": (
+        "DesertColossus",
+        "is_adult",
+        "Sheik, Desert Colossus",
+    ),
     "Dm_MelodyGet_Shadow.bfevfl.zs": (
         "KakarikoVillage",
         "is_adult and Forest_Temple_Clear and Fire_Temple_Clear and Water_Temple_Clear",
         "Sheik, Kakariko",
     ),
-    "Dm_MelodyGet_Shine.bfevfl.zs": ("TempleOfTime", "is_adult and Forest_Temple_Clear", "Sheik, Temple of Time"),
+    "Dm_MelodyGet_Shine.bfevfl.zs": (
+        "TempleOfTime",
+        "is_adult and Forest_Temple_Clear",
+        "Sheik, Temple of Time",
+    ),
 }
 
 # flow file -> (region, requirement, where the item is granted in vanilla)
 EVENT_LOCATIONS: dict[str, tuple[str, str, str]] = {
-    "Dm_Awake_Forest_Get.bfevfl.zs": ("ForestTemple", "Forest_Temple_Clear", "Forest Temple"),
+    "Dm_Awake_Forest_Get.bfevfl.zs": (
+        "ForestTemple",
+        "Forest_Temple_Clear",
+        "Forest Temple",
+    ),
     "Dm_Awake_Fire_Get.bfevfl.zs": ("FireTemple", "Fire_Temple_Clear", "Fire Temple"),
-    "Dm_Awake_Water_Get.bfevfl.zs": ("WaterTemple", "Water_Temple_Clear", "Water Temple"),
-    "Dm_Awake_Shadow_Get.bfevfl.zs": ("ShadowTemple", "Shadow_Temple_Clear", "Shadow Temple"),
-    "Dm_Awake_Spirit_Get.bfevfl.zs": ("SpiritTemple", "Spirit_Temple_Clear", "Spirit Temple"),
+    "Dm_Awake_Water_Get.bfevfl.zs": (
+        "WaterTemple",
+        "Water_Temple_Clear",
+        "Water Temple",
+    ),
+    "Dm_Awake_Shadow_Get.bfevfl.zs": (
+        "ShadowTemple",
+        "Shadow_Temple_Clear",
+        "Shadow Temple",
+    ),
+    "Dm_Awake_Spirit_Get.bfevfl.zs": (
+        "SpiritTemple",
+        "Spirit_Temple_Clear",
+        "Spirit Temple",
+    ),
     "Dm_Kokiri_0130.bfevfl.zs": ("InsideTheDekuTree", "Deku_Tree_Clear", "Deku Tree"),
-    "Dm_DeathMtTrail_0025.bfevfl.zs": ("DodongoCavern", "Dodongos_Cavern_Clear", "King Dodongo"),
+    "Dm_DeathMtTrail_0025.bfevfl.zs": (
+        "DeathMountainTrail",
+        "Dodongos_Cavern_Clear",
+        "Darunia",
+    ),
+    "Dm_ZoraFountain_0030.bfevfl.zs": (
+        "ZoraFountain",
+        "Jabu_Jabu_Clear",
+        "Ruto",
+    ),
     "Dm_Kokiri_0155.bfevfl.zs": ("LostWood", "is_child", "Saria, Lost Woods"),
     "Dm_MelodyGet_Time.bfevfl.zs": (
         "HyruleField",
@@ -122,37 +194,123 @@ EVENT_LOCATIONS: dict[str, tuple[str, str, str]] = {
 
 # (flow file, vanilla item) -> (region, requirement, who grants it in vanilla); mirrors npc_grants.py
 NPC_LOCATIONS: dict[tuple[str, str], tuple[str, str, str]] = {
-    ("MiniGame_HitTarget.bfevfl.zs", "Item_BulletBag_Medium"): ("LakeHylia", "Slingshot", "Bullseye, Lake Hylia"),
     ("MiniGame_HitTarget.bfevfl.zs", "Item_BulletBag_Large"): (
-        "LakeHylia", "Slingshot and Bullet_Bag_Medium", "Bullseye, Lake Hylia"),
-    ("MiniGame_HitTarget.bfevfl.zs", "Item_Quiver_Medium"): ("LakeHylia", "Bow", "Bullseye, Lake Hylia"),
-    ("MiniGame_HitTarget.bfevfl.zs", "Item_Quiver_Large"): (
-        "LakeHylia", "Bow and Quiver_Medium", "Bullseye, Lake Hylia"),
-    ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombBag_Medium"): ("Market", "Bomb_Bag", "Bombchu Bowling"),
+        "Market",
+        "is_child and Slingshot",
+        "Shooting Gallery, Market (2nd bullet bag upgrade)",
+    ),
+    ("MiniGame_HitTarget.bfevfl.zs", "Item_Quiver_Medium"): (
+        "KakarikoVillage",
+        "is_adult and Bow",
+        "Shooting Gallery, Kakariko",
+    ),
+    ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombBag_Medium"): (
+        "Market",
+        "Bomb_Bag",
+        "Bombchu Bowling",
+    ),
     ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombBag_Large"): (
-        "Market", "Bomb_Bag and Bomb_Bag_Medium", "Bombchu Bowling"),
-    ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombchuBundle_Medium"): ("Market", "true", "Bombchu Bowling"),
-    ("MiniGame_Fishing.bfevfl.zs", "Item_Scale_Gold"): ("LakeHylia", "true", "Fishing Pond"),
-    ("MiniGame_Diving.bfevfl.zs", "Item_Scale_Silver"): ("ZoraRiver", "true", "Diving Minigame"),
+        "Market",
+        "Bomb_Bag and Bomb_Bag_Medium",
+        "Bombchu Bowling",
+    ),
+    ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombchuBundle_Medium"): (
+        "Market",
+        "true",
+        "Bombchu Bowling",
+    ),
+    ("MiniGame_Fishing.bfevfl.zs", "Item_Scale_Gold"): (
+        "LakeHylia",
+        "true",
+        "Fishing Pond",
+    ),
+    ("MiniGame_Diving.bfevfl.zs", "Item_Scale_Silver"): (
+        "ZoraRiver",
+        "true",
+        "Diving Minigame",
+    ),
     ("Minigame_HorsebackArchery.bfevfl.zs", "Item_Quiver_Medium"): (
-        "GerudoFortress", "is_adult and Bow", "Horseback Archery"),
+        "GerudoFortress",
+        "is_adult and Bow",
+        "Horseback Archery",
+    ),
     ("Minigame_HorsebackArchery.bfevfl.zs", "Item_Quiver_Large"): (
-        "GerudoFortress", "is_adult and Bow and Quiver_Medium", "Horseback Archery"),
-    ("LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl.zs", "Item_StickBag_Medium"): (
-        "LostWood", "is_child and Deku_Sticks", "Lost Woods Scrub Elder, Skull Mask"),
-    ("LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl.zs", "Item_StickBag_Large"): (
-        "LostWood", "is_child and Deku_Sticks and Stick_Bag_Medium", "Lost Woods Scrub Elder, Skull Mask"),
+        "GerudoFortress",
+        "is_adult and Bow and Quiver_Medium",
+        "Horseback Archery",
+    ),
+    (
+        "LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl.zs",
+        "Item_StickBag_Medium",
+    ): ("LostWood", "is_child and Deku_Sticks", "Lost Woods Scrub Elder, Skull Mask"),
+    (
+        "LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl.zs",
+        "Item_StickBag_Large",
+    ): (
+        "LostWood",
+        "is_child and Deku_Sticks and Stick_Bag_Medium",
+        "Lost Woods Scrub Elder, Skull Mask",
+    ),
     ("LostWood_ScrubForestStageElder_TrueMaskFirst.bfevfl.zs", "Item_NutBag_Medium"): (
-        "LostWood", "is_child and Deku_Nuts", "Lost Woods Scrub Elder, True Mask"),
+        "LostWood",
+        "is_child and Deku_Nuts",
+        "Lost Woods Scrub Elder, True Mask",
+    ),
     ("LostWood_ScrubForestStageElder_TrueMaskFirst.bfevfl.zs", "Item_NutBag_Large"): (
-        "LostWood", "is_child and Deku_Nuts and Nut_Bag_Medium", "Lost Woods Scrub Elder, True Mask"),
-    ("Dm_LostWood_0040.bfevfl.zs", "Item_BulletBag_Medium"): ("LostWood", "is_child and Slingshot", "Lost Woods gift"),
-    ("Dm_LostWood_0040.bfevfl.zs", "Item_BulletBag_Large"): (
-        "LostWood", "is_child and Slingshot and Bullet_Bag_Medium", "Lost Woods gift"),
+        "LostWood",
+        "is_child and Deku_Nuts and Nut_Bag_Medium",
+        "Lost Woods Scrub Elder, True Mask",
+    ),
+    ("Enemy_Scrub_Business_Common.bfevfl.zs", "Item_StickBag_Large"): (
+        "LostWood",
+        "is_child and Deku_Sticks",
+        "Lost Woods Business Scrub, Deku Stick bag",
+    ),
+    ("Enemy_Scrub_Business_Common.bfevfl.zs", "Item_NutBag_Large"): (
+        "LostWood",
+        "is_child and Deku_Nuts and Bomb_Bag",
+        "Lost Woods Business Scrub, Deku Nut bag",
+    ),
+    ("Dm_LostWood_0040.bfevfl.zs", "Item_BulletBag_Medium"): (
+        "LostWood",
+        "is_child and Slingshot",
+        "Lost Woods scrub target (1st bullet bag upgrade)",
+    ),
     ("Npc_Goron_Biggoron_Adult.bfevfl.zs", "Item_Sword_Biggoron"): (
         "DeathMountainTrail",
         "is_adult and Ice_Cavern_Clear and (Eponas_Song or Longshot) and (Bomb_Bag or Megaton_Hammer)",
-        "Biggoron, Death Mountain Trail"),
+        "Biggoron, Death Mountain Trail",
+    ),
+    ("SubEvent_FindRichard.bfevfl.zs", "Obj_Heart_Piece"): (
+        "Market",
+        "is_child and moving_time",
+        "Mamamu Yan, after finding Richard",
+    ),
+    ("Npc_SkullKid_Child_02.bfevfl.zs", "Obj_Heart_Piece"): (
+        "LostWood",
+        "is_child and has_ocarina",
+        "Skullkid, on playing game 3 times",
+    ),
+    ("Dm_Goron_0030.bfevfl.zs", "Item_Gauntlet_Goron"): (
+        "GoronCity",
+        "is_child and Zeldas_Lullaby and Sarias_Song",
+        "Darunia, after Goron dance",
+    ),
+    ("Dm_FairyFountain_Din.bfevfl.zs", "Item_DinFire"): (
+        "DeathMountainTrail",
+        "has_bombs",
+        "Great Fairy for 25 rupees",
+    ),
+    ("Goto_HyruleCastle.bfevfl.zs", "Item_WeirdEgg"): (
+        "HyruleCastle",
+        "is_child",
+        "Talon, given as egg",
+    ),
+    ("Dm_HrlCastle_0050.bfevfl.zs", "Item_ZeldaLetter"): (
+        "HyruleCastle",
+        "is_child and Alarm_Cucco",
+        "Zelda, after speech",
+    ),
 }
 
 HEADER = """\
@@ -194,22 +352,30 @@ def build_template(slots: list[ChestSlot]) -> str:
     npc_by_region: dict[str, list[tuple[str, str]]] = defaultdict(list)
     for key, (region, _, _) in NPC_LOCATIONS.items():
         npc_by_region[region].append(key)
-    region_names = sorted(set(chest_by_region) | set(songs_by_region) | set(events_by_region) | set(EVENTS)
-                          | set(npc_by_region) | {SKULL_REGION})
+    region_names = sorted(
+        set(chest_by_region)
+        | set(songs_by_region)
+        | set(events_by_region)
+        | set(EVENTS)
+        | set(npc_by_region)
+        | {SKULL_REGION}
+    )
 
     lines = [HEADER, "[settings]"]
     lines += [
         'start_age = "child"',
         'child_spawn = "Root"',
         'adult_spawn = "Root"',
-        '# Event that unlocks playing as the other age (Door of Time / Master Sword).',
+        "# Event that unlocks playing as the other age (Door of Time / Master Sword).",
         'time_travel = "Time_Travel"',
         'goal = "Ganon_Defeated"',
         "start_items = []",
         "",
         "[regions.Root.exits]",
     ]
-    lines += [f"{_q(name)} = {_q(SCENE_ENTRY.get(name, OVERWORLD))}" for name in region_names]
+    lines += [
+        f"{_q(name)} = {_q(SCENE_ENTRY.get(name, OVERWORLD))}" for name in region_names
+    ]
 
     for name in region_names:
         lines += ["", f"[regions.{_q(name)}]"]
@@ -224,15 +390,21 @@ def build_template(slots: list[ChestSlot]) -> str:
         for flow in songs_by_region.get(name, []):
             _, req, who = SONG_LOCATIONS[flow]
             vanilla = SONG_DISPLAY_NAMES[SONG_SLOTS[flow]]
-            entries.append(f"{_q(song_location_name(flow))} = {_q(req)}  # song: {vanilla} from {who}")
+            entries.append(
+                f"{_q(song_location_name(flow))} = {_q(req)}  # song: {vanilla} from {who}"
+            )
         for flow in events_by_region.get(name, []):
             _, req, who = EVENT_LOCATIONS[flow]
             vanilla = EVENT_ITEM_DISPLAY_NAMES[EVENT_SLOTS[flow]]
-            entries.append(f"{_q(event_location_name(flow))} = {_q(req)}  # event item: {vanilla} from {who}")
+            entries.append(
+                f"{_q(event_location_name(flow))} = {_q(req)}  # event item: {vanilla} from {who}"
+            )
         for flow, item in npc_by_region.get(name, []):
             _, req, who = NPC_LOCATIONS[(flow, item)]
             vanilla = NPC_ITEM_DISPLAY_NAMES[item]
-            entries.append(f"{_q(npc_location_name(flow, item))} = {_q(req)}  # npc item: {vanilla} from {who}")
+            entries.append(
+                f"{_q(npc_location_name(flow, item))} = {_q(req)}  # npc item: {vanilla} from {who}"
+            )
         if name == SKULL_REGION:
             for tokens, item in SKULL_REWARDS.items():
                 vanilla = ITEM_DISPLAY_NAMES.get(item, item)
@@ -241,7 +413,11 @@ def build_template(slots: list[ChestSlot]) -> str:
                 )
         for slot in sorted(chest_by_region.get(name, []), key=lambda s: s.name):
             ages = slot.ages
-            req = "is_adult" if ages == {"adult"} else "is_child" if ages == {"child"} else "true"
+            req = (
+                "is_adult"
+                if ages == {"adult"}
+                else "is_child" if ages == {"child"} else "true"
+            )
             entries.append(f"{_q(slot.name)} = {_q(req)}")
         if entries:
             lines += ["", f"[regions.{_q(name)}.locations]", *entries]

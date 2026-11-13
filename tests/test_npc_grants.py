@@ -11,9 +11,11 @@ from oot_randomizer.npc_grants import (
     NPC_FLOWS,
     NPC_ITEM_DISPLAY_NAMES,
     NPC_SLOTS,
+    PROGRESSIVE_BRANCHES,
     _grant_params,
     npc_location_name,
     disable_scrub_biggoron_sale,
+    fix_progressive_branches,
     patch_npc_grant,
     patch_npc_grants,
     shuffle_npc_items,
@@ -65,10 +67,19 @@ def _raw_or_skip(name: str) -> bytes:
 
 
 class SlotTableTest(unittest.TestCase):
-    def test_eighteen_locations_one_per_flow_item_pair(self):
-        self.assertEqual(len(NPC_SLOTS), 18)
+    def test_twenty_three_locations_one_per_flow_item_pair(self):
+        self.assertEqual(len(NPC_SLOTS), 23)
         pairs = [(slot.flow, slot.item) for slot in NPC_SLOTS.values()]
-        self.assertEqual(len(set(pairs)), 18)
+        self.assertEqual(len(set(pairs)), 23)
+
+    def test_progressive_bullet_bag_games_keep_one_slot_each(self):
+        self.assertIn(_loc(DM_LOST_WOOD, "Item_BulletBag_Medium"), NPC_SLOTS)
+        self.assertNotIn(_loc(DM_LOST_WOOD, "Item_BulletBag_Large"), NPC_SLOTS)
+        self.assertIn(_loc(HIT_TARGET, "Item_BulletBag_Large"), NPC_SLOTS)
+        self.assertNotIn(_loc(HIT_TARGET, "Item_BulletBag_Medium"), NPC_SLOTS)
+        for flow, branches in PROGRESSIVE_BRANCHES.items():
+            for branch in branches:
+                self.assertIn(npc_location_name(flow, branch.keep_item), NPC_SLOTS)
 
     def test_flow_names_are_bfevfl_zs(self):
         for slot in NPC_SLOTS.values():
@@ -174,6 +185,73 @@ class PatchTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             patch_npc_grant(raw, "Item_Scale_Gold", "Item_Scale_Silver")
 
+    def test_progressive_branches_always_reach_the_kept_grant(self):
+        for flow_file, branches in PROGRESSIVE_BRANCHES.items():
+            raw = _raw_or_skip(flow_file.removesuffix(".zs"))
+            patched = fix_progressive_branches(raw, flow_file)
+            self.assertNotEqual(patched, raw)
+            flow = _load(patched)
+            self.assertEqual(_serialize(flow), patched)
+            events = {event.name: event for event in flow.flowchart.events}
+            for branch in branches:
+                with self.subTest(flow=flow_file, switch=branch.switch):
+                    cases = events[branch.switch].data.cases
+                    self.assertEqual(len(cases), 2)
+                    self.assertEqual({case.v.name for case in cases.values()}, {branch.keep})
+                    params = events[branch.keep].data.params.data
+                    item = params.get("ActorName", params.get("ReveiveItem"))
+                    self.assertEqual(item, branch.keep_item)
+            self.assertIs(fix_progressive_branches(patched, flow_file), patched)
+            self.assertEqual(_grant_values(patched), _grant_values(raw))
+
+    def test_progressive_fix_composes_with_grant_repoint(self):
+        flow_file = "Dm_LostWood_0040.bfevfl.zs"
+        raw = _raw_or_skip(DM_LOST_WOOD)
+        changes = {"Item_BulletBag_Medium": "Item_Hookshot"}
+        a = fix_progressive_branches(patch_npc_grants(raw, changes), flow_file)
+        b = patch_npc_grants(fix_progressive_branches(raw, flow_file), changes)
+        self.assertEqual(a, b)
+        events = {event.name: event for event in _load(a).flowchart.events}
+        self.assertEqual(events["Event30"].data.params.data["ActorName"], "Item_Hookshot")
+
+    def test_progressive_fix_rejects_unexpected_shape(self):
+        with self.assertRaises(ValueError):
+            fix_progressive_branches(_raw_or_skip(FISHING), "Dm_LostWood_0040.bfevfl.zs")
+
+    def test_business_scrub_bags_pin_large_and_drop_medium(self):
+        from evfl.event import SwitchEvent
+
+        flow_file = "Enemy_Scrub_Business_Common.bfevfl.zs"
+        raw = _raw_or_skip(flow_file.removesuffix(".zs"))
+        patched = fix_progressive_branches(raw, flow_file)
+        self.assertEqual(fix_progressive_branches(patched, flow_file), patched)
+        flow = _load(patched)
+        self.assertEqual(_serialize(flow), patched)
+        events = {event.name: event for event in flow.flowchart.events}
+        self.assertEqual({c.v.name for c in events["Event319"].data.cases.values()}, {"Event317"})
+        self.assertEqual({c.v.name for c in events["Event323"].data.cases.values()}, {"Event318"})
+        self.assertEqual(events["Event554"].data.cases[1].v.name, "Event319")
+        targets = {
+            case.v.name
+            for event in flow.flowchart.events
+            if isinstance(event.data, SwitchEvent)
+            for case in event.data.cases.values()
+        }
+        for dead in ("Event322", "Event326", "Event555"):
+            with self.subTest(dead=dead):
+                self.assertNotIn(dead, targets)
+
+    def test_business_scrub_bag_grants_repoint_and_compose(self):
+        flow_file = "Enemy_Scrub_Business_Common.bfevfl.zs"
+        raw = _raw_or_skip(flow_file.removesuffix(".zs"))
+        changes = {"Item_StickBag_Large": "Item_NutBag_Medium", "Item_NutBag_Large": "Item_Quiver_Medium"}
+        repointed = _grant_values(patch_npc_grants(raw, changes))
+        self.assertNotIn("Item_StickBag_Large", repointed)
+        self.assertNotIn("Item_NutBag_Large", repointed)
+        a = fix_progressive_branches(patch_npc_grants(raw, changes), flow_file)
+        b = patch_npc_grants(fix_progressive_branches(raw, flow_file), changes)
+        self.assertEqual(a, b)
+
     def test_every_flow_grants_its_slot_items(self):
         for flow in sorted(NPC_FLOWS):
             with self.subTest(flow=flow):
@@ -219,10 +297,9 @@ class ShippedLogicTest(unittest.TestCase):
         self.assertEqual(self.world.errors, [])
 
     def test_bag_upgrades_require_their_base_bag(self):
+        # Progressive bullet bag slots are forced in the flow, so they need no base bag.
         for raw_name, item, base in [
-            (HIT_TARGET, "Item_BulletBag_Large", "Item_BulletBag_Medium"),
             (HIT_TARGET, "Item_Quiver_Large", "Item_Quiver_Medium"),
-            (DM_LOST_WOOD, "Item_BulletBag_Large", "Item_BulletBag_Medium"),
         ]:
             name = _loc(raw_name, item)
             region = self.world.regions[self.world.location_region[name]]

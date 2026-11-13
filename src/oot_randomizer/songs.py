@@ -27,6 +27,9 @@ SONG_SLOTS: dict[str, str] = {
     "Dm_MelodyGet_Shine.bfevfl.zs": "Item_Melody_LightPrelude",
 }
 
+# Ocarina flow whose learning branch grants each vanilla song (see patch_bfevfl_songs).
+OCARINA_LEARN_FLOW = "Dm_SY_Ocarina.bfevfl.zs"
+
 # Friendly names usable in logic requirements.
 SONG_DISPLAY_NAMES: dict[str, str] = {
     "Item_Melody_ZeldaLullaby": "Zelda's Lullaby",
@@ -57,12 +60,21 @@ def shuffle_songs(seed: int | random.Random) -> dict[str, str]:
 
 
 def patch_bfevfl_song(data: bytes, old_song: str, new_song: str) -> bytes:
-    """Repoint every `[prefix.]old_song` string in a BFEVFL to `[prefix.]new_song`.
+    """Repoint every `[prefix.]old_song` string in a BFEVFL to `[prefix.]new_song`."""
+    return patch_bfevfl_songs(data, {old_song: new_song})
+
+
+def patch_bfevfl_songs(data: bytes, changes: dict[str, str]) -> bytes:
+    """Repoint every `[prefix.]old` string in a BFEVFL to `[prefix.]new`, for all pairs at once.
+
+    The matching is done on the original strings, so a chain of swaps (A->B while B->C) cannot
+    re-match a string that this call has just written. Every old song must occur in the flow.
 
     New strings are appended just before the RELT block; only the single pointer to each old
     string is rewritten, so no other offsets move except RELT itself.
     """
-    if old_song == new_song:
+    changes = {old: new for old, new in changes.items() if old != new}
+    if not changes:
         return data
     buf = bytearray(data)
     relt_off = struct.unpack_from("<I", buf, 0x18)[0]
@@ -70,8 +82,10 @@ def patch_bfevfl_song(data: bytes, old_song: str, new_song: str) -> bytes:
         raise ValueError("BFEVFL RELT block not found")
     head, relt = buf[:relt_off], buf[relt_off:]
 
-    pattern = re.compile(rb"(?:[A-Za-z]+\.)?" + re.escape(old_song.encode()) + rb"\x00")
+    names = b"|".join(re.escape(old.encode()) for old in changes)
+    pattern = re.compile(rb"(?:[A-Za-z]+\.)?(" + names + rb")\x00")
     repoints: list[tuple[int, bytes]] = []
+    found: set[str] = set()
     for m in pattern.finditer(bytes(head)):
         text = m.group()[:-1]
         len_off = m.start() - 2
@@ -81,9 +95,13 @@ def patch_bfevfl_song(data: bytes, old_song: str, new_song: str) -> bytes:
                 if p.start() % 8 == 0]
         if len(ptrs) != 1:
             raise ValueError(f"expected one pointer to {text!r}, found {len(ptrs)}")
-        repoints.append((ptrs[0], text.replace(old_song.encode(), new_song.encode())))
-    if not repoints:
-        raise ValueError(f"{old_song} not found in event flow")
+        old = m.group(1).decode()
+        found.add(old)
+        prefix = text[:len(text) - len(old)]
+        repoints.append((ptrs[0], prefix + changes[old].encode()))
+    missing = set(changes) - found
+    if missing:
+        raise ValueError(f"{sorted(missing)} not found in event flow")
 
     for ptr_off, text in repoints:
         while len(head) % 2:

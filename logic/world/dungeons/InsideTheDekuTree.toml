@@ -7,16 +7,16 @@
 dungeon = true
 
 [regions."InsideTheDekuTree".events]
-"Deku_Tree_Clear" = "is_child and Kokiri_Sword and Deku_Shield and Slingshot"
+"Deku_Tree_Clear" = "is_child and Kokiri_Sword and Deku_Shield and can_shoot"
 
 [regions."InsideTheDekuTree".locations]
 "Dm_Kokiri_0130 (event item)" = "Deku_Tree_Clear"
-"InsideTheDekuTree Dynamic room 3 #0 (TBox_DekuNutBundle)" = "Slingshot or Boomerang"
-"InsideTheDekuTree Dynamic room 4 #0 (Item_DekuStickBundle_Small)" = "Slingshot or Boomerang"
+"InsideTheDekuTree Dynamic room 3 #0 (TBox_DekuNutBundle)" = "can_shoot"
+"InsideTheDekuTree Dynamic room 4 #0 (Item_DekuStickBundle_Small)" = "can_shoot"
 "InsideTheDekuTree Static room 0 #0 (Item_Dungeon_Map)" = "true"
 "InsideTheDekuTree Static room 2 #0 (Item_Range_SlingShot)" = "true"
 "InsideTheDekuTree Static room 2 #0 (TBox_DekuNutBundle)" = "true"
-"InsideTheDekuTree Static room 3 #0 (Item_Dungeon_Compass)" = "Slingshot or Boomerang"
+"InsideTheDekuTree Static room 3 #0 (Item_Dungeon_Compass)" = "can_shoot"
 
 [regions."InsideTheDekuTree".skulltulas]
 "Deku Tree GS Compass Room" = "true"  # original: is_adult or can_child_attack
