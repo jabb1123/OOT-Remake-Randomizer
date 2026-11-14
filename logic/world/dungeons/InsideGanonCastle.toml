@@ -1,7 +1,7 @@
 # InsideGanonCastle
 
 [regions.Root.exits]
-"InsideGanonCastle" = "is_adult and Forest_Temple_Clear and Fire_Temple_Clear and Water_Temple_Clear and Shadow_Temple_Clear and Spirit_Temple_Clear"
+"InsideGanonCastle" = "is_adult and Item_Medal_Forest and Item_Medal_Fire and Item_Medal_Water and Item_Medal_Shadow and Item_Medal_Spirit"
 
 [regions."InsideGanonCastle"]
 dungeon = true
