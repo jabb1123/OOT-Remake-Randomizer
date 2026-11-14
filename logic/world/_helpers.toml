@@ -38,5 +38,4 @@ ranged_weapon = "(is_child and (Slingshot or Boomerang)) or (is_adult and (Bow o
 # --- Swimming -------------------------------------------------------------------------
 can_dive = "Item_Scale_Silver or Item_Scale_Gold"
 
-can_get_to_hyrule_field = "Deku_Tree_Clear and has_explosives"
-
+can_get_to_hyrule_field = "Deku_Tree_Clear or has_explosives"

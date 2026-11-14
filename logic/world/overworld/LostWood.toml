@@ -7,10 +7,10 @@
 
 [regions."LostWood".locations]
 "LostWood Dynamic room 0 #0 (TBox_Rupee_Purple)" = "is_adult"
-"LostWood_ScrubForestStageElder_SkullMaskFirst: Item_StickBag_Medium (npc item)" = "is_child and Deku_Sticks"
-"LostWood_ScrubForestStageElder_TrueMaskFirst: Item_NutBag_Medium (npc item)" = "is_child and Deku_Nuts"
+"LostWood_ScrubForestStageElder_SkullMaskFirst: Item_StickBag_Medium (npc item)" = "is_child and can_get_to_hyrule_field"
+"LostWood_ScrubForestStageElder_TrueMaskFirst: Item_NutBag_Medium (npc item)" = "is_child and can_get_to_hyrule_field"
 "Enemy_Scrub_Business_Common: Item_StickBag_Large (npc item)" = "is_child and Deku_Sticks"
-"Enemy_Scrub_Business_Common: Item_NutBag_Large (npc item)" = "is_child and Deku_Nuts and Bomb_Bag"
+"Enemy_Scrub_Business_Common: Item_NutBag_Large (npc item)" = "is_child and has_explosives"
 "Dm_LostWood_0040: Item_BulletBag_Medium (npc item)" = "is_child and Slingshot"
 "Npc_SkullKid_Child_02: Obj_Heart_Piece (npc item)" = "is_child and has_ocarina"
 
