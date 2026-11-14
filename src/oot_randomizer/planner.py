@@ -5,10 +5,11 @@ only go in a location reachable while assuming every still-unplaced progression 
 which guarantees the final seed is completable. Everything else is placed afterwards.
 
 Every location kind takes items from any pool group, as long as the location can physically give
-the item. Chest locations take anything. Song, event, and NPC locations take their own group plus
-any item an NPC can hand over (`can_hand_over`), which keeps the pool balanced: each of those
-groups has exactly one location per item, so a song can only leave its learning event if another
-item takes its place there. Consumable bundles (`CANNOT_NAME_GRANT`) never go to those locations,
+the item. Chest locations take anything. Song and NPC locations take their own group plus any item
+an NPC can hand over (`can_hand_over`), which keeps the pool balanced: each of those groups has
+exactly one location per item, so a song can only leave its learning event if another item takes
+its place there. Event items may also go to chest-kind locations, and chest-kind hand-over items may
+go to event locations. Consumable bundles (`CANNOT_NAME_GRANT`) never go to those locations,
 since their name-based grant hands out the Bomb Bag instead.
 
 House of Skulltula rewards share the chest pool, but only accept items an NPC can hand over.
@@ -339,6 +340,9 @@ def _try_fill(
             if loc not in placed and loc in reachable and allowed(loc, item, group)
         ]
         # Prefer the item's own locations; other groups' locations (chests) are a fallback so they
+        # don't use up the chest slots that chest-only items need. Event items are hand-over
+        # capable, so they skip this and may land in any location.
+        # Prefer the item's own locations; other groups' locations (chests) are a fallback so they
         # don't use up the chest slots that chest-only items need.
         own = [loc for loc in candidates if kind_of[loc] == group]
         candidates = own or candidates
@@ -373,7 +377,7 @@ def _try_fill(
         candidates = [loc for loc in kind_of if loc not in placed and allowed(loc, item, group)]
         if not candidates:
             return None
-        if can_hand_over(item) and item not in CANNOT_NAME_GRANT:
+        if can_hand_over(item) and item not in CANNOT_NAME_GRANT and group != "event":
             # Prefer the item's own slots, then non-chest slots, so chest slots stay free for bundles.
             own = [loc for loc in candidates if kind_of[loc] == group]
             non_chest = [loc for loc in candidates if kind_of[loc] != "chest"]
