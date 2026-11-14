@@ -34,24 +34,20 @@ SHOP_ITEM_WHITELIST: tuple[str, ...] = (
     "Shop_Weapon_Shield_",
     "Shop_Armor_",
     "Shop_Heart",
+    "Shop_ArrowBundle_",
+    "Shop_Bottle_",
+    "Shop_BombBundle_",
 )
-# Per-shop additions to SHOP_ITEM_WHITELIST. The Goron Shop's bottle and bomb-bundle shelves are
-# randomizable: their location access is already gated by the Goron Shop region, and the planner
-# adds the bomb-bag rule to any bomb item placed there.
-SHOP_EXTRA_ELIGIBLE: dict[str, tuple[str, ...]] = {
-    "Goron Shop": ("Shop_Bottle_RedPotion", "Shop_Bottle_Bug", "Shop_BombBundle_"),
-}
+
 # Excluded slots (vanilla gates them behind an upgrade, a bottle or a side quest, or they need
 # magic); widen SHOP_ITEM_WHITELIST after in-game testing:
-#   Bazaar       1 Shop_MagicJar_Small (magic), 2 Shop_DekuSeedBundle_02 (seeds),
-#                3 Shop_ArrowBundle_01 (arrows: bow), 4 Shop_BombBundle_01 (bombs: bomb bag)
-#   Potion Shop  0 Shop_Bottle_RedPotion, 1 Shop_Bottle_GreenPotion, 2 Shop_Bottle_HalfMilk,
-#                3 Shop_Bottle_Fairy, 4 Shop_Bottle_BlueFire, 5 Shop_Bottle_Poe,
-#                6 Shop_Bottle_Bug, 7 Shop_Bottle_Fish                               (bottle)
+#   Bazaar       1 Shop_MagicJar_Small (magic)
 #   Bombchu Shop 0-7 Shop_BombchuBundle_01..08                                       (bombchus)
 #   Mask Shop    0-7 Shop_Mask_*                                                     (mask quest)
-#   Zora Shop    0 Shop_Bottle_RedPotion, 1 Shop_Bottle_GreenPotion, 2 Shop_Bottle_Bug,
-#                6 Shop_Bottle_Fish (bottle), 4/5/7 Shop_ArrowBundle_01..03 (arrows: bow)
+
+# Slots the shipped logic leaves out: always sold out (Bazaar 4) or not reachable (Potion Shop 4).
+UNREACHABLE_SHOP_SLOTS: frozenset[str] = frozenset({"Bazaar Slot 4", "Potion Shop Slot 4"})
+
 
 MAX_SHOP_SLOTS_PER_SHOP = 4
 PRICE_STEP = 5
@@ -61,7 +57,7 @@ FILLER_ITEMS = ("TBox_Rupee_Blue", "TBox_Rupee_Red")
 # slots; the pool would otherwise have fewer sellable items than shop + heart slots.
 SHOP_FILLER_ITEMS = ("Item_BombBundle_Small", "Item_DekuStickBundle_Small")
 
-# Wallet capacity is 99 / 200 / 500 rupees.
+# Wallet capacity is 200 / 500 / 1000 rupees.
 MEDIUM_WALLET_PRICE = 100
 LARGE_WALLET_PRICE = 201
 MEDIUM_WALLET_RULE = "Item_Wallet_Medium or Item_Wallet_Large"
@@ -206,9 +202,7 @@ class ShopSlot:
     @property
     def eligible(self) -> bool:
         # Seed shelves are only randomized in the Kokiri Shop (the Bazaar seed slot is not in logic).
-        if self.vanilla.startswith("Shop_DekuSeedBundle_") and self.shop != "Kokiri Shop":
-            return False
-        return self.vanilla.startswith(SHOP_ITEM_WHITELIST + SHOP_EXTRA_ELIGIBLE.get(self.shop, ()))
+        return self.vanilla.startswith(SHOP_ITEM_WHITELIST) and self.name not in UNREACHABLE_SHOP_SLOTS
 
     @property
     def scene_files(self) -> list[str]:
@@ -220,45 +214,140 @@ def shop_slot_name(shop: str, index: int) -> str:
 
 
 SHOPS: tuple[Shop, ...] = (
-    Shop("Kokiri Shop", "Npc_Kokiri_001_Shop", "KokiriShop",
-         (ShopScene("KokiriForest_Child_Static", "child", copies=2),  # before / after the Deku Tree
-          ShopScene("KokiriForest_Adult_Static", "adult")),
-         ("Shop_Heart", "Shop_DekuSeedBundle_02", "Shop_DekuNutBundle_01", "Shop_DekuNutBundle_02",
-          "Shop_DekuSeedBundle_01", "Shop_DekuStickBundle_Medium", "Shop_Weapon_Shield_Deku",
-          "Shop_DekuStick")),
-    Shop("Bazaar", "Npc_Hylia_018_Shop", "Bazaar",
-         (ShopScene("Market_Child_Static", "child"),
-          ShopScene("KakarikoVillage_Adult_Static", "adult"),
-          ShopScene("KakarikoVillage_Adult_Alternative_Static", "adult")),
-         ("Shop_Heart", "Shop_MagicJar_Small", "Shop_DekuSeedBundle_02", "Shop_ArrowBundle_01",
-          "Shop_BombBundle_01", "Shop_DekuNutBundle_01", "Shop_Weapon_Shield_Hylian", "Shop_DekuStick")),
-    Shop("Potion Shop", "Npc_Hylia_020_Shop", None,
-         (ShopScene("Market_Child_Static", "child"),
-          ShopScene("KakarikoVillage_Adult_Static", "adult"),
-          ShopScene("KakarikoVillage_Adult_Alternative_Static", "adult")),
-         ("Shop_Bottle_RedPotion", "Shop_Bottle_GreenPotion", "Shop_Bottle_HalfMilk", "Shop_Bottle_Fairy",
-          "Shop_Bottle_BlueFire", "Shop_Bottle_Poe", "Shop_Bottle_Bug", "Shop_Bottle_Fish")),
-    Shop("Bombchu Shop", "Npc_Hylia_021_Shop", None,
-         (ShopScene("Market_Child_Static", "child"),),
-         ("Shop_BombchuBundle_03", "Shop_BombchuBundle_04", "Shop_BombchuBundle_05", "Shop_BombchuBundle_06",
-          "Shop_BombchuBundle_01", "Shop_BombchuBundle_07", "Shop_BombchuBundle_02", "Shop_BombchuBundle_08")),
-    Shop("Mask Shop", "Npc_Hylia_023_Shop", None,
-         (ShopScene("Market_Child_Static", "child"),),
-         ("Shop_Mask_Spooky", "Shop_Mask_Keaton", "Shop_Mask_Bunny", "Shop_Mask_Skull",
-          "Shop_Mask_Zora", "Shop_Mask_Goron", "Shop_Mask_Gerudo", "Shop_Mask_Truth")),
-    Shop("Goron Shop", "Npc_Goron_011_Shop", "GoronShop",
-         (ShopScene("GoronCity_Child_Static", "child"),
-          ShopScene("GoronCity_Adult_Static", "adult")),
-         ("Shop_Heart", "Shop_Bottle_RedPotion", "Shop_Bottle_Bug", "Shop_Armor_Goron",
-          "Shop_BombBundle_01", "Shop_BombBundle_02", "Shop_BombBundle_03", "Shop_BombBundle_04")),
+    Shop(
+        "Kokiri Shop",
+        "Npc_Kokiri_001_Shop",
+        "KokiriShop",
+        (
+            ShopScene(
+                "KokiriForest_Child_Static", "child", copies=2
+            ),  # before / after the Deku Tree
+            ShopScene("KokiriForest_Adult_Static", "adult"),
+        ),
+        (
+            "Shop_Heart",
+            "Shop_DekuSeedBundle_02",
+            "Shop_DekuNutBundle_01",
+            "Shop_DekuNutBundle_02",
+            "Shop_DekuSeedBundle_01",
+            "Shop_DekuStickBundle_Medium",
+            "Shop_Weapon_Shield_Deku",
+            "Shop_DekuStick",
+        ),
+    ),
+    Shop(
+        "Bazaar",
+        "Npc_Hylia_018_Shop",
+        "Bazaar",
+        (
+            ShopScene("Market_Child_Static", "child"),
+            ShopScene("KakarikoVillage_Adult_Static", "adult"),
+            ShopScene("KakarikoVillage_Adult_Alternative_Static", "adult"),
+        ),
+        (
+            "Shop_Heart",
+            "Shop_MagicJar_Small",
+            "Shop_DekuSeedBundle_02",
+            "Shop_ArrowBundle_01",
+            "Shop_BombBundle_01",
+            "Shop_DekuNutBundle_01",
+            "Shop_Weapon_Shield_Hylian",
+            "Shop_DekuStick",
+        ),
+    ),
+    Shop(
+        "Potion Shop",
+        "Npc_Hylia_020_Shop",
+        "PotionShop",
+        (
+            ShopScene("Market_Child_Static", "child"),
+            ShopScene("KakarikoVillage_Adult_Static", "adult"),
+            ShopScene("KakarikoVillage_Adult_Alternative_Static", "adult"),
+        ),
+        (
+            "Shop_Bottle_RedPotion",
+            "Shop_Bottle_GreenPotion",
+            "Shop_Bottle_HalfMilk",
+            "Shop_Bottle_Fairy",
+            "Shop_Bottle_BlueFire",
+            "Shop_Bottle_Poe",
+            "Shop_Bottle_Bug",
+            "Shop_Bottle_Fish",
+        ),
+    ),
+    Shop(
+        "Bombchu Shop",
+        "Npc_Hylia_021_Shop",
+        None,
+        (ShopScene("Market_Child_Static", "child"),),
+        (
+            "Shop_BombchuBundle_03",
+            "Shop_BombchuBundle_04",
+            "Shop_BombchuBundle_05",
+            "Shop_BombchuBundle_06",
+            "Shop_BombchuBundle_01",
+            "Shop_BombchuBundle_07",
+            "Shop_BombchuBundle_02",
+            "Shop_BombchuBundle_08",
+        ),
+    ),
+    Shop(
+        "Mask Shop",
+        "Npc_Hylia_023_Shop",
+        None,
+        (ShopScene("Market_Child_Static", "child"),),
+        (
+            "Shop_Mask_Spooky",
+            "Shop_Mask_Keaton",
+            "Shop_Mask_Bunny",
+            "Shop_Mask_Skull",
+            "Shop_Mask_Zora",
+            "Shop_Mask_Goron",
+            "Shop_Mask_Gerudo",
+            "Shop_Mask_Truth",
+        ),
+    ),
+    Shop(
+        "Goron Shop",
+        "Npc_Goron_011_Shop",
+        "GoronShop",
+        (
+            ShopScene("GoronCity_Child_Static", "child"),
+            ShopScene("GoronCity_Adult_Static", "adult"),
+        ),
+        (
+            "Shop_Heart",
+            "Shop_Bottle_RedPotion",
+            "Shop_Bottle_Bug",
+            "Shop_Armor_Goron",
+            "Shop_BombBundle_01",
+            "Shop_BombBundle_02",
+            "Shop_BombBundle_03",
+            "Shop_BombBundle_04",
+        ),
+    ),
     # The adult shopkeeper is frozen until King Zora is thawed (blue fire), which the logic
     # does not model, so the adult copies are patched but give no access.
-    Shop("Zora Shop", "Npc_Zora_011_Shop", "ZoraShop",
-         (ShopScene("ZoraDomain_Child_Static", "child"),
-          ShopScene("ZoraDomain_Adult_Static", "adult", reachable=False),
-          ShopScene("ZoraDomain_Adult_Alternative_Static", "adult", reachable=False)),
-         ("Shop_Bottle_RedPotion", "Shop_Bottle_GreenPotion", "Shop_Bottle_Bug", "Shop_Armor_Zora",
-          "Shop_ArrowBundle_01", "Shop_ArrowBundle_02", "Shop_Bottle_Fish", "Shop_ArrowBundle_03")),
+    Shop(
+        "Zora Shop",
+        "Npc_Zora_011_Shop",
+        "ZoraShop",
+        (
+            ShopScene("ZoraDomain_Child_Static", "child"),
+            ShopScene("ZoraDomain_Adult_Static", "adult", reachable=False),
+            ShopScene("ZoraDomain_Adult_Alternative_Static", "adult", reachable=False),
+        ),
+        (
+            "Shop_Bottle_RedPotion",
+            "Shop_Bottle_GreenPotion",
+            "Shop_Bottle_Bug",
+            "Shop_Armor_Zora",
+            "Shop_ArrowBundle_01",
+            "Shop_ArrowBundle_02",
+            "Shop_Bottle_Fish",
+            "Shop_ArrowBundle_03",
+        ),
+    ),
 )
 
 
@@ -359,18 +448,27 @@ def check_toc_room(nup_path: str | Path, item_actors: Iterable[str]) -> None:
 
 
 def shop_items_for(assignments: Iterable[tuple[str, str, int]]) -> list[tuple[str, int, list[Shelf]]]:
-    """apply_shop_items arguments for [(slot name, item, price)]."""
+    """apply_shop_items arguments for [(slot name, item, price)].
+
+    Copies of a filler bundle share one actor, so their shelves are merged; they must share a price.
+    Any other item may be sold once per seed.
+    """
     items: list[tuple[str, int, list[Shelf]]] = []
-    seen: dict[str, int] = {}
+    index: dict[str, int] = {}
     for name, item, price in assignments:
         slot = ALL_SHOP_SLOTS.get(name)
         if slot is None:
             raise ShopError(f"unknown shop slot {name!r}")
         if not can_sell(item):
             raise ShopError(f"{item} cannot be sold in a shop ({name})")
-        if item in seen:
-            raise ShopError(f"{item} is assigned to two shop slots; each item may be sold once per seed")
-        seen[item] = price
+        if item in index:
+            if item not in SHOP_FILLER_ITEMS:
+                raise ShopError(f"{item} is assigned to two shop slots; each item may be sold once per seed")
+            if items[index[item]][1] != price:
+                raise ShopError(f"copies of {item} must share one price")
+            items[index[item]][2].extend(slot.shelves)
+            continue
+        index[item] = len(items)
         items.append((item, price, list(slot.shelves)))
     return items
 

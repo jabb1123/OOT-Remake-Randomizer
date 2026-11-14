@@ -9,52 +9,55 @@ from __future__ import annotations
 
 # All confirmed Drop__DropActor strings found in Obj_TBox chest actors
 # across all 160 bcett files in the game.
-ITEM_ACTOR_NAMES: frozenset[str] = frozenset([
-    # Major items
-    "Item_Range_SlingShot",
-    "Item_Range_Bow",
-    "Item_Boomerang",
-    "Item_Hookshot",
-    "Item_Longshot",
-    "Item_Arrow_Ice",
-    "Item_GlassTruth",
-    "Item_Hammer",
-    "Item_HeavyBoot",
-    "Item_HoverBoot",
-    "Item_Gauntlet_Silver",
-    "Item_Gauntlet_Gold",
-    "Item_Shield_Mirror",
-    "Item_Sword_Kokiri",
-    "Item_BombBag_Small",
-    # Dungeon items
-    "Item_Dungeon_Map",
-    "Item_Dungeon_Compass",
-    "Item_Dungeon_SmallKey",
-    "Item_Dungeon_BossKey",
-    # Collectibles (chest-contained)
-    "Obj_Heart_Piece",
-    "TBox_Shield_Deku",
-    "TBox_Shield_Hylian",
-    "TBox_DekuNutBundle",
-    "TBox_ArrowBundle_Medium",
-    "TBox_ArrowBundle_Large",
-    "TBox_Rupee_Green",
-    "TBox_Rupee_Blue",
-    "TBox_Rupee_Red",
-    "TBox_Rupee_Purple",
-    "TBox_Rupee_Gold",
-    "Tbox_MagicJar_Large",
-    "Item_BombBundle_Small",
-    "Item_BombchuBundle_Small",
-    "Item_DekuStickBundle_Small",
-    "Item_ScrubBusinessSeed",
-    # House of Skulltula rewards
-    "Item_Wallet_Medium",
-    "Item_Wallet_Large",
-    "Item_AgonyStone",
-    "Item_BombchuBundle_Large",
-    "Item_Token_Gold",
-])
+ITEM_ACTOR_NAMES: frozenset[str] = frozenset(
+    [
+        # Major items
+        "Item_Range_SlingShot",
+        "Item_Range_Bow",
+        "Item_Boomerang",
+        "Item_Hookshot",
+        "Item_Longshot",
+        "Item_Arrow_Ice",
+        "Item_Arrow_Fire",
+        "Item_GlassTruth",
+        "Item_Hammer",
+        "Item_HeavyBoot",
+        "Item_HoverBoot",
+        "Item_Gauntlet_Silver",
+        "Item_Gauntlet_Gold",
+        "Item_Shield_Mirror",
+        "Item_Sword_Kokiri",
+        "Item_BombBag_Small",
+        # Dungeon items
+        "Item_Dungeon_Map",
+        "Item_Dungeon_Compass",
+        "Item_Dungeon_SmallKey",
+        "Item_Dungeon_BossKey",
+        # Collectibles (chest-contained)
+        "Obj_Heart_Piece",
+        "TBox_Shield_Deku",
+        "TBox_Shield_Hylian",
+        "TBox_DekuNutBundle",
+        "TBox_ArrowBundle_Medium",
+        "TBox_ArrowBundle_Large",
+        "TBox_Rupee_Green",
+        "TBox_Rupee_Blue",
+        "TBox_Rupee_Red",
+        "TBox_Rupee_Purple",
+        "TBox_Rupee_Gold",
+        "Tbox_MagicJar_Large",
+        "Item_BombBundle_Small",
+        "Item_BombchuBundle_Small",
+        "Item_DekuStickBundle_Small",
+        "Item_ScrubBusinessSeed",
+        # House of Skulltula rewards
+        "Item_Wallet_Medium",
+        "Item_Wallet_Large",
+        "Item_AgonyStone",
+        "Item_BombchuBundle_Large",
+        "Item_Token_Gold",
+    ]
+)
 
 # Human-readable display names for UI / manifests
 ITEM_DISPLAY_NAMES: dict[str, str] = {
@@ -114,6 +117,19 @@ def resolve_actor_name(item_name: str) -> str:
         return item_name
     return ITEM_ACTOR_BY_DISPLAY.get(item_name, item_name)
 
+# Consumable bundles that name-based grants (pouch and GetInEvent ActorName, used by event, song
+# and NPC locations) cannot hand out: the Bomb Bundle grant gives the Bomb Bag. These may only be
+# placed in chest-kind locations (chests, shops, loose hearts, Skulltula rewards).
+CANNOT_NAME_GRANT: frozenset[str] = frozenset(
+    [
+        "Item_BombBundle_Small",
+        "Item_BombchuBundle_Small",
+        "Item_BombchuBundle_Medium",
+        "Item_BombchuBundle_Large",
+        "Item_DekuStickBundle_Small",
+    ]
+)
+
 # Major progression items (not consumables, not keys)
 MAJOR_ITEM_ACTORS: frozenset[str] = frozenset(
     [
@@ -123,6 +139,7 @@ MAJOR_ITEM_ACTORS: frozenset[str] = frozenset(
         "Item_Hookshot",
         "Item_Longshot",
         "Item_Arrow_Ice",
+        "Item_Arrow_Fire",
         "Item_GlassTruth",
         "Item_Hammer",
         "Item_HeavyBoot",
@@ -134,5 +151,6 @@ MAJOR_ITEM_ACTORS: frozenset[str] = frozenset(
         "Item_BombBag_Small",
         "Item_WeirdEgg",
         "Item_ZeldaLetter",
+        "Item_AgonyStone",
     ]
 )

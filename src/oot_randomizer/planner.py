@@ -8,7 +8,8 @@ Every location kind takes items from any pool group, as long as the location can
 the item. Chest locations take anything. Song, event, and NPC locations take their own group plus
 any item an NPC can hand over (`can_hand_over`), which keeps the pool balanced: each of those
 groups has exactly one location per item, so a song can only leave its learning event if another
-item takes its place there.
+item takes its place there. Consumable bundles (`CANNOT_NAME_GRANT`) never go to those locations,
+since their name-based grant hands out the Bomb Bag instead.
 
 House of Skulltula rewards share the chest pool, but only accept items an NPC can hand over.
 Picked shop slots (shopsanity) share it too, but only accept items a shop can sell, each item
@@ -27,7 +28,7 @@ from dataclasses import dataclass, field
 from .engine import NOT_IN_GAME_SLOTS, UNSHUFFLED_ITEMS, ChestSlot
 from .event_items import EVENT_SLOTS, event_location_name
 from .heart_pickups import HEART_LOCATIONS, can_pickup
-from .item_ids import MAJOR_ITEM_ACTORS
+from .item_ids import CANNOT_NAME_GRANT, MAJOR_ITEM_ACTORS
 from .npc_grants import NPC_SLOTS
 from .shop_slots import (
     DEFAULT_PRICE_RANGE,
@@ -109,12 +110,11 @@ def shop_requirements(shop_assignments: list[tuple[str, str, int]]) -> dict[str,
 
 
 def _cap_shop_slots(rng: random.Random, picked: list, pool: list[tuple[str, str]], skull_count: int) -> list:
-    """Drop random picks the pool cannot stock (each slot needs a distinct sellable item, and
-    shops and skull rewards together need that many hand-over items)."""
+    """Drop random picks the pool cannot stock. Each pick gets its own filler bundle copy, and copies
+    of a filler share one price, so picks only need hand-over items for the skull rewards."""
     items = [item for item, _ in pool]
-    sellable = len({i for i in items if can_sell(i)})
     hand_over = sum(1 for i in items if can_hand_over(i))
-    limit = max(0, min(sellable, hand_over - skull_count))
+    limit = max(0, min(len(picked), hand_over - skull_count))
     if len(picked) <= limit:
         return picked
     keep = set(rng.sample(range(len(picked)), limit))
@@ -199,7 +199,8 @@ def plan_seed(seed: int, slots: list[ChestSlot], world: World | None, options: P
     seed_world = world.with_requirements(extra) if (world is not None and extra) else world
 
     for attempt in range(1, options.max_attempts + 1):
-        placed = _try_fill(rng, seed_world, dict(fixed), pool, open_locations, options, shop_locs, heart_locs)
+        placed = _try_fill(rng, seed_world, dict(fixed), pool, open_locations, options, shop_locs, heart_locs,
+                           prices)
         if placed is None:
             continue
         # Item rules (Bomb Bag for bombs) are only known once the fill has placed the items.
@@ -246,7 +247,9 @@ def _try_fill(
     options: PlanOptions,
     shop_locs: frozenset[str] = frozenset(),
     heart_locs: frozenset[str] = frozenset(),
+    shop_prices: dict[str, int] | None = None,
 ) -> dict[str, str] | None:
+    shop_prices = shop_prices or {}
     progression_names = world.referenced_items if world else set()
     progression = [e for e in pool if e[0] in progression_names]
     rest = [e for e in pool if e[0] not in progression_names]
@@ -258,6 +261,8 @@ def _try_fill(
     dungeon_of = world.dungeon_locations if (world and options.one_major_per_dungeon) else {}
     dungeons_with_major = {dungeon_of[loc] for loc, item in placed.items() if loc in dungeon_of and item in _MAJORS}
     in_shops: set[str] = set()
+    # Filler copies share one shop actor, so every copy must sit in a slot with the same price.
+    filler_price: dict[str, int] = {}
     kind_of = {loc: kind for kind, locs in open_locations.items() for loc in locs}
 
     def allowed(loc: str, item: str, group: str) -> bool:
@@ -266,10 +271,18 @@ def _try_fill(
         # Non-chest locations only take their own group, or an item an NPC can hand over.
         if kind_of[loc] != "chest" and group != kind_of[loc] and not can_hand_over(item):
             return False
+        if kind_of[loc] != "chest" and item in CANNOT_NAME_GRANT:
+            return False
         if loc in SKULL_LOCATIONS and not can_hand_over(item):
             return False
-        if loc in shop_locs and (not can_sell(item) or item in in_shops):
-            return False
+        if loc in shop_locs:
+            if not can_sell(item):
+                return False
+            if item in SHOP_FILLER_ITEMS:
+                if filler_price.get(item, shop_prices[loc]) != shop_prices[loc]:
+                    return False
+            elif item in in_shops:
+                return False
         if loc in heart_locs and not can_pickup(item):
             return False
         return not (item in _MAJORS and loc in dungeon_of and dungeon_of[loc] in dungeons_with_major)
@@ -277,7 +290,10 @@ def _try_fill(
     def place(loc: str, item: str) -> None:
         placed[loc] = item
         if loc in shop_locs:
-            in_shops.add(item)
+            if item in SHOP_FILLER_ITEMS:
+                filler_price.setdefault(item, shop_prices[loc])
+            else:
+                in_shops.add(item)
         if item in _MAJORS and loc in dungeon_of:
             dungeons_with_major.add(dungeon_of[loc])
 
@@ -299,6 +315,9 @@ def _try_fill(
                    if allowed(loc, item, group)]
         choices += [(rest, i) for i, (item, group) in enumerate(rest) if allowed(loc, item, group)]
         rng.shuffle(choices)
+        # Chest items first: NPC, event and song items have few slots of their own, so they should
+        # not take the shop slots that chest items need.
+        choices.sort(key=lambda c: c[0][c[1]][1] != "chest")
         for source, i in choices:
             item = source[i][0]
             if source is progression and world is not None:
@@ -332,15 +351,20 @@ def _try_fill(
         if loc not in SKULL_LOCATIONS or loc in placed:
             continue
         choices = [i for i, (item, group) in enumerate(rest) if allowed(loc, item, group)]
+        # Prefer chest-group items so NPC, event, and song items stay available for their own slots.
+        choices = [i for i in choices if rest[i][1] == "chest"] or choices
         if not choices:
             return None
         item, _ = rest.pop(rng.choice(choices))
         place(loc, item)
 
     # Chest-only items go first (they can't go anywhere else), then items limited to their own
-    # group, then hand-over items, which fit anywhere left over.
+    # group, then hand-over items, which fit anywhere left over. Bundles can only use chest slots,
+    # so they are placed with the chest-only items, before flexible hand-over items use those slots.
     def placement_rank(entry: tuple[str, str]) -> int:
         item, group = entry
+        if item in CANNOT_NAME_GRANT:
+            return 0
         if can_hand_over(item):
             return 2
         return 0 if group == "chest" else 1
@@ -349,5 +373,10 @@ def _try_fill(
         candidates = [loc for loc in kind_of if loc not in placed and allowed(loc, item, group)]
         if not candidates:
             return None
+        if can_hand_over(item) and item not in CANNOT_NAME_GRANT:
+            # Prefer the item's own slots, then non-chest slots, so chest slots stay free for bundles.
+            own = [loc for loc in candidates if kind_of[loc] == group]
+            non_chest = [loc for loc in candidates if kind_of[loc] != "chest"]
+            candidates = own or non_chest or candidates
         place(rng.choice(candidates), item)
     return placed

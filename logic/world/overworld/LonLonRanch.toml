@@ -7,6 +7,7 @@
 
 [regions."LonLonRanch".locations]
 "Dm_MelodyGet_Epona" = "is_child and Zeldas_Lullaby"  # song: Epona's Song from Malon, Lon Lon Ranch
+"LonLonRanch Heart Piece 1" = "is_child"  # loose Obj_Heart_Piece, child copy only (stored in HyruleField_Child_Static)
 
 [regions."LonLonRanch".skulltulas]
 "LLR GS Tree" = "is_child"  # original: is_child and can_bonk

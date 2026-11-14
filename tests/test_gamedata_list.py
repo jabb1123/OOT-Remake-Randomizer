@@ -5,7 +5,9 @@ from pathlib import Path
 
 from oot_randomizer.byml7 import U32, dump_byml7, parse_byml7_typed
 from oot_randomizer.gamedata_list import (
+    DIN_FAIRY_RECEIVED_BOOL,
     SHOP_SOLDOUT_NAMES,
+    add_npc_grant_bools,
     add_shop_soldout_bools,
     murmur3_32,
     patch_gamedata_list,
@@ -99,6 +101,39 @@ class AddShopSoldoutBoolsTests(unittest.TestCase):
         self.assertEqual(len(added), 7)
         hashes = [int(e["Hash"]) for e in root["Data"]["Bool"]]
         self.assertEqual(len(hashes), len(set(hashes)))
+
+
+class AddNpcGrantBoolsTests(unittest.TestCase):
+    def test_appends_din_received_bool_with_story_reset(self):
+        # 9368 bits fill exactly 1171 bytes, so one more bit grows the progress block by one byte.
+        root = _make_root(progress_bools=9368)
+        added = add_npc_grant_bools(root)
+        self.assertEqual(added, [DIN_FAIRY_RECEIVED_BOOL])
+        entry = root["Data"]["Bool"][-1]
+        self.assertEqual(int(entry["Hash"]), murmur3_32(DIN_FAIRY_RECEIVED_BOOL.encode()))
+        self.assertEqual(entry["ResetTypeValue"], 8)
+        self.assertEqual(entry["SaveFileIndex"], 0)
+        self.assertEqual(entry["DefaultValue"], False)
+        self.assertEqual(int(root["MetaData"]["SaveDataSize"][0]), 686829)
+
+    def test_idempotent(self):
+        root = _make_root(progress_bools=10)
+        add_npc_grant_bools(root)
+        self.assertEqual(add_npc_grant_bools(root), [])
+        self.assertEqual(len(root["Data"]["Bool"]), 11)
+
+    def test_patch_gamedata_list_npc_only_skips_shop_bools(self):
+        raw = dump_byml7(_make_root(progress_bools=9363), big_endian=True, version=7)
+        patched = parse_byml7_typed(patch_gamedata_list(raw, shop=False, npc_grant=True))
+        names = [int(e["Hash"]) for e in patched["Data"]["Bool"]]
+        self.assertEqual(len(names), 9364)
+        self.assertIn(murmur3_32(DIN_FAIRY_RECEIVED_BOOL.encode()), names)
+        for name in SHOP_SOLDOUT_NAMES:
+            self.assertNotIn(murmur3_32(name.encode()), names)
+
+    def test_no_flags_returns_input(self):
+        raw = dump_byml7(_make_root(progress_bools=3), big_endian=True, version=7)
+        self.assertIs(patch_gamedata_list(raw, shop=False, npc_grant=False), raw)
 
 
 class PatchGameDataListTests(unittest.TestCase):

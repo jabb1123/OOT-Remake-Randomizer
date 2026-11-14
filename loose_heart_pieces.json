@@ -138,7 +138,7 @@
     ]
   },
   {
-    "name": "HyruleField Heart Piece 1",
+    "name": "LakeHylia Heart Piece 1",
     "scene": "HyruleField",
     "ages": [
       "adult"
@@ -156,7 +156,7 @@
     ]
   },
   {
-    "name": "HyruleField Heart Piece 2",
+    "name": "LonLonRanch Heart Piece 1",
     "scene": "HyruleField",
     "ages": [
       "child"

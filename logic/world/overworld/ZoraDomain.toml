@@ -18,4 +18,11 @@
 "ZoraShop" = "is_child or (is_adult and Ice_Cavern_Clear)"
 
 [regions."ZoraShop".locations]
+"Zora Shop Slot 0" = "true"  # vanilla: Red Potion
+"Zora Shop Slot 1" = "true"  # vanilla: Green Potion
+"Zora Shop Slot 2" = "true"  # vanilla: Bug
 "Zora Shop Slot 3" = "true"  # vanilla: Shop_Armor_Zora
+"Zora Shop Slot 4" = "true"  # vanilla: Arrow_Bundle
+"Zora Shop Slot 5" = "true"  # vanilla: Arrow_Bundle
+"Zora Shop Slot 6" = "true"  # vanilla: Fish
+"Zora Shop Slot 7" = "true"  # vanilla: Arrow_Bundle

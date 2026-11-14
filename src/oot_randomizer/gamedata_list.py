@@ -1,4 +1,4 @@
-"""GameDataList (save-backed game data) edits for shopsanity.
+"""GameDataList (save-backed game data) edits for shopsanity and randomized NPC grants.
 
 Bool entries are stored in the Bool list of GameDataList.Product.100.byml. Names are
 hashed with MurmurHash3 x86_32 (seed 0). Save-layout fields in MetaData are adjusted
@@ -13,8 +13,13 @@ from .byml7 import U32, dump_byml7, parse_byml7_typed
 
 GAME_DATA_LIST = "GameDataList.Product.100.byml.zs"
 SHOP_SOLDOUT_NAMES = tuple(f"KokiriForest_Shop_SoldOut_{i}" for i in range(8))
+# Set when the Din's Fire fairy's randomized item has been handed over. The fairy's "already got
+# it" check reads this instead of IsGet.Item_DinFire, which is not registered for every item.
+DIN_FAIRY_RECEIVED_BOOL = "Rando_Din_FairyGrant_Received"
+NPC_GRANT_BOOL_NAMES = (DIN_FAIRY_RECEIVED_BOOL,)
 _PROGRESS_SAVE_INDEX = 0
-_SOLDOUT_RESET_TYPE = 9  # same as KokiriForest_Shop_SelectActor_Shield_Deku (Bool 8888)
+_SOLDOUT_RESET_TYPE = 9  # ResetType for shop sold-out bools (see docs/shopsanity.md)
+_NPC_GRANT_RESET_TYPE = 8  # same as the IsGet.* story bools
 
 
 def murmur3_32(data: bytes, seed: int = 0) -> int:
@@ -51,14 +56,11 @@ def murmur3_32(data: bytes, seed: int = 0) -> int:
     return h
 
 
-def add_shop_soldout_bools(root: dict) -> list[str]:
-    """Append the Kokiri Shop sold-out Bool entries to a parsed GameDataList.
-
-    Returns the names that were added; an empty list means they already exist and nothing changed.
-    """
+def _append_bools(root: dict, names: tuple[str, ...], reset_type: int) -> list[str]:
+    """Append save-backed Bool entries for `names` that are not registered yet; return the added names."""
     bools = root["Data"]["Bool"]
     existing = {int(e["Hash"]) for e in bools}
-    new_names = [n for n in SHOP_SOLDOUT_NAMES if murmur3_32(n.encode()) not in existing]
+    new_names = [n for n in names if murmur3_32(n.encode()) not in existing]
     if not new_names:
         return []
 
@@ -67,7 +69,7 @@ def add_shop_soldout_bools(root: dict) -> list[str]:
         bools.append({
             "DefaultValue": False,
             "Hash": U32(murmur3_32(name.encode())),
-            "ResetTypeValue": _SOLDOUT_RESET_TYPE,
+            "ResetTypeValue": reset_type,
             "SaveFileIndex": _PROGRESS_SAVE_INDEX,
         })
 
@@ -79,8 +81,26 @@ def add_shop_soldout_bools(root: dict) -> list[str]:
     return new_names
 
 
-def patch_gamedata_list(raw: bytes) -> bytes:
+def add_shop_soldout_bools(root: dict) -> list[str]:
+    """Append the Kokiri Shop sold-out Bool entries to a parsed GameDataList.
+
+    Returns the names that were added; an empty list means they already exist and nothing changed.
+    """
+    return _append_bools(root, SHOP_SOLDOUT_NAMES, _SOLDOUT_RESET_TYPE)
+
+
+def add_npc_grant_bools(root: dict) -> list[str]:
+    """Append the randomized NPC grant Bool entries (see NPC_GRANT_BOOL_NAMES) to a parsed GameDataList."""
+    return _append_bools(root, NPC_GRANT_BOOL_NAMES, _NPC_GRANT_RESET_TYPE)
+
+
+def patch_gamedata_list(raw: bytes, *, shop: bool = True, npc_grant: bool = False) -> bytes:
     root = parse_byml7_typed(raw)
-    if not add_shop_soldout_bools(root):
+    added: list[str] = []
+    if shop:
+        added += add_shop_soldout_bools(root)
+    if npc_grant:
+        added += add_npc_grant_bools(root)
+    if not added:
         return raw
     return dump_byml7(root, big_endian=True, version=7)

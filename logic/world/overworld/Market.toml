@@ -1,6 +1,6 @@
 # Market
 
-[regions.Root.exits]
+[regions."HyruleField".exits]
 "Market" = "is_adult or Deku_Tree_Clear"
 
 [regions."Market"]
@@ -19,9 +19,24 @@
 
 [regions."Market".exits]
 "Bazaar" = "is_child"
+"PotionShop" = "is_child"
 
 [regions."Bazaar".locations]
 "Bazaar Slot 0" = "true"  # vanilla: Shop_Heart
+# "Bazaar Slot 1" = "false"  # vanilla: Small Magic Jar
+"Bazaar Slot 2" = "true"  # vanilla: Shop_DekuSeed_01
+"Bazaar Slot 3" = "true"  # vanilla: Shop_ArrowBundle_01
+# "Bazaar Slot 4" = "false"  # vanilla: BomBundle (Always sold out)
 "Bazaar Slot 5" = "true"  # vanilla: Shop_DekuNutBundle_01
 "Bazaar Slot 6" = "true"  # vanilla: Shop_Weapon_Shield_Hylian
 "Bazaar Slot 7" = "true"  # vanilla: Shop_DekuStick
+
+[regions."PotionShop".locations]
+"Potion Shop Slot 0" = "true"  # vanilla: Red Potion
+"Potion Shop Slot 1" = "true"  # vanilla: Green Potion
+"Potion Shop Slot 2" = "true"  # vanilla: Milk
+"Potion Shop Slot 3" = "true"  # vanilla: Fairy in a Bottle
+# "Potion Shop Slot 4" = "false"  # vanilla: Blue Fire (Not reachable)
+"Potion Shop Slot 5" = "true"  # vanilla: Poe in a Bottle
+"Potion Shop Slot 6" = "true"  # vanilla: Bug in a Bottle
+"Potion Shop Slot 7" = "true"  # vanilla: Fish in a Bottle

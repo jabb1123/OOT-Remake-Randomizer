@@ -45,5 +45,3 @@ Status: experimental. Logic and placement are in place, but sold-out tracking an
 5. **Giant's Wallet.** Not yet tested in-game (late game).
 6. **Business Scrubs.** The bag sales are done for the stick and nut bags. Both Large bags are randomized and the Medium sales are removed. See `npc_grants.md`. The Biggoron Sword sale is still disabled (it would bypass the randomized Biggoron grant), and the Giant's Knife sale is kept.
 7. **Excluded shelves.** Widen the whitelist (bottles, masks, bombchus, arrows, magic) after playtesting.
-8. **Lake Hylia TODO.** The chest location in `LakeHylia.toml` is still unresolved.
-9. **Cleanup.** Delete the 25 GB probe ROM (`Randomized\oot_probe.nup`) once it is no longer needed.

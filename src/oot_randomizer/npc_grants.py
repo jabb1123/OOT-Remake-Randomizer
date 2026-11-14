@@ -15,6 +15,9 @@ import io
 import random
 from dataclasses import dataclass
 
+from .game_flags import insert_bool_write_before
+from .gamedata_list import DIN_FAIRY_RECEIVED_BOOL
+
 _HAND_OVER_SUBFLOW = "NpcCommon_HandOver_NpcToPlayer_NoDisplay"
 _HAND_OVER_KEY = "ReveiveItem"
 _GET_IN_EVENT_SUBFLOWS = frozenset(
@@ -57,9 +60,7 @@ _NPC_GRANTS: tuple[tuple[str, str], ...] = (
     ("MiniGame_Diving.bfevfl.zs", "Item_Scale_Silver"),
     ("Minigame_HorsebackArchery.bfevfl.zs", "Item_Quiver_Large"),
     ("LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl.zs", "Item_StickBag_Medium"),
-    ("LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl.zs", "Item_StickBag_Large"),
     ("LostWood_ScrubForestStageElder_TrueMaskFirst.bfevfl.zs", "Item_NutBag_Medium"),
-    ("LostWood_ScrubForestStageElder_TrueMaskFirst.bfevfl.zs", "Item_NutBag_Large"),
     ("Enemy_Scrub_Business_Common.bfevfl.zs", "Item_StickBag_Large"),
     ("Enemy_Scrub_Business_Common.bfevfl.zs", "Item_NutBag_Large"),
     ("Dm_LostWood_0040.bfevfl.zs", "Item_BulletBag_Medium"),
@@ -72,8 +73,6 @@ _NPC_GRANTS: tuple[tuple[str, str], ...] = (
     ("Dm_HrlCastle_0050.bfevfl.zs", "Item_ZeldaLetter"),
     ("Npc_Hylia_001_Adult.bfevfl.zs", "Obj_Heart_Piece"),
     ("Npc_Hylia_045_Child.bfevfl.zs", "Obj_Heart_Piece"),
-    ("MiniGame_FrogTenors.bfevfl.zs", "Obj_Heart_Piece"),
-
 )
 
 # Two grants of the same item in one flow, told apart by the sub-flow that makes them. The Song of
@@ -202,8 +201,13 @@ PROGRESSIVE_BRANCHES: dict[str, tuple[ProgressiveBranch, ...]] = {
     "Dm_LostWood_0040.bfevfl.zs": (
         ProgressiveBranch("Event83", "Event30", "Item_BulletBag_Medium"),
     ),
+    "MiniGame_BombchuBowling.bfevfl.zs": (
+        ProgressiveBranch("Event76", "Event306", "Item_BombBag_Large"),
+    ),
     "MiniGame_HitTarget.bfevfl.zs": (
-        # ProgressiveBranch("original check for the progressive item (win the game)", "event that gives the vanilla item (item is given)", "vanilla item we're going to overwrite"),
+        # ProgressiveBranch("original check for the progressive item (win the game)",
+        #                   "event that gives the vanilla item (item is given)",
+        #                   "vanilla item we're going to overwrite"),
         ProgressiveBranch("Event70", "Event378", "Item_BulletBag_Large"),
         ProgressiveBranch("Event181", "Event381", "Item_Quiver_Medium"),
     ),
@@ -217,7 +221,7 @@ PROGRESSIVE_BRANCHES: dict[str, tuple[ProgressiveBranch, ...]] = {
     "Enemy_Scrub_Business_Common.bfevfl.zs": (
         ProgressiveBranch("Event319", "Event317", "Item_StickBag_Large"),
         ProgressiveBranch("Event323", "Event318", "Item_NutBag_Large"),
-    )
+    ),
 }
 
 # (flow file) -> (source event, case key, old target, new target). Re-points one switch case, for
@@ -308,6 +312,53 @@ def fix_progressive_branches(data: bytes, flow_file: str) -> bytes:
         changed = True
     if not changed:
         return data
+    out = io.BytesIO()
+    flow.write(out)
+    return out.getvalue()
+
+
+DIN_FAIRY_FLOW = "Dm_FairyFountain_Din.bfevfl.zs"
+_DIN_RECEIVED_SWITCH = "Event78"  # SwitchEvent: owned Din's Fire -> skip the 25-rupee offer
+_DIN_OLD_FLAG = "IsGet.Item_DinFire"
+_DIN_GRANT = "Event212"  # SubFlowEvent GetInEvent_GreatFairyDin, which gives the randomized item
+
+
+def patch_din_fairy_received(data: bytes) -> bytes:
+    """Make the Din's Fire fairy's "already received" check follow the randomized grant.
+
+    The fairy's switch reads IsGet.Item_DinFire, which only reflects the vanilla item. This repoints
+    the switch at DIN_FAIRY_RECEIVED_BOOL and sets that bool right before the grant. Returns the
+    input unchanged when already patched. Raises ValueError if the flow does not have the expected shape.
+    """
+    from evfl import EventFlow
+    from evfl.event import ActionEvent, SubFlowEvent, SwitchEvent
+
+    flow = EventFlow()
+    flow.read(data)
+    by_name = {event.name: event for event in flow.flowchart.events}
+    switch, grant = by_name.get(_DIN_RECEIVED_SWITCH), by_name.get(_DIN_GRANT)
+    if switch is None or not isinstance(switch.data, SwitchEvent) or not switch.data.params:
+        raise ValueError(f"Din flow has no {_DIN_RECEIVED_SWITCH} switch")
+    if grant is None or not isinstance(grant.data, SubFlowEvent) or grant.data.entry_point_name not in _GET_IN_EVENT_SUBFLOWS:
+        raise ValueError(f"Din flow has no {_DIN_GRANT} item grant")
+    params = switch.data.params.data
+    writers = [
+        e for e in flow.flowchart.events
+        if isinstance(e.data, ActionEvent)
+        and e.data.params is not None
+        and e.data.params.data.get("GameDataName") == DIN_FAIRY_RECEIVED_BOOL
+        and e.data.nxt is not None
+        and e.data.nxt.v is grant
+    ]
+    if params.get("GameDataName") == DIN_FAIRY_RECEIVED_BOOL:
+        if len(writers) == 1:
+            return data
+        raise ValueError(f"Din flow is partly patched: {len(writers)} writers before {_DIN_GRANT}")
+    if params.get("GameDataName") != _DIN_OLD_FLAG:
+        raise ValueError(f"Din flow {_DIN_RECEIVED_SWITCH} is not {_DIN_OLD_FLAG}")
+
+    params["GameDataName"] = DIN_FAIRY_RECEIVED_BOOL
+    insert_bool_write_before(flow.flowchart, grant, DIN_FAIRY_RECEIVED_BOOL, True)
     out = io.BytesIO()
     flow.write(out)
     return out.getvalue()

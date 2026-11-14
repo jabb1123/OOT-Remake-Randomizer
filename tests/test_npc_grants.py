@@ -18,6 +18,7 @@ from oot_randomizer.npc_grants import (
     fix_progressive_branches,
     patch_npc_grant,
     patch_npc_grants,
+    patch_din_fairy_received,
     shuffle_npc_items,
 )
 from oot_randomizer.planner import PlanOptions, known_locations, plan_seed
@@ -67,11 +68,66 @@ def _raw_or_skip(name: str) -> bytes:
     return path.read_bytes()
 
 
+class DinFairyReceivedTest(unittest.TestCase):
+    """The Din's Fire fairy's already-received check must follow the randomized grant."""
+
+    def setUp(self):
+        self.raw = _raw_or_skip("Dm_FairyFountain_Din.bfevfl")
+
+    def _events(self, data: bytes):
+        return {event.name: event for event in _load(data).flowchart.events}
+
+    def test_switch_reads_the_randomized_bool(self):
+        from oot_randomizer.gamedata_list import DIN_FAIRY_RECEIVED_BOOL
+
+        patched = patch_din_fairy_received(self.raw)
+        events = self._events(patched)
+        self.assertEqual(events["Event78"].data.params.data["GameDataName"], DIN_FAIRY_RECEIVED_BOOL)
+
+    def test_grant_is_preceded_by_a_single_set_true_write(self):
+        from evfl.event import ActionEvent
+
+        from oot_randomizer.gamedata_list import DIN_FAIRY_RECEIVED_BOOL
+
+        events = self._events(patch_din_fairy_received(self.raw))
+        grant = events["Event212"]
+        writers = [
+            e for e in events.values()
+            if isinstance(e.data, ActionEvent)
+            and e.data.params is not None
+            and e.data.params.data.get("GameDataName") == DIN_FAIRY_RECEIVED_BOOL
+        ]
+        self.assertEqual(len(writers), 1)
+        writer = writers[0]
+        self.assertIs(writer.data.nxt.v, grant)
+        self.assertIs(events["Event403"].data.nxt.v, writer)
+        self.assertIs(writer.data.params.data["Value"], True)
+
+    def test_owned_path_is_unchanged(self):
+        before = self._events(self.raw)
+        after = self._events(patch_din_fairy_received(self.raw))
+        self.assertEqual(after["Event78"].data.cases[1].v.name, "Event86")
+        self.assertEqual(before["Event78"].data.cases[0].v.name, after["Event78"].data.cases[0].v.name)
+
+    def test_idempotent_and_round_trips(self):
+        once = patch_din_fairy_received(self.raw)
+        self.assertNotEqual(once, self.raw)
+        self.assertEqual(patch_din_fairy_received(once), once)
+        self.assertEqual(_serialize(_load(once)), once)
+
+    def test_unexpected_switch_raises(self):
+        flow = _load(self.raw)
+        events = {event.name: event for event in flow.flowchart.events}
+        events["Event78"].data.params.data["GameDataName"] = "SomethingElse"
+        with self.assertRaises(ValueError):
+            patch_din_fairy_received(_serialize(flow))
+
+
 class SlotTableTest(unittest.TestCase):
-    def test_twenty_seven_locations_one_per_flow_item_label(self):
-        self.assertEqual(len(NPC_SLOTS), 27)
+    def test_twenty_five_locations_one_per_flow_item_label(self):
+        self.assertEqual(len(NPC_SLOTS), 25)
         keys = [(slot.flow, slot.item, slot.label) for slot in NPC_SLOTS.values()]
-        self.assertEqual(len(set(keys)), 27)
+        self.assertEqual(len(set(keys)), 25)
 
     def test_frog_choir_hearts_are_two_slots_with_different_groups(self):
         frog = [s for s in NPC_SLOTS.values() if s.flow == FROG + ".zs" and s.item == "Obj_Heart_Piece"]
