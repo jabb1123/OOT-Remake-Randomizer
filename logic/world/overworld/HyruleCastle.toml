@@ -11,6 +11,7 @@
 "Goto_HyruleCastle: Item_WeirdEgg (npc item)" = "is_child"
 "Dm_MelodyGet_Zelda" = "is_child and Alarm_Cucco"  # song: Zelda's Lullaby from Impa, Hyrule Castle courtyard
 "Dm_HrlCastle_0050: Item_ZeldaLetter (npc item)" = "is_child and Alarm_Cucco"  # Zelda gives the letter in the castle; not randomized, gates the Kakariko/Death Mountain route for children
+"Dm_FairyFountain_Power: Item_FairyBless_MP (npc item)" = "has_explosives and is_child and can_play(Zeldas_Lullaby)"  # Great Fairies only spawn once Zelda's Lullaby is owned
 
 
 [regions."HyruleCastle".skulltulas]

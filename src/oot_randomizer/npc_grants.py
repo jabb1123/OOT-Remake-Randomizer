@@ -67,12 +67,17 @@ _NPC_GRANTS: tuple[tuple[str, str], ...] = (
     ("SubEvent_FindRichard.bfevfl.zs", "Obj_Heart_Piece"),
     ("Npc_SkullKid_Child_02.bfevfl.zs", "Obj_Heart_Piece"),
     ("Dm_Goron_0030.bfevfl.zs", "Item_Gauntlet_Goron"),
-    ("Dm_FairyFountain_Din.bfevfl.zs", "Item_DinFire"),
     ("Goto_HyruleCastle.bfevfl.zs", "Item_WeirdEgg"),
     ("Dm_HrlCastle_0050.bfevfl.zs", "Item_ZeldaLetter"),
     ("Npc_Hylia_001_Adult.bfevfl.zs", "Obj_Heart_Piece"),
     ("Npc_Hylia_045_Child.bfevfl.zs", "Obj_Heart_Piece"),
     ("MiniGame_FrogTenors.bfevfl.zs", "Obj_Heart_Piece"),
+    ("Dm_FairyFountain_Din.bfevfl.zs", "Item_DinFire"),
+    ("Dm_FairyFountain_Frore.bfevfl.zs", "Item_FaroreWind"),
+    ("Dm_FairyFountain_Nayru.bfevfl.zs", "Item_NayruLove"),
+    ("Dm_FairyFountain_Power.bfevfl.zs", "Item_FairyBless_MP"),
+    ("Dm_FairyFountain_Wisdom.bfevfl.zs", "Item_FairyBless_MPDouble"),
+    ("Dm_FairyFountain_Courage.bfevfl.zs", "Item_FairyBless_DefenseDouble"),
 
 )
 

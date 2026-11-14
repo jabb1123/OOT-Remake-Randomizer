@@ -9,7 +9,7 @@
 "DeathMountainTrail Heart Piece 1" = "is_adult"  # loose Obj_Heart_Piece, both ages
 "DeathMountainTrail Dynamic room 0 #0 (Item_ScrubBusinessSeed)" = "has_bombs"
 "Npc_Goron_Biggoron_Adult: Item_Sword_Biggoron (npc item)" = "is_adult and Ice_Cavern_Clear and (can_play(Eponas_Song) or Longshot) and (has_bombs or Megaton_Hammer)"  # whole Biggoron chain: Kokiri, Kakariko, Gerudo, Lake Hylia, Zora, DMT gates
-"Dm_FairyFountain_Din: Item_DinFire (npc item)" = "has_bombs and can_play(Zeldas_Lullaby)"  # Great Fairies only spawn once Zelda's Lullaby is owned
+"Dm_FairyFountain_Din: Item_DinFire (npc item)" = "has_explosives and can_play(Zeldas_Lullaby)"  # Great Fairies only spawn once Zelda's Lullaby is owned
 
 [regions."DeathMountainTrail".skulltulas]
 "DMT GS Bean Patch" = "is_child and (has_explosives or Goron_Bracelet)"  # original: can_plant_bugs and can_child_attack and (has_explosives or Progressive_Strength_Upgrade or (logic_dmt_soil_...
