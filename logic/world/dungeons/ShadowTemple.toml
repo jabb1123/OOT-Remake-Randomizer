@@ -1,7 +1,7 @@
 # ShadowTemple
 
 [regions.Root.exits]
-"ShadowTemple" = "can_play(Nocturne_of_Shadow) and Dins_Fire"
+"ShadowTemple" = "can_play(Nocturne_of_Shadow) and Dins_Fire and has_hookshot"
 
 [regions."ShadowTemple"]
 dungeon = true

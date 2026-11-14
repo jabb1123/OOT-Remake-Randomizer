@@ -50,6 +50,7 @@ _NPC_GRANTS: tuple[tuple[str, str], ...] = (
     ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombBag_Large"),
     ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombchuBundle_Medium"),
     ("MiniGame_Fishing.bfevfl.zs", "Item_Scale_Gold"),
+    ("MiniGame_Fishing.bfevfl.zs", "Obj_Heart_Piece"),
     ("MiniGame_Diving.bfevfl.zs", "Item_Scale_Silver"),
     ("Minigame_HorsebackArchery.bfevfl.zs", "Item_Quiver_Medium"),
     ("Minigame_HorsebackArchery.bfevfl.zs", "Item_Quiver_Large"),
@@ -173,7 +174,9 @@ PROGRESSIVE_BRANCHES: dict[str, tuple[ProgressiveBranch, ...]] = {
         ProgressiveBranch("Event83", "Event30", "Item_BulletBag_Medium"),
     ),
     "MiniGame_HitTarget.bfevfl.zs": (
+        # ProgressiveBranch("original check for the progressive item (win the game)", "event that gives the vanilla item (item is given)", "vanilla item we're going to overwrite"),
         ProgressiveBranch("Event70", "Event378", "Item_BulletBag_Large"),
+        ProgressiveBranch("Event181", "Event381", "Item_Quiver_Medium"),
     ),
     "LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl.zs": (
         ProgressiveBranch("Event30", "Event29", "Item_StickBag_Medium"),
@@ -185,7 +188,7 @@ PROGRESSIVE_BRANCHES: dict[str, tuple[ProgressiveBranch, ...]] = {
     "Enemy_Scrub_Business_Common.bfevfl.zs": (
         ProgressiveBranch("Event319", "Event317", "Item_StickBag_Large"),
         ProgressiveBranch("Event323", "Event318", "Item_NutBag_Large"),
-    ),
+    )
 }
 
 # (flow file) -> (source event, case key, old target, new target). Re-points one switch case, for

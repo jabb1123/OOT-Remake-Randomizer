@@ -29,7 +29,7 @@ can_blast_or_smash = "has_explosives or (is_adult and Megaton_Hammer)"
 
 # --- Weapons and tools -------------------------------------------------------------------
 has_weapon = "((has_hookshot or Megaton_Hammer) and is_adult) or (is_child and Slingshot) or (is_child and Kokiri_Sword)"
-has_hookshot = "Hookshot or Longshot"
+has_hookshot = "is_adult and (Hookshot or Longshot)"
 # Slingshot or Boomerang (child) or Bow (adult): eye switches, targets and other projectile checks.
 can_shoot = "(is_child and (Slingshot or Boomerang)) or (is_adult and Bow)"
 # Any ranged attack for the current age, boomerang and hookshot included.
