@@ -245,30 +245,12 @@ NPC_LOCATIONS: dict[tuple[str, str, str | None], tuple[str, str, str]] = {
         None,
     ): ("LostWood", "is_child and Deku_Sticks", "Lost Woods Scrub Elder, Skull Mask"),
     (
-        "LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl.zs",
-        "Item_StickBag_Large",
-        None,
-    ): (
-        "LostWood",
-        "is_child and Deku_Sticks and Stick_Bag_Medium",
-        "Lost Woods Scrub Elder, Skull Mask",
-    ),
-    (
         "LostWood_ScrubForestStageElder_TrueMaskFirst.bfevfl.zs",
         "Item_NutBag_Medium",
         None,
     ): (
         "LostWood",
         "is_child and Deku_Nuts",
-        "Lost Woods Scrub Elder, True Mask",
-    ),
-    (
-        "LostWood_ScrubForestStageElder_TrueMaskFirst.bfevfl.zs",
-        "Item_NutBag_Large",
-        None,
-    ): (
-        "LostWood",
-        "is_child and Deku_Nuts and Nut_Bag_Medium",
         "Lost Woods Scrub Elder, True Mask",
     ),
     ("Enemy_Scrub_Business_Common.bfevfl.zs", "Item_StickBag_Large", None): (
@@ -318,7 +300,7 @@ NPC_LOCATIONS: dict[tuple[str, str, str | None], tuple[str, str, str]] = {
     ),
     ("Npc_Hylia_001_Adult.bfevfl.zs", "Obj_Heart_Piece", None): (
         "KakarikoVillage",
-        "is_adult and has_hookshot",
+        "is_adult and Hookshot",
         "Man on a roof, as an adult",
     ),
     ("Npc_Hylia_045_Child.bfevfl.zs", "Obj_Heart_Piece", None): (

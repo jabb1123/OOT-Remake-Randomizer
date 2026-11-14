@@ -9,6 +9,7 @@
 [regions."LakeHylia".locations]
 "MiniGame_Fishing: Item_Scale_Gold (npc item)" = "is_adult and (Water_Temple_Clear or (has_hookshot and has_ocarina))" 
 "MiniGame_Fishing: Obj_Heart_Piece (npc item)" = "true"
+"LakeHylia Heart Piece 1" = "is_adult and has_hookshot"  # loose Obj_Heart_Piece, adult copy only (stored in HyruleField_Adult_Static)
 
 [regions."LakeHylia".skulltulas]
 "LH GS Bean Patch" = "is_child"  # original: can_plant_bugs and can_child_attack

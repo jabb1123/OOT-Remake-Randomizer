@@ -25,8 +25,8 @@ Only these parameters change. Model, LOD and XLink references keep the vanilla a
 | MiniGame_Fishing | Golden Scale / Heart Piece | LakeHylia | true |
 | MiniGame_Diving | Silver Scale | ZoraRiver | true |
 | Minigame_HorsebackArchery | Quiver Large | GerudoFortress | adult + Bow. Every win gives Large, then the heart piece (Event349). The Medium grant is removed from this minigame. |
-| LostWood_ScrubForestStageElder_SkullMaskFirst | Stick Bag Medium / Large | LostWood | child + Deku Sticks (Large also needs Stick Bag Medium) |
-| LostWood_ScrubForestStageElder_TrueMaskFirst | Nut Bag Medium / Large | LostWood | child + Deku Nuts (Large also needs Nut Bag Medium) |
+| LostWood_ScrubForestStageElder_SkullMaskFirst | Stick Bag Medium | LostWood | child + Deku Sticks |
+| LostWood_ScrubForestStageElder_TrueMaskFirst | Nut Bag Medium | LostWood | child + Deku Nuts |
 | Enemy_Scrub_Business_Common (Business Scrub bag sales) | Stick Bag Large / Nut Bag Large | LostWood | child + Deku Sticks (stick), child + Deku Nuts + Bomb Bag (nut) |
 | Dm_LostWood_0040 (Lost Woods scrub target) | Bullet Bag Medium (1st upgrade) | LostWood | child + Slingshot (flow forced to this slot, see below) |
 | Npc_Goron_Biggoron_Adult | Biggoron Sword | DeathMountainTrail | adult, Ice_Cavern_Clear, (can_play(Eponas_Song) or Longshot), (has_bombs or Megaton_Hammer) |
@@ -92,7 +92,8 @@ and Event555 become unreachable.
 Both Large bags are randomized locations in `LostWood`. The stick bag needs child and Deku
 Sticks. The nut bag needs child, Deku Nuts and Bomb Bag. The Large bags no longer need a
 Medium bag, because the Medium sale is gone from the scrub. The Lost Woods scrub's own
-Medium and Large bags stay as they were.
+Medium and Large bags stay as they were. The Lost Woods scrub's Large bags are not randomized: see
+the Lost Woods section below.
 
 The scrub's flow is shared by every Business Scrub instance that loads
 `Enemy_Scrub_Business_Common`. The randomized bags therefore show up in every such scrub, not only
@@ -108,11 +109,32 @@ bypass the randomized grant. `disable_scrub_biggoron_sale` repoints Event42's
 "not owned" case past that sale (Event46) to Event47, so Event46 is unreachable. The Giant's
 Knife sale (Event45, 300 rupees) is kept. The patch is applied only when NPC items are shuffled.
 
+## Din's Fire fairy (already-received check)
+
+The Great Fairy in `Dm_FairyFountain_Din` asks for 25 rupees to grant Din's Fire. Event78 gated
+the offer on `IsGet.Item_DinFire`, which is only set for the vanilla item. After a randomized
+grant, the fairy asked again on every visit.
+
+`patch_din_fairy_received` in `npc_grants.py` fixes this:
+
+- Event78 reads a custom bool, `Rando_Din_FairyGrant_Received` (`DIN_FAIRY_RECEIVED_BOOL`),
+  registered in GameDataList by `add_npc_grant_bools`.
+- A set-True write to that bool is inserted before the grant (Event212) by
+  `insert_bool_write_before` in `game_flags.py`.
+
+The bool is registered only when the Din's Fire fairy slot is randomized. `IsGet.Item_DinFire` is
+still read by other flows that check whether Din's is owned (see below).
+
 ## Gates not converted (for Stage B)
 
 These checks read the game's own state and are left alone. They need a decision when the
 granted item moves. `Dm_LostWood_0040` Event83 and the shooting gallery's Event70 are handled
 by the progressive bullet bag fix above.
+
+- Global "owns Din's Fire" checks on `IsGet.Item_DinFire` in other flows: Dm_DeathMtTrail_0025
+  (Event113), Dm_SY_BancChange_EscapeDungeon, Enemy_Scrub_Business_Common (Event407, Event435),
+  Enemy_Scrub_Business_Seed (Event147), Npc_Gerudo_012 (Event37), Npc_Goron_008_Child (Event57),
+  Npc_Kaepora_DeathMountainTrail (Event4), and TriForcePoint. These still follow the vanilla item.
 
 - Pouch queries (`PouchSystemActor.EventQueryIsExistInPouch`) for upgrade and base items:
   shooting gallery quivers (Event181: Medium owned picks the Large grant, the same
@@ -138,12 +160,21 @@ grant of that item, and a group key matches only that sub-flow. Both hearts shar
 requirement, and they appear as separate locations in logic. The Event162/Event76 `Obj_Rupee_Blue`
 grants in `MushiToriGame` are not randomized.
 
+## Lost Woods scrub Large bags (not randomized)
+
+The Elder scrub's Large bags (`Event32` in SkullMaskFirst, `Event31` in TrueMaskFirst) are only
+reachable through the pinned `Event30` switch in the first-visit flows. `PROGRESSIVE_BRANCHES`
+points every case of that switch at the Medium grant, so the Large grant is never reached. Its
+logic rows were removed with the slot. Two things are still unverified in game: whether the
+first-visit flow replays on a later talk (the Medium grant would then repeat, because the
+randomized Medium item never enters the pouch), and whether the Large bag can be given there at all.
+
 ## Options
 
 - Planner pool group `npc`, `PlanOptions.shuffle_npc_items` (default `True`).
 - CLI `--no-npc-items` keeps the vanilla NPC items. These locations are not majors for
   `one_major_per_dungeon`, the same as event items.
-- Logic check: 27 NPC slots (25 plain, plus the two Frog Choir hearts). The vanilla goal is reachable, and 347 of 347 locations are
+- Logic check: 25 NPC slots (23 plain, plus the two Frog Choir hearts). The vanilla goal is reachable, and 347 of 347 locations are
   listed and reachable.
 
 ## Unverified in-game

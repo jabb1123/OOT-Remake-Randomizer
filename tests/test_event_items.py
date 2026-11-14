@@ -12,6 +12,7 @@ from oot_randomizer.event_items import (
     patch_event_item,
     shuffle_event_items,
 )
+from oot_randomizer.item_ids import CANNOT_NAME_GRANT
 from oot_randomizer.npc_grants import NPC_SLOTS
 from oot_randomizer.planner import PlanOptions, known_locations, plan_seed
 from oot_randomizer.skulltula_rewards import SKULL_REWARDS
@@ -200,6 +201,16 @@ class PlannerEventTest(unittest.TestCase):
         on = plan_seed(7, self.slots, None, PlanOptions(shuffle_songs=False))
         off = plan_seed(7, self.slots, None, PlanOptions(shuffle_songs=False, shuffle_event_items=False))
         self.assertEqual(on.song_assignments, off.song_assignments)
+
+    def test_bundles_never_land_in_name_granted_locations(self):
+        bundles_in_chests = 0
+        for seed in range(10):
+            plan = plan_seed(seed, self.slots, None, PlanOptions(shop_slots_per_shop=0, shuffle_heart_pieces=False))
+            name_granted = (list(plan.song_assignments.values()) + list(plan.event_assignments.values())
+                            + list(plan.npc_assignments.values()))
+            self.assertFalse(CANNOT_NAME_GRANT & set(name_granted), f"seed {seed}")
+            bundles_in_chests += sum(1 for _, item in plan.chest_assignments if item in CANNOT_NAME_GRANT)
+        self.assertGreater(bundles_in_chests, 0)
 
 
 if __name__ == "__main__":

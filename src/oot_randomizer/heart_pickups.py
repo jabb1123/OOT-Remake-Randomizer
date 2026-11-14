@@ -26,6 +26,8 @@ HEART_GYAMLS: frozenset[str] = frozenset({"Obj_Heart_Piece", "Obj_GerudoValley_H
 NAME_PREFIX = "Obj_HeartRando_"
 
 # slot name -> [(scene bcett file, Actors index)]; one entry per scene copy that holds the piece.
+# Slot names follow the logic region the piece sits in, which can differ from the scene file
+# that stores it (the Lake Hylia and Lon Lon Ranch pieces are stored in the HyruleField scenes).
 _HEART_TARGETS: dict[str, list[tuple[str, int]]] = {
     "DeathMountainCrater Heart Piece 1": [
         ("DeathMountainCrater_Adult_Static.bcett.byml.zs", 10),
@@ -45,9 +47,9 @@ _HEART_TARGETS: dict[str, list[tuple[str, int]]] = {
     "Graveyard Heart Piece 1": [
         ("Graveyard_Adult_Static.bcett.byml.zs", 237),
         ("Graveyard_Child_Static.bcett.byml.zs", 237)],
-    "HyruleField Heart Piece 1": [
+    "LakeHylia Heart Piece 1": [
         ("HyruleField_Adult_Static.bcett.byml.zs", 1733)],
-    "HyruleField Heart Piece 2": [
+    "LonLonRanch Heart Piece 1": [
         ("HyruleField_Child_Static.bcett.byml.zs", 1495)],
     "KakarikoVillage Heart Piece 1": [
         ("KakarikoVillage_Adult_Alternative_Static.bcett.byml.zs", 41),

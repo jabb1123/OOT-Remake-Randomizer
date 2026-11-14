@@ -6,8 +6,6 @@
 [regions."HyruleField"]
 
 [regions."HyruleField".locations]
-# "HyruleField Heart Piece 1" = "is_child and has_adult"  # loose Obj_Heart_Piece, adult copy only
-# "HyruleField Heart Piece 2" = "is_child and has_adult"  # loose Obj_Heart_Piece, child copy only
 "Dm_MelodyGet_Time (event item)" = "is_child and Zeldas_Lullaby and Deku_Tree_Clear and Dodongos_Cavern_Clear and Jabu_Jabu_Clear"
 "Dm_MelodyGet_Time" = "is_child and Zeldas_Lullaby and Deku_Tree_Clear and Dodongos_Cavern_Clear and Jabu_Jabu_Clear"  # song: Song of Time from Zelda at the moat, after all three stones
 "HyruleField Dynamic room 0 #0 (Item_ScrubBusinessSeed)" = "true"

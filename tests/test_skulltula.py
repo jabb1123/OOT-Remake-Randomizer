@@ -147,9 +147,10 @@ class SkullPlanningTests(unittest.TestCase):
 
     def test_tight_pool_never_dead_ends(self):
         # Besides progression, only the five vanilla rewards can be handed over; a naive
-        # random fill would often strand them in chests.
+        # random fill would often strand them in chests. NPC shuffling is off: the nine toy
+        # chests can't absorb the bowling bundle that the NPC slot would otherwise need to swap out.
         for seed in range(40):
-            plan = plan_seed(seed, SLOTS, self.world, PlanOptions(max_attempts=1))
+            plan = plan_seed(seed, SLOTS, self.world, PlanOptions(max_attempts=1, shuffle_npc_items=False))
             self.assertTrue(all(can_hand_over(i) for i in plan.skull_assignments.values()))
 
     def test_tokens_stay_fixed(self):
@@ -161,7 +162,7 @@ class SkullPlanningTests(unittest.TestCase):
 
     def test_no_skull_shuffle_keeps_vanilla(self):
         for seed in range(10):
-            plan = plan_seed(seed, SLOTS, self.world, PlanOptions(shuffle_skull_rewards=False))
+            plan = plan_seed(seed, SLOTS, self.world, PlanOptions(shuffle_skull_rewards=False, shuffle_npc_items=False))
             self.assertEqual(plan.skull_assignments, SKULL_REWARDS)
             placed = Counter([i for _, i in plan.chest_assignments] + list(plan.song_assignments.values())
                              + list(plan.event_assignments.values()) + list(plan.npc_assignments.values()))

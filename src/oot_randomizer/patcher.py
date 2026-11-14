@@ -20,11 +20,13 @@ from .cutscene_skips import INTRO_EVENT_FLOW, skip_intro_cutscene
 from .kokiri_blocker import MIDO_BLOCKER_FLOW, clear_mido_blocker
 from .event_items import EVENT_SLOTS, patch_event_item
 from .npc_grants import (
+    DIN_FAIRY_FLOW,
     NPC_SLOTS,
     REROUTED_FLOWS,
     SCRUB_BIGGORON_FLOW,
     disable_scrub_biggoron_sale,
     fix_progressive_branches,
+    patch_din_fairy_received,
     patch_npc_grants,
 )
 from .item_ids import resolve_actor_name
@@ -294,6 +296,11 @@ class RomPatcher:
             for flow_file, changes in npc_changes.items():
                 patcher.replace_file(flow_file, lambda data, c=changes: patch_npc_grants(data, c))
                 applied += 1
+            din_randomized = DIN_FAIRY_FLOW in npc_changes
+            if din_randomized:
+                # The fairy's "already received" check must follow the randomized grant, not Din's Fire.
+                patcher.replace_file(DIN_FAIRY_FLOW, patch_din_fairy_received)
+                applied += 1
             if npc_assignments:
                 # The Biggoron Sword is only obtainable from its randomized location, so the scrub's sale is removed.
                 patcher.replace_file(SCRUB_BIGGORON_FLOW, disable_scrub_biggoron_sale)
@@ -312,8 +319,12 @@ class RomPatcher:
                         applied += 1
                     except NupPatchError:
                         pass
+            if shop_actors or din_randomized:
+                patcher.replace_file(
+                    GAME_DATA_LIST,
+                    lambda data: patch_gamedata_list(data, shop=bool(shop_actors), npc_grant=din_randomized),
+                )
             if shop_actors:
-                patcher.replace_file(GAME_DATA_LIST, patch_gamedata_list)
                 patcher.replace_file(DISPLAY_SHOP_FLOW, patch_kokiri_soldout)
                 applied += 1
             patcher.update_resource_size_tables()
