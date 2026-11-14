@@ -311,6 +311,21 @@ NPC_LOCATIONS: dict[tuple[str, str], tuple[str, str, str]] = {
         "is_child and Alarm_Cucco",
         "Zelda, after speech",
     ),
+    ("Npc_Hylia_001_Adult.bfevfl.zs", "Obj_Heart_Piece"): (
+        "KakarikoVillage",
+        "is_adult",
+        "Man on a roof, as an adult"
+    ),
+    ("Npc_Hylia_045_Child.bfevfl.zs", "Obj_Heart_Piece"): (
+        "KakarikoVillage",
+        "is_child",
+        "Man on a roof, as a kid",
+    ),
+    ("MiniGame_FrogTenors.bfevfl.zs", "Obj_Heart_Piece"): (
+        "ZoraRiver",
+        "is_child and can_play(Zeldas_Lullaby) and can_play(Sarias_Song) and can_play(Eponas_Song) and can_play(Suns_Song) and can_play(Song_of_Time)",
+        "Frog Choir, playing minigame with all 5 songs",
+    ),
 }
 
 HEADER = """\
