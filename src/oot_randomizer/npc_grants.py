@@ -23,7 +23,10 @@ _HAND_OVER_KEY = "ReveiveItem"
 _GET_IN_EVENT_SUBFLOWS = frozenset(
     {
         "GetInEvent_Goron",
+        "GetInEvent_GreatFairyCourge",
         "GetInEvent_GreatFairyDin",
+        "GetInEvent_Demo_NotLookatObjectEntry",
+        "GetInEvent_GreatFairyWisdom",
         "GetInEvent_Zeldaletter",
         "GetInEvent_NotTurn",
         "GetInEvent_NotTurn_PosCamera",
@@ -185,7 +188,9 @@ def patch_npc_grants(data: bytes, changes: dict[tuple[str | None, str] | str, st
         if any(p[k] in new_items for p, k, _ in params):
             return data
         olds = sorted({item for _, item in changes})
-        raise ValueError(f"NPC flow grants neither {olds} nor {sorted(new_items)}")
+        raise ValueError(
+            f"NPC flow {flow.name} grants neither {olds} nor {sorted(new_items)}"
+        )
     for p, k, new in hits:
         p[k] = new
     out = io.BytesIO()
