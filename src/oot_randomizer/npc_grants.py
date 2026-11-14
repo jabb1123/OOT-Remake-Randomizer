@@ -35,6 +35,7 @@ _GET_IN_EVENT_SUBFLOWS = frozenset(
         "GetInEventItemSwordBiggoron",  # Dm_SY_GetInEvent/GetInEventItemSwordBiggoron (stored without the flow prefix)
         "SimpleShopSub_Scrub_Business_OneTime",  # Enemy_Scrub_Business_Common bag sales (ActorName is the bag)
         "MushiToriGame",  # MiniGame_FrogTenors insect-repellent game (ActorName is the award)
+        "GetInEvent",  # Npc_Hylia_001_Adult heart grant; matches only a changed ActorName
     }
 )
 _GET_IN_EVENT_KEY = "ActorName"
