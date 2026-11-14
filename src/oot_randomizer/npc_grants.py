@@ -49,7 +49,6 @@ _NPC_GRANTS: tuple[tuple[str, str], ...] = (
     ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombBag_Medium"),
     ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombBag_Large"),
     ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombchuBundle_Medium"),
-    ("MiniGame_FrogTenors.bfevfl.zs", "Obj_Heart_Piece"),
     ("MiniGame_Fishing.bfevfl.zs", "Item_Scale_Gold"),
     ("MiniGame_Fishing.bfevfl.zs", "Obj_Heart_Piece"),
     ("MiniGame_Diving.bfevfl.zs", "Item_Scale_Silver"),
@@ -70,6 +69,7 @@ _NPC_GRANTS: tuple[tuple[str, str], ...] = (
     ("Dm_HrlCastle_0050.bfevfl.zs", "Item_ZeldaLetter"),
     ("Npc_Hylia_001_Adult.bfevfl.zs", "Obj_Heart_Piece"),
     ("Npc_Hylia_045_Child.bfevfl.zs", "Obj_Heart_Piece"),
+    ("MiniGame_FrogTenors.bfevfl.zs", "Obj_Heart_Piece"),
 
 )
 

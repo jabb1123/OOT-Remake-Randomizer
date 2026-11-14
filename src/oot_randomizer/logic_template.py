@@ -313,7 +313,7 @@ NPC_LOCATIONS: dict[tuple[str, str], tuple[str, str, str]] = {
     ),
     ("Npc_Hylia_001_Adult.bfevfl.zs", "Obj_Heart_Piece"): (
         "KakarikoVillage",
-        "is_adult",
+        "is_adult and has_hookshot",
         "Man on a roof, as an adult"
     ),
     ("Npc_Hylia_045_Child.bfevfl.zs", "Obj_Heart_Piece"): (
