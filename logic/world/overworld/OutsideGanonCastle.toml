@@ -6,7 +6,7 @@
 [regions."OutsideGanonCastle"]
 
 [regions."OutsideGanonCastle".locations]
-"Dm_FairyFountain_Courage: Item_FairyBless_DefenseDouble (npc item)" = "Golden_Gauntlets and can_play(Zeldas_Lullaby)"  # Great Fairies only spawn once Zelda's Lullaby is owned
+"Dm_FairyFountain_Courage: Item_FairyBless_DefenseDouble (npc item)" = "Golden_Gauntlets and (Item_Wallet_Medium or Item_Wallet_Large) and can_play(Zeldas_Lullaby)"  # Great Fairies only spawn once Zelda's Lullaby is owned
 
 [regions."OutsideGanonCastle".skulltulas]
 "OGC GS" = "is_adult"  # original: True

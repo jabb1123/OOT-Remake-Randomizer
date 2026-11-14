@@ -11,7 +11,7 @@
 "DesertColossus Static room 0 #0 (Item_Gauntlet_Silver)" = "is_child and has_explosives and (Boomerang or Slingshot)"
 "DesertColossus Static room 0 #0 (Item_Shield_Mirror)" = "is_adult and (Silver_Gauntlets or Golden_Gauntlets) and has_explosives"
 "DesertColossus Static room 0 #0 (TBox_Rupee_Purple)" = "true"
-"Dm_FairyFountain_Nayru: Item_NayruLove (npc item)" = "(has_explosives or (Megaton_Hammer and is_adult)) and can_play(Zeldas_Lullaby)"  # Great Fairies only spawn once Zelda's Lullaby is owned
+"Dm_FairyFountain_Nayru: Item_NayruLove (npc item)" = "(has_explosives or (Megaton_Hammer and is_adult)) and (Item_Wallet_Medium or Item_Wallet_Large) and can_play(Zeldas_Lullaby)"  # Great Fairies only spawn once Zelda's Lullaby is owned
 
 [regions."DesertColossus".skulltulas]
 "Colossus GS Bean Patch" = "is_child"  # original: can_plant_bugs and can_child_attack
