@@ -18,7 +18,7 @@ def _make_nup(path: Path, extra: bytes = b"") -> None:
 
 class RomValidationTests(unittest.TestCase):
     def test_accepts_valid_nup_file(self):
-        temp_path = Path("/tmp/test_valid_rom.nup")
+        temp_path = Path("tmp/test_valid_rom.nup")
         _make_nup(temp_path)
         self.addCleanup(temp_path.unlink, missing_ok=True)
 
@@ -26,7 +26,7 @@ class RomValidationTests(unittest.TestCase):
         self.assertTrue(info.is_nup)
 
     def test_rejects_wrong_extension(self):
-        temp_path = Path("/tmp/test_invalid_rom.z64")
+        temp_path = Path("tmp/test_invalid_rom.z64")
         temp_path.write_bytes(b"12345")
         self.addCleanup(temp_path.unlink, missing_ok=True)
 
@@ -35,16 +35,16 @@ class RomValidationTests(unittest.TestCase):
 
     def test_rejects_missing_file(self):
         with self.assertRaises(FileNotFoundError):
-            validate_nup_rom("/tmp/does_not_exist.nup")
+            validate_nup_rom("tmp/does_not_exist.nup")
 
     def test_randomizer_writes_copy_without_modifying_source(self):
-        source_path = Path("/tmp/source_copy_test.nup")
+        source_path = Path("tmp/source_copy_test.nup")
         _make_nup(source_path, b"payload")
-        output_path = Path("/tmp/output_copy_test.nup")
+        output_path = Path("tmp/output_copy_test.nup")
         self.addCleanup(source_path.unlink, missing_ok=True)
         self.addCleanup(output_path.unlink, missing_ok=True)
-        self.addCleanup(Path("/tmp/output_copy_test.json").unlink, missing_ok=True)
-        self.addCleanup(Path("/tmp/output_copy_test.patch.json").unlink, missing_ok=True)
+        self.addCleanup(Path("tmp/output_copy_test.json").unlink, missing_ok=True)
+        self.addCleanup(Path("tmp/output_copy_test.patch.json").unlink, missing_ok=True)
 
         source_before = source_path.read_bytes()
         result = OOTRandomizer(RandomizerConfig(seed=7, output_path=str(output_path))).randomize(str(source_path))
@@ -74,7 +74,8 @@ class RomValidationTests(unittest.TestCase):
         self.assertTrue(all(placement.location for placement in placements))
 
     def test_randomizer_handles_unwritable_output_path(self):
-        source_path = Path("/tmp/unwritable_output_source.nup")
+        self.skipTest("This does not work on Windows OSes")
+        source_path = Path("tmp/unwritable_output_source.nup")
         _make_nup(source_path)
         blocked_dir = Path("/tmp/blocked_oot_output_dir")
         blocked_dir.mkdir(exist_ok=True)

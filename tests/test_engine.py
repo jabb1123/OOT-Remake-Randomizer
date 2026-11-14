@@ -173,14 +173,14 @@ class ChestShuffleTests(unittest.TestCase):
 
 class RomValidationTests(unittest.TestCase):
     def test_accepts_valid_nup_file(self):
-        p = Path("/tmp/test_valid_rom.nup")
+        p = Path("tmp/test_valid_rom.nup")
         _make_nup(p)
         self.addCleanup(p.unlink, missing_ok=True)
         info = validate_nup_rom(p)
         self.assertTrue(info.is_nup)
 
     def test_rejects_wrong_extension(self):
-        p = Path("/tmp/test_invalid_rom.z64")
+        p = Path("tmp/test_invalid_rom.z64")
         p.write_bytes(b"12345")
         self.addCleanup(p.unlink, missing_ok=True)
         with self.assertRaises(RomValidationError):
@@ -188,12 +188,12 @@ class RomValidationTests(unittest.TestCase):
 
     def test_rejects_missing_file(self):
         with self.assertRaises(FileNotFoundError):
-            validate_nup_rom("/tmp/does_not_exist.nup")
+            validate_nup_rom("tmp/does_not_exist.nup")
 
 
 class NupParserTests(unittest.TestCase):
     def test_parses_valid_nup_header(self):
-        p = Path("/tmp/nup_parser_test.nup")
+        p = Path("tmp/nup_parser_test.nup")
         _make_nup(p, b"content")
         self.addCleanup(p.unlink, missing_ok=True)
 
@@ -204,14 +204,14 @@ class NupParserTests(unittest.TestCase):
         self.assertTrue(any(r.name == "header" for r in header.regions))
 
     def test_rejects_non_nup_file(self):
-        p = Path("/tmp/nup_bad_magic.nup")
+        p = Path("tmp/nup_bad_magic.nup")
         p.write_bytes(b"FAKE" + b"\x00" * 60)
         self.addCleanup(p.unlink, missing_ok=True)
         with self.assertRaises(NupParseError):
             parse_nup_header(p)
 
     def test_detects_embedded_region_markers(self):
-        p = Path("/tmp/nup_with_pfs0.nup")
+        p = Path("tmp/nup_with_pfs0.nup")
         _make_nup(p, b"\x00" * 256 + b"PFS0" + b"\x00" * 64)
         self.addCleanup(p.unlink, missing_ok=True)
 
@@ -258,7 +258,7 @@ class PatcherTests(unittest.TestCase):
         self.assertIsNone(record.byte_offset)
 
     def test_patcher_operates_in_manifest_only_without_offsets(self):
-        p = Path("/tmp/patcher_manifest_test.nup")
+        p = Path("tmp/patcher_manifest_test.nup")
         _make_nup(p)
         self.addCleanup(p.unlink, missing_ok=True)
 
@@ -386,13 +386,13 @@ class LogicEngineTests(unittest.TestCase):
 
 class SafeCopyTests(unittest.TestCase):
     def test_copy_does_not_modify_source(self):
-        src = Path("/tmp/source_copy_test.nup")
+        src = Path("tmp/source_copy_test.nup")
         _make_nup(src, b"original-data")
-        out = Path("/tmp/output_copy_test.nup")
+        out = Path("tmp/output_copy_test.nup")
         self.addCleanup(src.unlink, missing_ok=True)
         self.addCleanup(out.unlink, missing_ok=True)
-        self.addCleanup(Path("/tmp/output_copy_test.json").unlink, missing_ok=True)
-        self.addCleanup(Path("/tmp/output_copy_test.patch.json").unlink, missing_ok=True)
+        self.addCleanup(Path("tmp/output_copy_test.json").unlink, missing_ok=True)
+        self.addCleanup(Path("tmp/output_copy_test.patch.json").unlink, missing_ok=True)
 
         before = src.read_bytes()
         result = OOTRandomizer(RandomizerConfig(seed=7, output_path=str(out))).randomize(str(src))
@@ -406,14 +406,15 @@ class SafeCopyTests(unittest.TestCase):
         self.assertEqual(result.patch_mode, "manifest-only")
 
     def test_refuses_to_overwrite_original(self):
-        src = Path("/tmp/overwrite_guard_test.nup")
+        src = Path("tmp/overwrite_guard_test.nup")
         _make_nup(src)
         self.addCleanup(src.unlink, missing_ok=True)
         with self.assertRaises(RomValidationError):
             OOTRandomizer(RandomizerConfig(output_path=str(src))).randomize(str(src))
 
     def test_handles_unwritable_output_dir(self):
-        src = Path("/tmp/unwritable_output_source.nup")
+        self.skipTest("This does not work on Windows OSes")
+        src = Path("tmp/unwritable_output_source.nup")
         _make_nup(src)
         blocked = Path("/tmp/blocked_oot_output_dir")
         blocked.mkdir(exist_ok=True)

@@ -320,32 +320,32 @@ NPC_LOCATIONS: dict[tuple[str, str, str | None], tuple[str, str, str]] = {
     ),
     ("Dm_FairyFountain_Din.bfevfl.zs", "Item_DinFire", None): (
         "DeathMountainTrail",
-        "Bomb_Bag and (Goron_Bracelet or Silver_Gauntlets or Golden_Gauntlets) and can_play(Zeldas_Lullaby)",
+        "Bomb_Bag and (Goron_Bracelet or Silver_Gauntlets or Golden_Gauntlets) and (Zeldas_Lullaby and (Fairy_Ocarina or Ocarina_of_Time))",
         "Great Fairy for 25 rupees",
     ),
     ("Dm_FairyFountain_Frore.bfevfl.zs", "Item_FaroreWind", None): (
         "ZoraFountain",
-        "has_explosives and can_play(Zeldas_Lullaby)"
+        "Bomb_Bag and (Goron_Bracelet or Silver_Gauntlets or Golden_Gauntlets) and (Zeldas_Lullaby and (Fairy_Ocarina or Ocarina_of_Time))",
         "Great Fairy for 100 rupees",
     ),
     ("Dm_FairyFountain_Nayru.bfevfl.zs", "Item_NayruLove", None): (
         "DesertColossus",
-        "(has_explosives or (Megaton_Hammer and is_adult)) and can_play(Zeldas_Lullaby)"
+        "(Bomb_Bag and (Goron_Bracelet or Silver_Gauntlets or Golden_Gauntlets) or (Megaton_Hammer and is_adult)) and (Zeldas_Lullaby and (Fairy_Ocarina or Ocarina_of_Time)) and Item_Wallet_Medium",
         "Great Fairy for 300 rupees",
-    ), 
+    ),
     ("Dm_FairyFountain_Power.bfevfl.zs", "Item_FairyBless_MP", None): (
         "HyruleCastle",
-        "has_explosives and is_child and can_play(Zeldas_Lullaby)",
+        "Bomb_Bag and (Goron_Bracelet or Silver_Gauntlets or Golden_Gauntlets) and is_child and (Zeldas_Lullaby and (Fairy_Ocarina or Ocarina_of_Time))",
         "Great Fairy for 50 rupees",
     ),
     ("Dm_FairyFountain_Wisdom.bfevfl.zs", "Item_FairyBless_MPDouble", None): (
         "DeathMountainCrater",
-        "Megaton_Hammer and is_adult and can_play(Zeldas_Lullaby)",
+        "Megaton_Hammer and is_adult and (Zeldas_Lullaby and (Fairy_Ocarina or Ocarina_of_Time))",
         "Great Fairy for 200 rupees",
     ),
     ("Dm_FairyFountain_Courage.bfevfl.zs", "Item_FairyBless_DefenseDouble", None): (
         "OutsideGanonCastle",
-        "Golden_Gauntlets and can_play(Zeldas_Lullaby)",
+        "Golden_Gauntlets and (Zeldas_Lullaby and (Fairy_Ocarina or Ocarina_of_Time)) and Item_Wallet_Medium",
         "Great Fairy for 500 rupees",
     ),
 }

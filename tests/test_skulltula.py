@@ -180,8 +180,10 @@ class SkullPlanningTests(unittest.TestCase):
             self.assertTrue(all(n <= 1 for n in per_dungeon.values()), per_dungeon)
 
     def test_without_world(self):
+        # The toy chests plus skull rewards already fill every chest-kind slot, so shops are left
+        # off here; shopsanity has its own tests.
         for seed in range(10):
-            plan = plan_seed(seed, SLOTS, None, PlanOptions(shuffle_heart_pieces=False))
+            plan = plan_seed(seed, SLOTS, None, PlanOptions(shuffle_heart_pieces=False, shop_slots_per_shop=0))
             self.assertTrue(all(can_hand_over(i) for i in plan.skull_assignments.values()))
 
 

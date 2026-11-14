@@ -125,9 +125,9 @@ class DinFairyReceivedTest(unittest.TestCase):
 
 class SlotTableTest(unittest.TestCase):
     def test_twenty_five_locations_one_per_flow_item_label(self):
-        self.assertEqual(len(NPC_SLOTS), 25)
+        self.assertEqual(len(NPC_SLOTS), 30)
         keys = [(slot.flow, slot.item, slot.label) for slot in NPC_SLOTS.values()]
-        self.assertEqual(len(set(keys)), 25)
+        self.assertEqual(len(set(keys)), 30)
 
     def test_frog_choir_hearts_are_two_slots_with_different_groups(self):
         frog = [s for s in NPC_SLOTS.values() if s.flow == FROG + ".zs" and s.item == "Obj_Heart_Piece"]

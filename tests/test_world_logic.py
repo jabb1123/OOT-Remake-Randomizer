@@ -191,6 +191,7 @@ class TemplatePlanningTests(unittest.TestCase):
         vanilla |= {song_location_name(f): s for f, s in SONG_SLOTS.items()}
         vanilla |= {event_location_name(f): item for f, item in EVENT_SLOTS.items()}
         vanilla |= {loc: slot.item for loc, slot in NPC_SLOTS.items()}
+        vanilla |= {skull_location_name(n): i for n, i in SKULL_REWARDS.items()}
         res = self.world.explore(vanilla, {"bombchus_in_logic": True})
         self.assertTrue(self.world.goal_met(res))
         self.assertEqual(set(vanilla) - res.locations, set())

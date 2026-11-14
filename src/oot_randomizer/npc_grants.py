@@ -72,14 +72,12 @@ _NPC_GRANTS: tuple[tuple[str, str], ...] = (
     ("Dm_HrlCastle_0050.bfevfl.zs", "Item_ZeldaLetter"),
     ("Npc_Hylia_001_Adult.bfevfl.zs", "Obj_Heart_Piece"),
     ("Npc_Hylia_045_Child.bfevfl.zs", "Obj_Heart_Piece"),
-    ("MiniGame_FrogTenors.bfevfl.zs", "Obj_Heart_Piece"),
     ("Dm_FairyFountain_Din.bfevfl.zs", "Item_DinFire"),
     ("Dm_FairyFountain_Frore.bfevfl.zs", "Item_FaroreWind"),
     ("Dm_FairyFountain_Nayru.bfevfl.zs", "Item_NayruLove"),
     ("Dm_FairyFountain_Power.bfevfl.zs", "Item_FairyBless_MP"),
     ("Dm_FairyFountain_Wisdom.bfevfl.zs", "Item_FairyBless_MPDouble"),
     ("Dm_FairyFountain_Courage.bfevfl.zs", "Item_FairyBless_DefenseDouble"),
-
 )
 
 # Two grants of the same item in one flow, told apart by the sub-flow that makes them. The Song of
@@ -108,6 +106,11 @@ NPC_ITEM_DISPLAY_NAMES: dict[str, str] = {
     "Item_Sword_Biggoron": "Biggoron Sword",
     "Item_Gauntlet_Goron": "Goron_Bracelet",
     "Item_DinFire": "Dins Fire",
+    "Item_FaroreWind": "Farore's Wind",
+    "Item_NayruLove": "Nayru's Love",
+    "Item_FairyBless_MP": "Spin Attack Upgrade",
+    "Item_FairyBless_MPDouble": "Magic Meter Upgrade",
+    "Item_FairyBless_DefenseDouble": "Half Damage",
     "Item_WeirdEgg": "Alarm_Cucco",
     "Item_ZeldaLetter": "Zeldas_Letter",
     "Obj_Heart_Piece": "Heart Piece",

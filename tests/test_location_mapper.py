@@ -88,7 +88,7 @@ class LocationMapperTests(unittest.TestCase):
         self.assertIn("deku_tree", index)
         self.assertEqual(len(index["deku_tree"]), 4)
 
-        loaded = load_summary_file("/Users/jacob/Desktop/Roms/oot_randomizer/chest_locations_summary.json")
+        loaded = load_summary_file("./chest_locations_summary.json")
         self.assertTrue(loaded)
 
 

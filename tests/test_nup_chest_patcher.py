@@ -5,13 +5,10 @@ import unittest
 from pathlib import Path
 
 from oot_randomizer.nup_chest_patcher import (
-    ChestEntry,
     NupChestPatcher,
-    NupPatchError,
     _detect_dict_id,
     _walk_byml_chests,
 )
-
 
 # ---------------------------------------------------------------------------
 # Unit tests that don't need the real NUP
