@@ -30,6 +30,8 @@ Only these parameters change. Model, LOD and XLink references keep the vanilla a
 | Enemy_Scrub_Business_Common (Business Scrub bag sales) | Stick Bag Large / Nut Bag Large | LostWood | child + Deku Sticks (stick), child + Deku Nuts + Bomb Bag (nut) |
 | Dm_LostWood_0040 (Lost Woods scrub target) | Bullet Bag Medium (1st upgrade) | LostWood | child + Slingshot (flow forced to this slot, see below) |
 | Npc_Goron_Biggoron_Adult | Biggoron Sword | DeathMountainTrail | adult, Ice_Cavern_Clear, (can_play(Eponas_Song) or Longshot), (has_bombs or Megaton_Hammer) |
+| MiniGame_FrogTenors (Frog Choir, Song of Storms) | Heart Piece | ZoraRiver | child, Zelda's Lullaby, Sarias, Epona's, Sun's, Song of Time (the Frog Choir requirement) |
+| MiniGame_FrogTenors (Frog Choir, insect repellent game) | Heart Piece | ZoraRiver | same as the Song of Storms heart |
 
 The Biggoron row is the final reward of the Biggoron chain. The chain itself stays fixed (Option A).
 Only the item handed over at the end is randomized. Its logic is the union of the chain gates:
@@ -120,12 +122,28 @@ by the progressive bullet bag fix above.
 - Scrub bools: `LostWood_ScrubForestStage_SkullMaskEventLaunched` and
   `LostWood_ScrubForestStage_TrueMaskEventLaunched`. These gate whether the scrub grant replays.
 
+## Frog Choir hearts (two grants in one flow)
+
+`MiniGame_FrogTenors` pays two Heart Pieces, and both are `Obj_Heart_Piece`. They come from two
+different sub-flows of the same file, so a flow-and-item key cannot tell them apart:
+
+| Heart | Sub-flow | Event |
+| --- | --- | --- |
+| Song of Storms (minigame) | `GetInEvent_NotTurn_NotNpc` | Event384 |
+| Insect repellent (game) | `MushiToriGame` | Event161, Event75 |
+
+`_NPC_GRANT_GROUPS` in `npc_grants.py` lists both as `NpcSlot`s with a `group` set to the
+sub-flow name. `patch_npc_grants` accepts `(group, item)` keys. A `(None, item)` key matches any
+grant of that item, and a group key matches only that sub-flow. Both hearts share the Frog Choir
+requirement, and they appear as separate locations in logic. The Event162/Event76 `Obj_Rupee_Blue`
+grants in `MushiToriGame` are not randomized.
+
 ## Options
 
 - Planner pool group `npc`, `PlanOptions.shuffle_npc_items` (default `True`).
 - CLI `--no-npc-items` keeps the vanilla NPC items. These locations are not majors for
   `one_major_per_dungeon`, the same as event items.
-- Logic check: 23 NPC locations. The vanilla goal is reachable, and 347 of 347 locations are
+- Logic check: 27 NPC slots (25 plain, plus the two Frog Choir hearts). The vanilla goal is reachable, and 347 of 347 locations are
   listed and reachable.
 
 ## Unverified in-game

@@ -31,6 +31,7 @@ RAW_DIR = Path(
 )
 HIT_TARGET = "MiniGame_HitTarget.bfevfl"
 FISHING = "MiniGame_Fishing.bfevfl"
+FROG = "MiniGame_FrogTenors.bfevfl"
 DM_LOST_WOOD = "Dm_LostWood_0040.bfevfl"
 BIGGORON = "Npc_Goron_Biggoron_Adult.bfevfl"
 SCRUB = "Enemy_Scrub_Business_Dream.bfevfl"
@@ -56,7 +57,7 @@ def _serialize(flow) -> bytes:
 
 
 def _grant_values(data: bytes) -> list[str]:
-    return [params[key] for params, key in _grant_params(_load(data))]
+    return [params[key] for params, key, _ in _grant_params(_load(data))]
 
 
 def _raw_or_skip(name: str) -> bytes:
@@ -67,10 +68,17 @@ def _raw_or_skip(name: str) -> bytes:
 
 
 class SlotTableTest(unittest.TestCase):
-    def test_twenty_three_locations_one_per_flow_item_pair(self):
-        self.assertEqual(len(NPC_SLOTS), 23)
-        pairs = [(slot.flow, slot.item) for slot in NPC_SLOTS.values()]
-        self.assertEqual(len(set(pairs)), 23)
+    def test_twenty_seven_locations_one_per_flow_item_label(self):
+        self.assertEqual(len(NPC_SLOTS), 27)
+        keys = [(slot.flow, slot.item, slot.label) for slot in NPC_SLOTS.values()]
+        self.assertEqual(len(set(keys)), 27)
+
+    def test_frog_choir_hearts_are_two_slots_with_different_groups(self):
+        frog = [s for s in NPC_SLOTS.values() if s.flow == FROG + ".zs" and s.item == "Obj_Heart_Piece"]
+        self.assertEqual(
+            {(s.group, s.label) for s in frog},
+            {("GetInEvent_NotTurn_NotNpc", "song of storms"), ("MushiToriGame", "insect repellent")},
+        )
 
     def test_progressive_bullet_bag_games_keep_one_slot_each(self):
         self.assertIn(_loc(DM_LOST_WOOD, "Item_BulletBag_Medium"), NPC_SLOTS)
@@ -103,7 +111,7 @@ class SlotTableTest(unittest.TestCase):
         self.assertTrue(NPC_FLOWS.isdisjoint(taken), NPC_FLOWS & taken)
 
     def test_location_table_matches_slots(self):
-        self.assertEqual(set(NPC_LOCATIONS), {(s.flow, s.item) for s in NPC_SLOTS.values()})
+        self.assertEqual(set(NPC_LOCATIONS), {(s.flow, s.item, s.label) for s in NPC_SLOTS.values()})
 
 
 class PermutationTest(unittest.TestCase):
@@ -184,6 +192,25 @@ class PatchTest(unittest.TestCase):
         raw = _raw_or_skip(HIT_TARGET)
         with self.assertRaises(ValueError):
             patch_npc_grant(raw, "Item_Scale_Gold", "Item_Scale_Silver")
+
+    def test_frog_hearts_repoint_by_their_own_sub_flow(self):
+        raw = _raw_or_skip(FROG)
+        storm = _grant_values(patch_npc_grants(raw, {("GetInEvent_NotTurn_NotNpc", "Obj_Heart_Piece"): "Item_Hookshot"}))
+        self.assertEqual(storm.count("Item_Hookshot"), 1)
+        insect = _grant_values(patch_npc_grants(raw, {("MushiToriGame", "Obj_Heart_Piece"): "Item_Hookshot"}))
+        self.assertEqual(insect.count("Item_Hookshot"), 2)
+        both = _grant_values(patch_npc_grants(raw, {
+            ("GetInEvent_NotTurn_NotNpc", "Obj_Heart_Piece"): "Item_Hookshot",
+            ("MushiToriGame", "Obj_Heart_Piece"): "Item_Quiver_Medium",
+        }))
+        self.assertEqual(both.count("Item_Hookshot"), 1)
+        self.assertEqual(both.count("Item_Quiver_Medium"), 2)
+        self.assertEqual(both.count("Obj_Heart_Piece"), 0)
+
+    def test_group_key_that_matches_no_grant_raises(self):
+        raw = _raw_or_skip(FROG)
+        with self.assertRaises(ValueError):
+            patch_npc_grants(raw, {("Dm_SY_GetInEvent", "Obj_Heart_Piece"): "Item_Hookshot"})
 
     def test_progressive_branches_always_reach_the_kept_grant(self):
         for flow_file, branches in PROGRESSIVE_BRANCHES.items():
@@ -315,17 +342,17 @@ class ShippedLogicTest(unittest.TestCase):
         cls.world = load_world(DEFAULT_WORLD_PATH)
 
     def test_every_npc_location_is_listed_in_its_region(self):
-        for (flow, item), (region, _, _) in NPC_LOCATIONS.items():
-            with self.subTest(location=npc_location_name(flow, item)):
-                self.assertEqual(self.world.location_region[npc_location_name(flow, item)], region)
+        for (flow, item, label), (region, _, _) in NPC_LOCATIONS.items():
+            with self.subTest(location=npc_location_name(flow, item, label)):
+                self.assertEqual(self.world.location_region[npc_location_name(flow, item, label)], region)
 
     def test_world_has_no_errors(self):
         self.assertEqual(self.world.errors, [])
 
-    def test_bag_upgrades_require_their_base_bag(self):
-        # Progressive bullet bag slots are forced in the flow, so they need no base bag.
+    def test_horseback_large_quiver_requires_the_bow(self):
+        # The Large quiver moved from HitTarget to Horseback Archery, and the Medium award was dropped.
         for raw_name, item, base in [
-            (HIT_TARGET, "Item_Quiver_Large", "Item_Quiver_Medium"),
+            ("Minigame_HorsebackArchery.bfevfl", "Item_Quiver_Large", "Item_Range_Bow"),
         ]:
             name = _loc(raw_name, item)
             region = self.world.regions[self.world.location_region[name]]

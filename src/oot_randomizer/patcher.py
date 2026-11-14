@@ -286,11 +286,11 @@ class RomPatcher:
                         lambda data, o=old_item, n=new_item: patch_event_item(data, o, n),
                     )
                     applied += 1
-            npc_changes: dict[str, dict[str, str]] = {}
+            npc_changes: dict[str, dict[tuple[str | None, str], str]] = {}
             for loc, new_item in (npc_assignments or {}).items():
                 slot = NPC_SLOTS[loc]
                 if new_item != slot.item:
-                    npc_changes.setdefault(slot.flow, {})[slot.item] = new_item
+                    npc_changes.setdefault(slot.flow, {})[(slot.group, slot.item)] = new_item
             for flow_file, changes in npc_changes.items():
                 patcher.replace_file(flow_file, lambda data, c=changes: patch_npc_grants(data, c))
                 applied += 1

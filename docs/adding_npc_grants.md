@@ -42,7 +42,7 @@ A gate that reads the vanilla item can send a randomized item down the wrong bra
 
 In [test_npc_grants.py](../tests/test_npc_grants.py):
 
-- Update the count tests (currently 23 NPC locations).
+- Update the count tests (currently 27 NPC locations).
 - Add the flow to the round-trip, idempotent, and "every flow grants its slot items" tests.
 - Check the region listing test.
 
@@ -56,6 +56,7 @@ In [test_npc_grants.py](../tests/test_npc_grants.py):
 
 - A gate on a vanilla item can make a location unreachable or pay the wrong item.
 - One item can have several grant nodes (fishing has two). Patch all of them.
+- If one flow grants the same item from two sub-flows (the Frog Choir gives two `Obj_Heart_Piece`s), add a second `NpcSlot` with a `group` and a `label`. Give the `NPC_LOCATIONS` key a 3-tuple `(flow, item, label)`, and key `patch_npc_grants` by `(group, item)`.
 - An unknown name in logic creates `world.errors`, and that cascades into planner test failures. Fix the first error before reading the rest.
 
 ## Candidates
