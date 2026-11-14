@@ -35,12 +35,14 @@ SKULL_LOCATIONS: dict[str, int] = {skull_location_name(n): n for n in SKULL_REWA
 
 
 def can_hand_over(item: str) -> bool:
-    """Items an NPC can give through the get-item demo.
+    """Items an NPC can give through a name-based grant (GetInEvent or hand-over).
 
-    Chest-only actors (TBox_*), dungeon-bound items and the scrub placeholder are excluded.
+    Chest-only actors (TBox_*, except rupees), dungeon-bound items and the scrub placeholder are
+    excluded. Rupees qualify because vanilla grants TBox_Rupee_Green by name (Lost Woods).
     """
+
     if item.startswith(("TBox_", "Tbox_", "Item_Dungeon_", "Item_Melody_")):
-        return False
+        return True
     return item != "Item_ScrubBusinessSeed"
 
 

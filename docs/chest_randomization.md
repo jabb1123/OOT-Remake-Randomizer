@@ -65,10 +65,10 @@ The loose overworld `Obj_Heart_Piece` pickups (not chests) are randomized as pic
 The planner in [planner.py](../src/oot_randomizer/planner.py) fills every randomized location. Each kind of location accepts:
 
 - **Chests:** any item from the chest pool, including songs, medallions, ocarinas, bags, and rupees.
-- **Song, event, and NPC locations:** their own group (a song for a song slot, and so on), or any item an NPC can hand over (`can_hand_over`). Songs and dungeon items are not hand-over items, so they cannot go to event or NPC slots. Consumable bundles (`CANNOT_NAME_GRANT` in `item_ids.py`) are never placed in these locations, because their name-based grant gives the Bomb Bag.
+- **Song, event, and NPC locations:** any item an NPC can hand over (`can_hand_over`). Songs and dungeon items are not hand-over items, so they cannot go to event or NPC slots. Rupees (`TBox_Rupee_*`) are hand-over items, because vanilla grants `TBox_Rupee_Green` by name. Consumable bundles (`CANNOT_NAME_GRANT` in `item_ids.py`) are never placed in these locations, because their name-based grant gives the Bomb Bag.
 - **Skulltula rewards:** hand-over items only.
 - **Shop and loose heart slots:** sellable or pickupable items only (`can_sell`, `can_pickup`). Each shop or heart slot also adds one filler to the pool (`SHOP_FILLER_ITEMS`).
-- **Rupees and dungeon items:** chests only, since no other location can give them.
+- **Dungeon items, bundles, and other `TBox_*` actors:** chests only. Rupees are the exception above.
 
 Progression items prefer their own group's locations and fall back to chests. Chest-only items are placed before songs, and hand-over items go last.
 

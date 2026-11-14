@@ -33,6 +33,8 @@ The Zora's Sapphire grant is `Item_Stone_Water` in `Dm_ZoraFountain_0030` (Event
 ## Planner and logic
 
 - Event locations use the group `"event"` and are controlled by `PlanOptions.shuffle_event_items` (default `True`, CLI `--no-event-items`).
+- Every item is placed uniformly at random among the slots it can legally fill, regardless of group. Event items can land in event, chest, shop, Skulltula, song, and NPC slots; the legality rules are `can_hand_over` and the per-kind checks in `allowed()`.
+- Feasibility guard: chest-only items (bundles, dungeon items, and `TBox_*` other than rupees) can only use chest-kind slots. A flexible item may take a chest-kind slot only while enough chest-kind slots remain for them. In the current pool, chest-only items fill most chest-kind slots, so only a small number of flexible placements per seed can land there (about 30 in the 50-seed measurement).
 - Event items are not counted as majors for `one_major_per_dungeon`. Counting them made fill infeasible on 9 of 10 seeds.
 - Each event location has an entry in the region TOML files under `logic\world\`, keyed `"<flow stem> (event item)"`. The requirements match the vanilla gates.
 

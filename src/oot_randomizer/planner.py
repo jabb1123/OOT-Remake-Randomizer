@@ -265,6 +265,18 @@ def _try_fill(
     # Filler copies share one shop actor, so every copy must sit in a slot with the same price.
     filler_price: dict[str, int] = {}
     kind_of = {loc: kind for kind, locs in open_locations.items() for loc in locs}
+    # Chest-only items (bundles, dungeon items, ...) can only use chest-kind slots, so a flexible item
+    # may take a chest slot only while enough chest slots remain for them. This is a feasibility
+    # guard: outside it, every item is placed uniformly at random.
+    group_of = {item: group for item, group in pool}
+
+    def needs_chest(item: str) -> bool:
+        return item in CANNOT_NAME_GRANT or (group_of.get(item) == "chest" and not can_hand_over(item))
+
+    chest_free = sum(1 for loc, kind in kind_of.items() if kind == "chest" and loc not in placed)
+    chest_needed = sum(1 for item, _ in pool if needs_chest(item))
+    if chest_needed > chest_free:
+        return None
 
     def allowed(loc: str, item: str, group: str) -> bool:
         if item == _WEIRD_EGG and loc != _WEIRD_EGG_SLOT:
@@ -273,6 +285,8 @@ def _try_fill(
         if kind_of[loc] != "chest" and group != kind_of[loc] and not can_hand_over(item):
             return False
         if kind_of[loc] != "chest" and item in CANNOT_NAME_GRANT:
+            return False
+        if kind_of[loc] == "chest" and not needs_chest(item) and chest_free - 1 < chest_needed:
             return False
         if loc in SKULL_LOCATIONS and not can_hand_over(item):
             return False
@@ -289,7 +303,12 @@ def _try_fill(
         return not (item in _MAJORS and loc in dungeon_of and dungeon_of[loc] in dungeons_with_major)
 
     def place(loc: str, item: str) -> None:
+        nonlocal chest_free, chest_needed
         placed[loc] = item
+        if kind_of[loc] == "chest":
+            chest_free -= 1
+        if needs_chest(item):
+            chest_needed -= 1
         if loc in shop_locs:
             if item in SHOP_FILLER_ITEMS:
                 filler_price.setdefault(item, shop_prices[loc])
@@ -316,9 +335,6 @@ def _try_fill(
                    if allowed(loc, item, group)]
         choices += [(rest, i) for i, (item, group) in enumerate(rest) if allowed(loc, item, group)]
         rng.shuffle(choices)
-        # Chest items first: NPC, event and song items have few slots of their own, so they should
-        # not take the shop slots that chest items need.
-        choices.sort(key=lambda c: c[0][c[1]][1] != "chest")
         for source, i in choices:
             item = source[i][0]
             if source is progression and world is not None:
@@ -339,13 +355,6 @@ def _try_fill(
             loc for loc in kind_of
             if loc not in placed and loc in reachable and allowed(loc, item, group)
         ]
-        # Prefer the item's own locations; other groups' locations (chests) are a fallback so they
-        # don't use up the chest slots that chest-only items need. Event items are hand-over
-        # capable, so they skip this and may land in any location.
-        # Prefer the item's own locations; other groups' locations (chests) are a fallback so they
-        # don't use up the chest slots that chest-only items need.
-        own = [loc for loc in candidates if kind_of[loc] == group]
-        candidates = own or candidates
         if not candidates:
             return None
         place(rng.choice(candidates), item)
@@ -355,8 +364,6 @@ def _try_fill(
         if loc not in SKULL_LOCATIONS or loc in placed:
             continue
         choices = [i for i, (item, group) in enumerate(rest) if allowed(loc, item, group)]
-        # Prefer chest-group items so NPC, event, and song items stay available for their own slots.
-        choices = [i for i in choices if rest[i][1] == "chest"] or choices
         if not choices:
             return None
         item, _ = rest.pop(rng.choice(choices))
@@ -377,10 +384,5 @@ def _try_fill(
         candidates = [loc for loc in kind_of if loc not in placed and allowed(loc, item, group)]
         if not candidates:
             return None
-        if can_hand_over(item) and item not in CANNOT_NAME_GRANT and group != "event":
-            # Prefer the item's own slots, then non-chest slots, so chest slots stay free for bundles.
-            own = [loc for loc in candidates if kind_of[loc] == group]
-            non_chest = [loc for loc in candidates if kind_of[loc] != "chest"]
-            candidates = own or non_chest or candidates
         place(rng.choice(candidates), item)
     return placed
