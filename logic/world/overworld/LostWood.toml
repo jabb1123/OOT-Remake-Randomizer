@@ -6,7 +6,6 @@
 [regions."LostWood"]
 
 [regions."LostWood".locations]
-"Dm_Kokiri_0155 (event item)" = "is_child"
 "LostWood Dynamic room 0 #0 (TBox_Rupee_Purple)" = "is_adult"
 "LostWood_ScrubForestStageElder_SkullMaskFirst: Item_StickBag_Medium (npc item)" = "is_child and Deku_Sticks"
 "LostWood_ScrubForestStageElder_TrueMaskFirst: Item_NutBag_Medium (npc item)" = "is_child and Deku_Nuts"
