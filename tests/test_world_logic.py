@@ -189,6 +189,7 @@ class TemplatePlanningTests(unittest.TestCase):
         self.assertEqual(self.world.errors, [])
         vanilla = {s.name: s.vanilla_item for s in self.slots}
         vanilla |= {song_location_name(f): s for f, s in SONG_SLOTS.items()}
+        vanilla |= {event_location_name(f): item for f, item in EVENT_SLOTS.items()}
         vanilla |= {loc: slot.item for loc, slot in NPC_SLOTS.items()}
         res = self.world.explore(vanilla, {"bombchus_in_logic": True})
         self.assertTrue(self.world.goal_met(res))
@@ -196,6 +197,9 @@ class TemplatePlanningTests(unittest.TestCase):
 
     def test_planned_seeds_are_beatable_permutations(self):
         options = PlanOptions()
+        pool = Counter([s.vanilla_item for s in self.slots] + list(SKULL_REWARDS.values())
+                       + list(SONG_SLOTS.values()) + list(EVENT_SLOTS.values())
+                       + [s.item for s in NPC_SLOTS.values()])
         for seed in range(15):
             plan = plan_seed(seed, self.slots, self.world, options)
             placed = {s.name: item for s, item in plan.chest_assignments}
@@ -204,14 +208,8 @@ class TemplatePlanningTests(unittest.TestCase):
             placed |= plan.npc_assignments
             placed |= {skull_location_name(n): i for n, i in plan.skull_assignments.items()}
             res = self.world.explore(placed, options.logic_options)
-            # Skulltula rewards share the chest pool.
-            self.assertEqual(
-                sorted([i for _, i in plan.chest_assignments] + list(plan.skull_assignments.values())),
-                sorted([s.vanilla_item for s in self.slots] + list(SKULL_REWARDS.values())),
-            )
-            self.assertEqual(sorted(plan.song_assignments.values()), sorted(SONG_SLOTS.values()))
-            self.assertEqual(sorted(plan.event_assignments.values()), sorted(EVENT_SLOTS.values()))
-            self.assertEqual(sorted(plan.npc_assignments.values()), sorted(s.item for s in NPC_SLOTS.values()))
+            # Every pool item is placed exactly once, in any kind of location.
+            self.assertEqual(Counter(placed.values()), pool, f"seed {seed}")
             self.assertTrue(self.world.goal_met(res), f"seed {seed}")
             self.assertEqual(set(placed) - res.locations, set(), f"seed {seed}")
 

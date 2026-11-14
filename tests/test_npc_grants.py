@@ -21,7 +21,7 @@ from oot_randomizer.npc_grants import (
     shuffle_npc_items,
 )
 from oot_randomizer.planner import PlanOptions, known_locations, plan_seed
-from oot_randomizer.skulltula_rewards import SKULL_FLOW
+from oot_randomizer.skulltula_rewards import SKULL_FLOW, SKULL_REWARDS
 from oot_randomizer.songs import SONG_SLOTS
 from oot_randomizer.stone_gates import STONE_GATE_FLOWS
 from oot_randomizer.world_logic import DEFAULT_WORLD_PATH, _items_in, load_world
@@ -67,10 +67,10 @@ def _raw_or_skip(name: str) -> bytes:
 
 
 class SlotTableTest(unittest.TestCase):
-    def test_twenty_three_locations_one_per_flow_item_pair(self):
-        self.assertEqual(len(NPC_SLOTS), 23)
+    def test_twenty_two_locations_one_per_flow_item_pair(self):
+        self.assertEqual(len(NPC_SLOTS), 22)
         pairs = [(slot.flow, slot.item) for slot in NPC_SLOTS.values()]
-        self.assertEqual(len(set(pairs)), 23)
+        self.assertEqual(len(set(pairs)), 22)
 
     def test_progressive_bullet_bag_games_keep_one_slot_each(self):
         self.assertIn(_loc(DM_LOST_WOOD, "Item_BulletBag_Medium"), NPC_SLOTS)
@@ -252,6 +252,18 @@ class PatchTest(unittest.TestCase):
         b = patch_npc_grants(fix_progressive_branches(raw, flow_file), changes)
         self.assertEqual(a, b)
 
+    def test_horseback_quiver_skips_pouch_switch_and_chains_heart(self):
+        flow_file = "Minigame_HorsebackArchery.bfevfl.zs"
+        raw = _raw_or_skip(flow_file.removesuffix(".zs"))
+        patched = fix_progressive_branches(raw, flow_file)
+        self.assertNotEqual(patched, raw)
+        self.assertEqual(fix_progressive_branches(patched, flow_file), patched)
+        events = {event.name: event for event in _load(patched).flowchart.events}
+        self.assertIs(events["Event121"].data.nxt.v, events["Event319"])
+        self.assertIs(events["Event133"].data.nxt.v, events["Event319"])
+        self.assertIs(events["Event319"].data.nxt.v, events["Event349"])
+        self.assertEqual(events["Event319"].data.params.data["ActorName"], "Item_Quiver_Large")
+
     def test_every_flow_grants_its_slot_items(self):
         for flow in sorted(NPC_FLOWS):
             with self.subTest(flow=flow):
@@ -265,22 +277,36 @@ class PlannerTest(unittest.TestCase):
     def setUpClass(cls):
         cls.slots = load_default_slots()
 
-    def test_default_plan_assigns_every_npc_location_once(self):
-        plan = plan_seed(42, self.slots, None, PlanOptions())
+    def test_default_plan_places_every_item_once(self):
+        plan = plan_seed(42, self.slots, None, PlanOptions(shop_slots_per_shop=0, shuffle_heart_pieces=False))
         self.assertEqual(set(plan.npc_assignments), set(NPC_SLOTS))
-        self.assertEqual(
-            Counter(plan.npc_assignments.values()),
-            Counter(s.item for s in NPC_SLOTS.values()),
-        )
+        placed = Counter([i for _, i in plan.chest_assignments] + list(plan.skull_assignments.values())
+                         + list(plan.song_assignments.values()) + list(plan.event_assignments.values())
+                         + list(plan.npc_assignments.values()))
+        expected = Counter(s.vanilla_item for s in self.slots) + Counter(SKULL_REWARDS.values())
+        expected += Counter(SONG_SLOTS.values()) + Counter(EVENT_SLOTS.values())
+        expected += Counter(s.item for s in NPC_SLOTS.values())
+        self.assertEqual(placed, expected)
 
     def test_disabled_keeps_vanilla_npc_items(self):
         plan = plan_seed(42, self.slots, None, PlanOptions(shuffle_npc_items=False))
         self.assertEqual(plan.npc_assignments, {loc: s.item for loc, s in NPC_SLOTS.items()})
 
     def test_npc_shuffle_keeps_other_assignments_valid(self):
-        on = plan_seed(7, self.slots, None, PlanOptions())
-        self.assertEqual(sorted(on.event_assignments.values()), sorted(EVENT_SLOTS.values()))
-        self.assertEqual(sorted(on.song_assignments.values()), sorted(SONG_SLOTS.values()))
+        on = plan_seed(7, self.slots, None, PlanOptions(shop_slots_per_shop=0, shuffle_heart_pieces=False))
+        placed = Counter([i for _, i in on.chest_assignments] + list(on.skull_assignments.values())
+                         + list(on.song_assignments.values()) + list(on.event_assignments.values())
+                         + list(on.npc_assignments.values()))
+        expected = Counter(s.vanilla_item for s in self.slots) + Counter(SKULL_REWARDS.values())
+        expected += Counter(SONG_SLOTS.values()) + Counter(EVENT_SLOTS.values())
+        expected += Counter(s.item for s in NPC_SLOTS.values())
+        self.assertEqual(placed, expected)
+
+    def test_weird_egg_only_goes_to_malons_slot(self):
+        for seed in range(1, 6):
+            plan = plan_seed(seed, self.slots, None, PlanOptions(shop_slots_per_shop=0, shuffle_heart_pieces=False))
+            egg_slots = [loc for loc, item in plan.npc_assignments.items() if item == "Item_WeirdEgg"]
+            self.assertEqual(egg_slots, ["Goto_HyruleCastle: Item_WeirdEgg (npc item)"], seed)
 
 
 class ShippedLogicTest(unittest.TestCase):

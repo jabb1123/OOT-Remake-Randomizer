@@ -1,5 +1,6 @@
 import io
 import unittest
+from collections import Counter
 from pathlib import Path
 
 from oot_randomizer.engine import load_default_slots
@@ -11,7 +12,9 @@ from oot_randomizer.event_items import (
     patch_event_item,
     shuffle_event_items,
 )
+from oot_randomizer.npc_grants import NPC_SLOTS
 from oot_randomizer.planner import PlanOptions, known_locations, plan_seed
+from oot_randomizer.skulltula_rewards import SKULL_REWARDS
 from oot_randomizer.songs import SONG_SLOTS, patch_bfevfl_song
 
 RAW_DIR = Path(
@@ -178,10 +181,16 @@ class PlannerEventTest(unittest.TestCase):
     def setUp(self):
         self.slots = load_default_slots()
 
-    def test_default_plan_assigns_every_event_item_once(self):
-        plan = plan_seed(42, self.slots, None, PlanOptions())
+    def test_default_plan_places_every_item_once(self):
+        plan = plan_seed(42, self.slots, None, PlanOptions(shop_slots_per_shop=0, shuffle_heart_pieces=False))
         self.assertEqual(set(plan.event_assignments), set(EVENT_SLOTS))
-        self.assertEqual(sorted(plan.event_assignments.values()), sorted(EVENT_SLOTS.values()))
+        placed = Counter([i for _, i in plan.chest_assignments] + list(plan.skull_assignments.values())
+                         + list(plan.song_assignments.values()) + list(plan.event_assignments.values())
+                         + list(plan.npc_assignments.values()))
+        expected = Counter(s.vanilla_item for s in self.slots) + Counter(SKULL_REWARDS.values())
+        expected += Counter(SONG_SLOTS.values()) + Counter(EVENT_SLOTS.values())
+        expected += Counter(s.item for s in NPC_SLOTS.values())
+        self.assertEqual(placed, expected)
 
     def test_disabled_keeps_vanilla_event_items(self):
         plan = plan_seed(42, self.slots, None, PlanOptions(shuffle_event_items=False))

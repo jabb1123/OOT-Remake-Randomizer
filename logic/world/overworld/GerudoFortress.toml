@@ -8,7 +8,6 @@
 [regions."GerudoFortress".locations]
 "GerudoFortress Static room 0 #0 (Obj_Heart_Piece)" = "is_adult and Longshot"
 "GerudoFortress Static room 0 #0 (TBox_Rupee_Red)" = "is_adult"
-"Minigame_HorsebackArchery: Item_Quiver_Medium (npc item)" = "is_adult and Bow"
 "Minigame_HorsebackArchery: Item_Quiver_Large (npc item)" = "is_adult and Bow and Quiver_Medium"
 
 [regions."GerudoFortress".skulltulas]

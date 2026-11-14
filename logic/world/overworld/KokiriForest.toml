@@ -12,7 +12,6 @@
 "KokiriForest Dynamic room 0 #0 (TBox_Rupee_Purple)" = "can_play(Song_of_Storms)"
 "KokiriForest Dynamic room 0 #1 (TBox_Rupee_Blue)" = "true"
 "KokiriForest Dynamic room 0 #2 (TBox_Rupee_Blue)" = "true"
-"KokiriForest Static room 0 #0 (TBox_Rupee_Green)" = "true"
 
 [regions."KokiriForest".skulltulas]
 "KF GS Know It All House" = "is_child"  # original: is_child and can_child_attack and at_night and (had_night_start or can_leave_forest or can_play(Suns_Song) )

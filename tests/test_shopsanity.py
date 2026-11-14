@@ -13,9 +13,10 @@ import zstandard
 
 from oot_randomizer.byml7 import U32, U64, dump_byml7, parse_byml7, parse_byml7_typed
 from oot_randomizer.engine import ChestSlot, load_default_slots
-from oot_randomizer.event_items import event_location_name
+from oot_randomizer.event_items import EVENT_SLOTS, event_location_name
 from oot_randomizer.gamedata_list import GAME_DATA_LIST, SHOP_SOLDOUT_NAMES, murmur3_32
 from oot_randomizer.item_ids import MAJOR_ITEM_ACTORS
+from oot_randomizer.npc_grants import NPC_SLOTS
 from oot_randomizer.nup_chest_patcher import _decompress, _load_dicts_from_sarc, _restbl_entry_offset
 from oot_randomizer.patcher import PatchRecord, RomPatcher
 from oot_randomizer.planner import PlanningError, PlanOptions, known_locations, plan_seed, shop_requirements
@@ -411,16 +412,18 @@ class ShippedShopPlanningTests(unittest.TestCase):
     def test_fillers_only_in_chests_and_counts_balance(self):
         # Each new shop or heart slot adds one pool entry (SHOP_FILLER_ITEMS); nothing else is added.
         fillers = set(SHOP_FILLER_ITEMS)
-        expected = Counter(s.vanilla_item for s in self.slots) + Counter(SKULL_REWARDS.values())
+        expected = (Counter(s.vanilla_item for s in self.slots) + Counter(SKULL_REWARDS.values())
+                    + Counter(SONG_SLOTS.values()) + Counter(EVENT_SLOTS.values())
+                    + Counter(s.item for s in NPC_SLOTS.values()))
         for seed, plan in self.plans.items():
-            chest_items = Counter(i for _, i in plan.chest_assignments)
-            others = (Counter(plan.skull_assignments.values()) + Counter(i for _, i, _ in plan.shop_assignments)
-                      + Counter(i for _, i in plan.heart_assignments))
-            total = chest_items + others
-            added = total - expected
+            placed = (Counter(i for _, i in plan.chest_assignments) + Counter(plan.skull_assignments.values())
+                      + Counter(plan.song_assignments.values()) + Counter(plan.event_assignments.values())
+                      + Counter(plan.npc_assignments.values())
+                      + Counter(i for _, i, _ in plan.shop_assignments) + Counter(i for _, i in plan.heart_assignments))
+            added = placed - expected
             self.assertEqual(sum(added.values()), len(plan.shop_assignments) + len(plan.heart_assignments), seed)
             self.assertTrue(set(added) <= fillers, (seed, added))
-            self.assertEqual(expected - total, Counter(), seed)
+            self.assertEqual(expected - placed, Counter(), seed)
 
     def test_planned_seeds_are_beatable_with_price_rules(self):
         options = PlanOptions()
@@ -432,14 +435,18 @@ class ShippedShopPlanningTests(unittest.TestCase):
             self.assertEqual(set(placed) - res.locations, set(), seed)
 
     def test_disabled(self):
-        expected = sorted([s.vanilla_item for s in self.slots] + list(SKULL_REWARDS.values()))
+        expected = (Counter(s.vanilla_item for s in self.slots) + Counter(SKULL_REWARDS.values())
+                    + Counter(SONG_SLOTS.values()) + Counter(EVENT_SLOTS.values())
+                    + Counter(s.item for s in NPC_SLOTS.values()))
         for seed in range(5):
             plan = plan_seed(seed, self.slots, self.world,
                              PlanOptions(shop_slots_per_shop=0, shuffle_heart_pieces=False))
             self.assertEqual(plan.shop_assignments, [])
             self.assertEqual(plan.extra_requirements, {})
-            self.assertEqual(sorted([i for _, i in plan.chest_assignments] + list(plan.skull_assignments.values())),
-                             expected)
+            placed = (Counter([i for _, i in plan.chest_assignments] + list(plan.skull_assignments.values())
+                              + list(plan.song_assignments.values()) + list(plan.event_assignments.values())
+                              + list(plan.npc_assignments.values())))
+            self.assertEqual(placed, expected)
 
     def test_max_slots_and_one_major_per_dungeon(self):
         dungeon_of = self.world.dungeon_locations

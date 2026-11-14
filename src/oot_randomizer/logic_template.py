@@ -35,7 +35,7 @@ SCENE_ENTRY: dict[str, str] = {
     "ZoraDomain": "(is_adult or Deku_Tree_Clear) and Zeldas_Lullaby",
     "ZoraFountain": "(is_adult or Deku_Tree_Clear) and Zeldas_Lullaby",
     "InsideJabuJabuBelly": "is_child and Deku_Tree_Clear and Zeldas_Lullaby",
-    "HyruleCastle": "is_child and Deku_Tree_Clear and",
+    "HyruleCastle": "is_child and Deku_Tree_Clear",
     "BottomOfTheWell": "is_child and Deku_Tree_Clear and Song_of_Storms",
     "IceCavern": "is_adult and Zeldas_Lullaby",
     "ForestTemple": "is_adult and Hookshot",
@@ -229,11 +229,6 @@ NPC_LOCATIONS: dict[tuple[str, str], tuple[str, str, str]] = {
         "true",
         "Diving Minigame",
     ),
-    ("Minigame_HorsebackArchery.bfevfl.zs", "Item_Quiver_Medium"): (
-        "GerudoFortress",
-        "is_adult and Bow",
-        "Horseback Archery",
-    ),
     ("Minigame_HorsebackArchery.bfevfl.zs", "Item_Quiver_Large"): (
         "GerudoFortress",
         "is_adult and Bow and Quiver_Medium",
@@ -283,12 +278,12 @@ NPC_LOCATIONS: dict[tuple[str, str], tuple[str, str, str]] = {
     ),
     ("SubEvent_FindRichard.bfevfl.zs", "Obj_Heart_Piece"): (
         "Market",
-        "is_child and moving_time",
+        "is_child and Alarm_Cucco",
         "Mamamu Yan, after finding Richard",
     ),
     ("Npc_SkullKid_Child_02.bfevfl.zs", "Obj_Heart_Piece"): (
         "LostWood",
-        "is_child and has_ocarina",
+        "is_child and (Fairy_Ocarina or Ocarina_of_Time)",
         "Skullkid, on playing game 3 times",
     ),
     ("Dm_Goron_0030.bfevfl.zs", "Item_Gauntlet_Goron"): (
@@ -298,7 +293,7 @@ NPC_LOCATIONS: dict[tuple[str, str], tuple[str, str, str]] = {
     ),
     ("Dm_FairyFountain_Din.bfevfl.zs", "Item_DinFire"): (
         "DeathMountainTrail",
-        "has_bombs",
+        "Bomb_Bag and (Goron_Bracelet or Silver_Gauntlets or Golden_Gauntlets) and Zeldas_Lullaby",
         "Great Fairy for 25 rupees",
     ),
     ("Goto_HyruleCastle.bfevfl.zs", "Item_WeirdEgg"): (

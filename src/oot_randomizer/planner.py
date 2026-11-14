@@ -4,6 +4,12 @@ Progression items (anything the logic file mentions) are placed one at a time. E
 only go in a location reachable while assuming every still-unplaced progression item is owned,
 which guarantees the final seed is completable. Everything else is placed afterwards.
 
+Every location kind takes items from any pool group, as long as the location can physically give
+the item. Chest locations take anything. Song, event, and NPC locations take their own group plus
+any item an NPC can hand over (`can_hand_over`), which keeps the pool balanced: each of those
+groups has exactly one location per item, so a song can only leave its learning event if another
+item takes its place there.
+
 House of Skulltula rewards share the chest pool, but only accept items an NPC can hand over.
 Picked shop slots (shopsanity) share it too, but only accept items a shop can sell, each item
 at most once; they are stocked first, still by assumed fill. Loose overworld heart pieces are
@@ -18,7 +24,7 @@ import random
 from collections import Counter
 from dataclasses import dataclass, field
 
-from .engine import UNSHUFFLED_ITEMS, ChestSlot
+from .engine import NOT_IN_GAME_SLOTS, UNSHUFFLED_ITEMS, ChestSlot
 from .event_items import EVENT_SLOTS, event_location_name
 from .heart_pickups import HEART_LOCATIONS, can_pickup
 from .item_ids import MAJOR_ITEM_ACTORS
@@ -42,6 +48,10 @@ _SONG_ACTORS = frozenset(SONG_SLOTS.values())
 # Songs count as majors for "one major item per dungeon". Event items do not: each sits in its
 # dungeon's reward slot, and counting them too leaves the fill with no valid placement.
 _MAJORS = MAJOR_ITEM_ACTORS | _SONG_ACTORS
+
+# The Weird Egg hatch is built into Malon's Hyrule Castle flow, so the egg only goes to her slot.
+_WEIRD_EGG = "Item_WeirdEgg"
+_WEIRD_EGG_SLOT = "Goto_HyruleCastle: Item_WeirdEgg (npc item)"
 
 
 @dataclass
@@ -101,9 +111,9 @@ def shop_requirements(shop_assignments: list[tuple[str, str, int]]) -> dict[str,
 def _cap_shop_slots(rng: random.Random, picked: list, pool: list[tuple[str, str]], skull_count: int) -> list:
     """Drop random picks the pool cannot stock (each slot needs a distinct sellable item, and
     shops and skull rewards together need that many hand-over items)."""
-    chest_items = [item for item, group in pool if group == "chest"]
-    sellable = len({i for i in chest_items if can_sell(i)})
-    hand_over = sum(1 for i in chest_items if can_hand_over(i))
+    items = [item for item, _ in pool]
+    sellable = len({i for i in items if can_sell(i)})
+    hand_over = sum(1 for i in items if can_hand_over(i))
     limit = max(0, min(sellable, hand_over - skull_count))
     if len(picked) <= limit:
         return picked
@@ -121,7 +131,7 @@ def plan_seed(seed: int, slots: list[ChestSlot], world: World | None, options: P
         fixed[loc] = TOKEN_ITEM
 
     for slot in slots:
-        if slot.vanilla_item in UNSHUFFLED_ITEMS or slot.name in excluded:
+        if slot.vanilla_item in UNSHUFFLED_ITEMS or slot.name in excluded or slot.name in NOT_IN_GAME_SLOTS:
             fixed[slot.name] = slot.vanilla_item
         else:
             pool.append((slot.vanilla_item, "chest"))
@@ -248,8 +258,14 @@ def _try_fill(
     dungeon_of = world.dungeon_locations if (world and options.one_major_per_dungeon) else {}
     dungeons_with_major = {dungeon_of[loc] for loc, item in placed.items() if loc in dungeon_of and item in _MAJORS}
     in_shops: set[str] = set()
+    kind_of = {loc: kind for kind, locs in open_locations.items() for loc in locs}
 
-    def allowed(loc: str, item: str) -> bool:
+    def allowed(loc: str, item: str, group: str) -> bool:
+        if item == _WEIRD_EGG and loc != _WEIRD_EGG_SLOT:
+            return False
+        # Non-chest locations only take their own group, or an item an NPC can hand over.
+        if kind_of[loc] != "chest" and group != kind_of[loc] and not can_hand_over(item):
+            return False
         if loc in SKULL_LOCATIONS and not can_hand_over(item):
             return False
         if loc in shop_locs and (not can_sell(item) or item in in_shops):
@@ -265,6 +281,14 @@ def _try_fill(
         if item in _MAJORS and loc in dungeon_of:
             dungeons_with_major.add(dungeon_of[loc])
 
+    # Reserve Malon's slot for the Weird Egg before anything else can take it.
+    egg = next((e for e in rest + progression if e[0] == _WEIRD_EGG), None)
+    if egg is not None:
+        if _WEIRD_EGG_SLOT not in kind_of or _WEIRD_EGG_SLOT in placed:
+            return None
+        (progression if egg in progression else rest).remove(egg)
+        place(_WEIRD_EGG_SLOT, _WEIRD_EGG)
+
     # Shop and heart slots accept the fewest items, so stock them first from the whole pool. A
     # progression item still needs the slot reachable without it (assumed fill).
     stock_first = [loc for loc in open_locations["chest"]
@@ -272,8 +296,8 @@ def _try_fill(
     rng.shuffle(stock_first)
     for loc in stock_first:
         choices = [(progression, i) for i, (item, group) in enumerate(progression)
-                   if group == "chest" and allowed(loc, item)]
-        choices += [(rest, i) for i, (item, group) in enumerate(rest) if group == "chest" and allowed(loc, item)]
+                   if allowed(loc, item, group)]
+        choices += [(rest, i) for i, (item, group) in enumerate(rest) if allowed(loc, item, group)]
         rng.shuffle(choices)
         for source, i in choices:
             item = source[i][0]
@@ -292,9 +316,13 @@ def _try_fill(
         assumed = Counter(i for i, _ in progression)
         reachable = world.explore(placed, options.logic_options, assumed).locations
         candidates = [
-            loc for loc in open_locations[group]
-            if loc not in placed and loc in reachable and allowed(loc, item)
+            loc for loc in kind_of
+            if loc not in placed and loc in reachable and allowed(loc, item, group)
         ]
+        # Prefer the item's own locations; other groups' locations (chests) are a fallback so they
+        # don't use up the chest slots that chest-only items need.
+        own = [loc for loc in candidates if kind_of[loc] == group]
+        candidates = own or candidates
         if not candidates:
             return None
         place(rng.choice(candidates), item)
@@ -303,14 +331,22 @@ def _try_fill(
     for loc in open_locations["chest"]:
         if loc not in SKULL_LOCATIONS or loc in placed:
             continue
-        choices = [i for i, (item, group) in enumerate(rest) if group == "chest" and allowed(loc, item)]
+        choices = [i for i, (item, group) in enumerate(rest) if allowed(loc, item, group)]
         if not choices:
             return None
         item, _ = rest.pop(rng.choice(choices))
         place(loc, item)
 
-    for item, group in rest:
-        candidates = [loc for loc in open_locations[group] if loc not in placed and allowed(loc, item)]
+    # Chest-only items go first (they can't go anywhere else), then items limited to their own
+    # group, then hand-over items, which fit anywhere left over.
+    def placement_rank(entry: tuple[str, str]) -> int:
+        item, group = entry
+        if can_hand_over(item):
+            return 2
+        return 0 if group == "chest" else 1
+
+    for item, group in sorted(rest, key=placement_rank):
+        candidates = [loc for loc in kind_of if loc not in placed and allowed(loc, item, group)]
         if not candidates:
             return None
         place(rng.choice(candidates), item)

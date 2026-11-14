@@ -6,7 +6,9 @@ from collections import Counter
 from pathlib import Path
 
 from oot_randomizer.engine import ChestSlot
+from oot_randomizer.event_items import EVENT_SLOTS
 from oot_randomizer.item_ids import MAJOR_ITEM_ACTORS
+from oot_randomizer.npc_grants import NPC_SLOTS
 from oot_randomizer.planner import PlanOptions, known_locations, plan_seed
 from oot_randomizer.skulltula_rewards import (
     SKULL_LOCATIONS,
@@ -125,8 +127,12 @@ class SkullPlanningTests(unittest.TestCase):
             self.assertEqual(set(placed) - res.locations, set(), f"seed {seed}")
             self.assertEqual(plan.unreachable, [])
             self.assertEqual(
-                sorted([i for _, i in plan.chest_assignments] + list(plan.skull_assignments.values())),
-                sorted([s.vanilla_item for s in SLOTS] + list(SKULL_REWARDS.values())),
+                sorted([i for _, i in plan.chest_assignments] + list(plan.skull_assignments.values())
+                       + list(plan.song_assignments.values()) + list(plan.event_assignments.values())
+                       + list(plan.npc_assignments.values())),
+                sorted([s.vanilla_item for s in SLOTS] + list(SKULL_REWARDS.values())
+                       + list(SONG_SLOTS.values()) + list(EVENT_SLOTS.values())
+                       + [s.item for s in NPC_SLOTS.values()]),
             )
 
     def test_skull_rewards_only_get_hand_over_items(self):
@@ -157,7 +163,11 @@ class SkullPlanningTests(unittest.TestCase):
         for seed in range(10):
             plan = plan_seed(seed, SLOTS, self.world, PlanOptions(shuffle_skull_rewards=False))
             self.assertEqual(plan.skull_assignments, SKULL_REWARDS)
-            self.assertEqual(sorted(i for _, i in plan.chest_assignments), sorted(s.vanilla_item for s in SLOTS))
+            placed = Counter([i for _, i in plan.chest_assignments] + list(plan.song_assignments.values())
+                             + list(plan.event_assignments.values()) + list(plan.npc_assignments.values()))
+            expected = Counter([s.vanilla_item for s in SLOTS] + list(SONG_SLOTS.values())
+                               + list(EVENT_SLOTS.values()) + [s.item for s in NPC_SLOTS.values()])
+            self.assertEqual(placed, expected)
 
     def test_one_major_per_dungeon_still_holds(self):
         dungeon_of = self.world.dungeon_locations

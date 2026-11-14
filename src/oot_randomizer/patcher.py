@@ -21,7 +21,7 @@ from .kokiri_blocker import MIDO_BLOCKER_FLOW, clear_mido_blocker
 from .event_items import EVENT_SLOTS, patch_event_item
 from .npc_grants import (
     NPC_SLOTS,
-    PROGRESSIVE_BRANCHES,
+    REROUTED_FLOWS,
     SCRUB_BIGGORON_FLOW,
     disable_scrub_biggoron_sale,
     fix_progressive_branches,
@@ -299,7 +299,7 @@ class RomPatcher:
                 patcher.replace_file(SCRUB_BIGGORON_FLOW, disable_scrub_biggoron_sale)
                 applied += 1
                 # Progressive bullet bag games always pay out the one slot the logic keeps.
-                for flow_file in PROGRESSIVE_BRANCHES:
+                for flow_file in REROUTED_FLOWS:
                     patcher.replace_file(flow_file, lambda data, f=flow_file: fix_progressive_branches(data, f))
                     applied += 1
             if event_assignments:

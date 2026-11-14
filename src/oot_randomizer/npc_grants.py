@@ -51,7 +51,6 @@ _NPC_GRANTS: tuple[tuple[str, str], ...] = (
     ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombchuBundle_Medium"),
     ("MiniGame_Fishing.bfevfl.zs", "Item_Scale_Gold"),
     ("MiniGame_Diving.bfevfl.zs", "Item_Scale_Silver"),
-    ("Minigame_HorsebackArchery.bfevfl.zs", "Item_Quiver_Medium"),
     ("Minigame_HorsebackArchery.bfevfl.zs", "Item_Quiver_Large"),
     ("LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl.zs", "Item_StickBag_Medium"),
     ("LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl.zs", "Item_StickBag_Large"),
@@ -89,6 +88,7 @@ NPC_ITEM_DISPLAY_NAMES: dict[str, str] = {
     "Item_DinFire": "Dins Fire",
     "Item_WeirdEgg": "Alarm_Cucco",
     "Item_ZeldaLetter": "Zeldas_Letter",
+    "Obj_Heart_Piece": "Heart Piece",
 }
 
 
@@ -197,6 +197,23 @@ CASE_REROUTES: dict[str, tuple[tuple[str, int, str, str], ...]] = {
     ),
 }
 
+# (flow file) -> (source event, old next event or None, new next event). Re-points the `nxt` of an
+# event, so the flow skips a pouch switch and continues into the next step.
+NEXT_REROUTES: dict[str, tuple[tuple[str, str | None, str], ...]] = {
+    # The horseback quiver is always the Large grant (Event319), then the heart piece talk runs
+    # (Event349). Event99 is the Medium/Large pouch switch and becomes unreachable.
+    "Minigame_HorsebackArchery.bfevfl.zs": (
+        ("Event121", "Event99", "Event319"),
+        ("Event133", "Event99", "Event319"),
+        ("Event319", None, "Event349"),
+    ),
+}
+
+# Every flow that fix_progressive_branches patches.
+REROUTED_FLOWS: tuple[str, ...] = tuple(
+    dict.fromkeys((*PROGRESSIVE_BRANCHES, *CASE_REROUTES, *NEXT_REROUTES))
+)
+
 
 def fix_progressive_branches(data: bytes, flow_file: str) -> bytes:
     """Point every case of the flow's progressive bag switches at the kept grant.
@@ -206,12 +223,13 @@ def fix_progressive_branches(data: bytes, flow_file: str) -> bytes:
     """
     from evfl import EventFlow
     from evfl.event import SubFlowEvent, SwitchEvent
+    from evfl.util import make_index
 
     flow = EventFlow()
     flow.read(data)
     by_name = {event.name: event for event in flow.flowchart.events}
     changed = False
-    for branch in PROGRESSIVE_BRANCHES[flow_file]:
+    for branch in PROGRESSIVE_BRANCHES.get(flow_file, ()):
         switch, keep = by_name.get(branch.switch), by_name.get(branch.keep)
         if (
             switch is None
@@ -244,6 +262,17 @@ def fix_progressive_branches(data: bytes, flow_file: str) -> bytes:
         if case.v is not by_name.get(old_target):
             raise ValueError(f"{flow_file}: {source} case {key} does not lead to {old_target}")
         case.v = by_name[new_target]
+        changed = True
+    for source, old_next, new_next in NEXT_REROUTES.get(flow_file, ()):
+        event, target = by_name.get(source), by_name.get(new_next)
+        if event is None or not hasattr(event.data, "nxt") or target is None:
+            raise ValueError(f"{flow_file}: {source} has no next event or {new_next} is missing")
+        current = event.data.nxt.v if event.data.nxt is not None else None
+        if current is target:
+            continue
+        if current is not (by_name.get(old_next) if old_next else None):
+            raise ValueError(f"{flow_file}: {source} does not lead to {old_next}")
+        event.data.nxt = make_index(target)
         changed = True
     if not changed:
         return data

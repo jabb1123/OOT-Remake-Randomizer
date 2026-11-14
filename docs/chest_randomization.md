@@ -22,6 +22,8 @@ The results go into `chest_locations_summary.json` at the project root. The `sca
 - `ages` reports whether the chest is child-only, adult-only, or both, based on the file name.
 - `scene` is the logic region key (the scene prefix, e.g. `KokiriForest`).
 
+Slots listed in `NOT_IN_GAME_SLOTS` (in [engine.py](../src/oot_randomizer/engine.py)) are dropped from shuffling and from the planner. They have no chest in game, even though the scan finds them. `KokiriForest Static room 0 #0 (TBox_Rupee_Green)` is the current entry. Do not use the `NoBake` name alone to detect these. Many real chests also have `NoBake`.
+
 ### 3. Add logic
 
 `logic template` generates a starter file from the slots, with one `[regions.X.locations]` entry per chest. Set each chest's requirement by hand under `logic\world\`. Chests in the unknown-area region keep their vanilla items until confirmed reachable.
@@ -51,12 +53,24 @@ The Kokiri Forest sword chest is a special case: [chest_events.py](../src/oot_ra
 
 The loose overworld `Obj_Heart_Piece` pickups (not chests) are randomized as pickupable items, the same set shops can sell. They are handled by [heart_pickups.py](../src/oot_randomizer/heart_pickups.py).
 
-- **Slots:** 13 physical pieces, listed in `_HEART_TARGETS`. Each has a `Heart Piece N` logic location in its region TOML. Child and Adult copies are merged into one slot. [scan_loose_hearts.py](../scripts/scan_loose_hearts.py) produces the reference list in `loose_heart_pieces.json`.
+- **Slots:** 14 physical pieces, listed in `_HEART_TARGETS`. Each has a `Heart Piece N` logic location in its region TOML. Child and Adult copies are merged into one slot. [scan_loose_hearts.py](../scripts/scan_loose_hearts.py) produces the reference list in `loose_heart_pieces.json`. To add a piece, follow [adding_heart_pieces.md](./adding_heart_pieces.md).
 - **Patching:** each distinct item gets a clone actor, `Obj_HeartRando_<item>`, built from the `Obj_Heart_Piece` template with the item's model and pouch content. Only the Gyaml string index in the scene changes. Actor positions are kept. The clones are added through the same path as shopsanity (`apply_shop_items`).
-- **Planning:** the planner draws heart items after shop items. Each heart slot adds a rupee filler to the chest pool. Fillers can only go in chests, and heart slots only accept pickupable items.
+- **Planning:** the planner draws heart items after shop items. Each heart slot adds one filler (`SHOP_FILLER_ITEMS`, bombs or sticks) to the pool. Heart slots only accept pickupable items.
 - **Logic:** the rules are placeholders. Adjust them in the region TOMLs.
 - **Disable:** `--no-heart-shuffle` on the CLI, or `shuffle_heart_pieces = false` in the config.
 - **Not included:** the Goron large-pot drop (`EventGoronLargePotDropPrize`), dungeon heart containers, and the Market minigame rewards.
+
+## Where items can go
+
+The planner in [planner.py](../src/oot_randomizer/planner.py) fills every randomized location. Each kind of location accepts:
+
+- **Chests:** any item from the chest pool, including songs, medallions, ocarinas, bags, and rupees.
+- **Song, event, and NPC locations:** their own group (a song for a song slot, and so on), or any item an NPC can hand over (`can_hand_over`). Songs and dungeon items are not hand-over items, so they cannot go to event or NPC slots.
+- **Skulltula rewards:** hand-over items only.
+- **Shop and loose heart slots:** sellable or pickupable items only (`can_sell`, `can_pickup`). Each shop or heart slot also adds one filler to the pool (`SHOP_FILLER_ITEMS`).
+- **Rupees and dungeon items:** chests only, since no other location can give them.
+
+Progression items prefer their own group's locations and fall back to chests. Chest-only items are placed before songs, and hand-over items go last.
 
 ## Pitfalls
 

@@ -42,7 +42,7 @@ A gate that reads the vanilla item can send a randomized item down the wrong bra
 
 In [test_npc_grants.py](../tests/test_npc_grants.py):
 
-- Update the count tests (currently 16 NPC locations).
+- Update the count tests (currently 22 NPC locations).
 - Add the flow to the round-trip, idempotent, and "every flow grants its slot items" tests.
 - Check the region listing test.
 
@@ -71,9 +71,9 @@ In [test_npc_grants.py](../tests/test_npc_grants.py):
 
 ### Malon's Cucco Egg
 
-- Not found yet. Searching the dump for `Cucco` or `Egg` only finds Cucco minigame flags.
-- The egg is probably a hand-over or a flag under a different item name.
-- Next step: scan the Malon flows (`Goto_HyruleCastle`, `Dm_MelodyGet_Epona`, and the Malon child flows) for `ReveiveItem` and `ActorName` values.
+- The egg's slot is `Goto_HyruleCastle: Item_WeirdEgg (npc item)`. The hatch runs in the same flow: Event55 removes the egg from the pouch, Event93 checks for `Item_AlarmCucco`, and Event20 runs `GetInEvent_EggHatche`.
+- The planner only lets `Item_WeirdEgg` go to this slot (`_WEIRD_EGG_SLOT` in `planner.py`). A playtest with the egg at a scrub sale never hatched. Only Malon's slot is known to be in the hatch flow.
+- Not confirmed in game. If the hatch still fails at Malon's slot, the next step is the Event93 and Event20 branch conditions.
 
 ## Open questions
 

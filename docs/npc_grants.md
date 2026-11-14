@@ -24,7 +24,7 @@ Only these parameters change. Model, LOD and XLink references keep the vanilla a
 | MiniGame_BombchuBowling | Bombchu Bundle Medium | Market | true |
 | MiniGame_Fishing | Golden Scale | LakeHylia | true |
 | MiniGame_Diving | Silver Scale | ZoraRiver | true |
-| Minigame_HorsebackArchery | Quiver Medium / Large | GerudoFortress | adult + Bow (Large also needs Quiver Medium) |
+| Minigame_HorsebackArchery | Quiver Large | GerudoFortress | adult + Bow + Quiver Medium. Every win gives Large, then the heart piece (Event349). The Medium grant is removed from this minigame. |
 | LostWood_ScrubForestStageElder_SkullMaskFirst | Stick Bag Medium / Large | LostWood | child + Deku Sticks (Large also needs Stick Bag Medium) |
 | LostWood_ScrubForestStageElder_TrueMaskFirst | Nut Bag Medium / Large | LostWood | child + Deku Nuts (Large also needs Nut Bag Medium) |
 | Enemy_Scrub_Business_Common (Business Scrub bag sales) | Stick Bag Large / Nut Bag Large | LostWood | child + Deku Sticks (stick), child + Deku Nuts + Bomb Bag (nut) |
@@ -114,8 +114,9 @@ by the progressive bullet bag fix above.
 
 - Pouch queries (`PouchSystemActor.EventQueryIsExistInPouch`) for upgrade and base items:
   shooting gallery quivers (Event181: Medium owned picks the Large grant, the same
-  progressive pattern as the bullet bags), bowling (Event76, Event3), horseback (Event99),
-  scrub elder (Event30), Dm_LostWood (Event38, cosmetic).
+  progressive pattern as the bullet bags), bowling (Event76, Event3), scrub elder (Event30),
+  Dm_LostWood (Event38, cosmetic). Horseback (Event99) is bypassed by `NEXT_REROUTES`, which
+  routes Event121 and Event133 straight to the Large grant.
 - Scrub bools: `LostWood_ScrubForestStage_SkullMaskEventLaunched` and
   `LostWood_ScrubForestStage_TrueMaskEventLaunched`. These gate whether the scrub grant replays.
 
@@ -124,7 +125,7 @@ by the progressive bullet bag fix above.
 - Planner pool group `npc`, `PlanOptions.shuffle_npc_items` (default `True`).
 - CLI `--no-npc-items` keeps the vanilla NPC items. These locations are not majors for
   `one_major_per_dungeon`, the same as event items.
-- Logic check: 16 NPC locations. The vanilla goal is reachable, and 347 of 347 locations are
+- Logic check: 22 NPC locations. The vanilla goal is reachable, and 347 of 347 locations are
   listed and reachable.
 
 ## Unverified in-game
