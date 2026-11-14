@@ -1,7 +1,7 @@
 # InsideTheDekuTree
 
 [regions.Root.exits]
-"InsideTheDekuTree" = "is_child and Kokiri_Sword and Deku_Shield"
+"InsideTheDekuTree" = "is_child and Kokiri_Sword and (Deku_Shield or TBox_Shield_Hylian)"
 
 [regions."InsideTheDekuTree"]
 dungeon = true
