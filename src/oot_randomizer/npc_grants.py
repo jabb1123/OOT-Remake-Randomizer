@@ -72,6 +72,7 @@ _NPC_GRANTS: tuple[tuple[str, str], ...] = (
     ("Dm_HrlCastle_0050.bfevfl.zs", "Item_ZeldaLetter"),
     ("Npc_Hylia_001_Adult.bfevfl.zs", "Obj_Heart_Piece"),
     ("Npc_Hylia_045_Child.bfevfl.zs", "Obj_Heart_Piece"),
+    ("MiniGame_FrogTenors.bfevfl.zs", "Obj_Heart_Piece"),
 
 )
 

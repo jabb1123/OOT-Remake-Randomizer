@@ -9,7 +9,7 @@
 "ZoraRiver Heart Piece 1" = "true"  # loose Obj_Heart_Piece, both ages
 "ZoraRiver Heart Piece 2" = "true"  # loose Obj_Heart_Piece, both ages
 "ZoraRiver Dynamic room 0 #0 (Item_ScrubBusinessSeed)" = "true"
-"MiniGame_FrogTenors: Obj_Heart_Piece (song of storms) (npc item)" = "is_child and can_play(Zeldas_Lullaby) and can_play(Sarias_Song) and can_play(Eponas_Song) and can_play(Suns_Song) and can_play(Song_of_Time)"  # Frog Choir, Song of Storms in the minigame
+"MiniGame_FrogTenors: Obj_Heart_Piece (song of storms) (npc item)" = "is_child and can_play(Song_of_Storms) # Frog Choir, Song of Storms
 "MiniGame_FrogTenors: Obj_Heart_Piece (insect repellent) (npc item)" = "is_child and can_play(Zeldas_Lullaby) and can_play(Sarias_Song) and can_play(Eponas_Song) and can_play(Suns_Song) and can_play(Song_of_Time)"  # Frog Choir, insect repellent game
 
 

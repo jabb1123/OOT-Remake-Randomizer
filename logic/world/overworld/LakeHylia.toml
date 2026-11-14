@@ -7,7 +7,7 @@
 # TODO: Track down chest in LH
 
 [regions."LakeHylia".locations]
-"MiniGame_Fishing: Item_Scale_Gold (npc item)" = "true"
+"MiniGame_Fishing: Item_Scale_Gold (npc item)" = "is_adult and (Water_Temple_Clear or (has_hookshot and has_ocarina)) 
 "MiniGame_Fishing: Obj_Heart_Piece (npc item)" = "true"
 
 [regions."LakeHylia".skulltulas]

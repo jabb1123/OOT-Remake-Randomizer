@@ -230,7 +230,7 @@ NPC_LOCATIONS: dict[tuple[str, str, str | None], tuple[str, str, str]] = {
         "Fishing Pond",
     ),
     ("MiniGame_Diving.bfevfl.zs", "Item_Scale_Silver", None): (
-        "ZoraRiver",
+        "ZoraDomain",
         "true",
         "Diving Minigame",
     ),
@@ -239,18 +239,34 @@ NPC_LOCATIONS: dict[tuple[str, str, str | None], tuple[str, str, str]] = {
         "is_adult and Bow",
         "Horseback Archery",
     ),
-    ("LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl.zs", "Item_StickBag_Medium", None): ("LostWood", "is_child and Deku_Sticks", "Lost Woods Scrub Elder, Skull Mask"),
-    ("LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl.zs", "Item_StickBag_Large", None): (
+    (
+        "LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl.zs",
+        "Item_StickBag_Medium",
+        None,
+    ): ("LostWood", "is_child and Deku_Sticks", "Lost Woods Scrub Elder, Skull Mask"),
+    (
+        "LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl.zs",
+        "Item_StickBag_Large",
+        None,
+    ): (
         "LostWood",
         "is_child and Deku_Sticks and Stick_Bag_Medium",
         "Lost Woods Scrub Elder, Skull Mask",
     ),
-    ("LostWood_ScrubForestStageElder_TrueMaskFirst.bfevfl.zs", "Item_NutBag_Medium", None): (
+    (
+        "LostWood_ScrubForestStageElder_TrueMaskFirst.bfevfl.zs",
+        "Item_NutBag_Medium",
+        None,
+    ): (
         "LostWood",
         "is_child and Deku_Nuts",
         "Lost Woods Scrub Elder, True Mask",
     ),
-    ("LostWood_ScrubForestStageElder_TrueMaskFirst.bfevfl.zs", "Item_NutBag_Large", None): (
+    (
+        "LostWood_ScrubForestStageElder_TrueMaskFirst.bfevfl.zs",
+        "Item_NutBag_Large",
+        None,
+    ): (
         "LostWood",
         "is_child and Deku_Nuts and Nut_Bag_Medium",
         "Lost Woods Scrub Elder, True Mask",
@@ -307,8 +323,8 @@ NPC_LOCATIONS: dict[tuple[str, str, str | None], tuple[str, str, str]] = {
     ),
     ("Npc_Hylia_001_Adult.bfevfl.zs", "Obj_Heart_Piece", None): (
         "KakarikoVillage",
-        "is_adult",
-        "Man on a roof, as an adult"
+        "is_adult and has_hookshot",
+        "Man on a roof, as an adult",
     ),
     ("Npc_Hylia_045_Child.bfevfl.zs", "Obj_Heart_Piece", None): (
         "KakarikoVillage",
@@ -317,7 +333,7 @@ NPC_LOCATIONS: dict[tuple[str, str, str | None], tuple[str, str, str]] = {
     ),
     ("MiniGame_FrogTenors.bfevfl.zs", "Obj_Heart_Piece", "song of storms"): (
         "ZoraRiver",
-        "is_child and Zeldas_Lullaby and Sarias_Song and Eponas_Song and Suns_Song and Song_of_Time",
+        "is_child and Song_of_Storms",
         "Frog Choir, Song of Storms in the minigame",
     ),
     ("MiniGame_FrogTenors.bfevfl.zs", "Obj_Heart_Piece", "insect repellent"): (
