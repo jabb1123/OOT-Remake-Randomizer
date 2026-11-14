@@ -67,10 +67,10 @@ def _raw_or_skip(name: str) -> bytes:
 
 
 class SlotTableTest(unittest.TestCase):
-    def test_twenty_two_locations_one_per_flow_item_pair(self):
-        self.assertEqual(len(NPC_SLOTS), 22)
+    def test_twenty_three_locations_one_per_flow_item_pair(self):
+        self.assertEqual(len(NPC_SLOTS), 23)
         pairs = [(slot.flow, slot.item) for slot in NPC_SLOTS.values()]
-        self.assertEqual(len(set(pairs)), 22)
+        self.assertEqual(len(set(pairs)), 23)
 
     def test_progressive_bullet_bag_games_keep_one_slot_each(self):
         self.assertIn(_loc(DM_LOST_WOOD, "Item_BulletBag_Medium"), NPC_SLOTS)

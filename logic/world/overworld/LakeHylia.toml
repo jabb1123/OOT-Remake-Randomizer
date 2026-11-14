@@ -8,6 +8,7 @@
 
 [regions."LakeHylia".locations]
 "MiniGame_Fishing: Item_Scale_Gold (npc item)" = "true"
+"MiniGame_Fishing: Obj_Heart_Piece (npc item)" = "true"
 
 [regions."LakeHylia".skulltulas]
 "LH GS Bean Patch" = "is_child"  # original: can_plant_bugs and can_child_attack

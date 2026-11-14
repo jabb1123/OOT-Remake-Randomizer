@@ -42,7 +42,7 @@ A gate that reads the vanilla item can send a randomized item down the wrong bra
 
 In [test_npc_grants.py](../tests/test_npc_grants.py):
 
-- Update the count tests (currently 22 NPC locations).
+- Update the count tests (currently 23 NPC locations).
 - Add the flow to the round-trip, idempotent, and "every flow grants its slot items" tests.
 - Check the region listing test.
 

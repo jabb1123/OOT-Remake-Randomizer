@@ -22,9 +22,9 @@ Only these parameters change. Model, LOD and XLink references keep the vanilla a
 | MiniGame_HitTarget (Shooting Gallery, adult) | Quiver Medium | KakarikoVillage | adult + Bow |
 | MiniGame_BombchuBowling | Bomb Bag Medium / Large | Market | Bomb Bag (Large also needs Bomb Bag Medium) |
 | MiniGame_BombchuBowling | Bombchu Bundle Medium | Market | true |
-| MiniGame_Fishing | Golden Scale | LakeHylia | true |
+| MiniGame_Fishing | Golden Scale / Heart Piece | LakeHylia | true |
 | MiniGame_Diving | Silver Scale | ZoraRiver | true |
-| Minigame_HorsebackArchery | Quiver Large | GerudoFortress | adult + Bow + Quiver Medium. Every win gives Large, then the heart piece (Event349). The Medium grant is removed from this minigame. |
+| Minigame_HorsebackArchery | Quiver Large | GerudoFortress | adult + Bow. Every win gives Large, then the heart piece (Event349). The Medium grant is removed from this minigame. |
 | LostWood_ScrubForestStageElder_SkullMaskFirst | Stick Bag Medium / Large | LostWood | child + Deku Sticks (Large also needs Stick Bag Medium) |
 | LostWood_ScrubForestStageElder_TrueMaskFirst | Nut Bag Medium / Large | LostWood | child + Deku Nuts (Large also needs Nut Bag Medium) |
 | Enemy_Scrub_Business_Common (Business Scrub bag sales) | Stick Bag Large / Nut Bag Large | LostWood | child + Deku Sticks (stick), child + Deku Nuts + Bomb Bag (nut) |
@@ -125,7 +125,7 @@ by the progressive bullet bag fix above.
 - Planner pool group `npc`, `PlanOptions.shuffle_npc_items` (default `True`).
 - CLI `--no-npc-items` keeps the vanilla NPC items. These locations are not majors for
   `one_major_per_dungeon`, the same as event items.
-- Logic check: 22 NPC locations. The vanilla goal is reachable, and 347 of 347 locations are
+- Logic check: 23 NPC locations. The vanilla goal is reachable, and 347 of 347 locations are
   listed and reachable.
 
 ## Unverified in-game

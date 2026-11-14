@@ -224,6 +224,11 @@ NPC_LOCATIONS: dict[tuple[str, str], tuple[str, str, str]] = {
         "true",
         "Fishing Pond",
     ),
+    ("MiniGame_Fishing.bfevfl.zs", "Obj_Heart_Piece"): (
+        "LakeHylia",
+        "true",
+        "Fishing Pond",
+    ),
     ("MiniGame_Diving.bfevfl.zs", "Item_Scale_Silver"): (
         "ZoraRiver",
         "true",
@@ -231,7 +236,7 @@ NPC_LOCATIONS: dict[tuple[str, str], tuple[str, str, str]] = {
     ),
     ("Minigame_HorsebackArchery.bfevfl.zs", "Item_Quiver_Large"): (
         "GerudoFortress",
-        "is_adult and Bow and Quiver_Medium",
+        "is_adult and Bow",
         "Horseback Archery",
     ),
     (
@@ -299,7 +304,7 @@ NPC_LOCATIONS: dict[tuple[str, str], tuple[str, str, str]] = {
     ("Goto_HyruleCastle.bfevfl.zs", "Item_WeirdEgg"): (
         "HyruleCastle",
         "is_child",
-        "Talon, given as egg",
+        "Malon, given as egg",
     ),
     ("Dm_HrlCastle_0050.bfevfl.zs", "Item_ZeldaLetter"): (
         "HyruleCastle",
