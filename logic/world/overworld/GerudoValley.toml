@@ -1,7 +1,7 @@
 # GerudoValley
 
 [regions.Root.exits]
-"GerudoValley" = "is_adult or Deku_Tree_Clear"
+"GerudoValley" = "is_adult or Deku_Tree_Clear or has_explosives"
 
 [regions."GerudoValley"]
 

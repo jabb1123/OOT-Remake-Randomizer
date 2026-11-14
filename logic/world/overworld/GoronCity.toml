@@ -1,7 +1,7 @@
 # GoronCity
 
 [regions.Root.exits]
-"GoronCity" = "is_adult or Deku_Tree_Clear or has_bombs"
+"GoronCity" = "is_adult or Zeldas_Letter or has_bombs"
 
 [regions."GoronCity"]
 

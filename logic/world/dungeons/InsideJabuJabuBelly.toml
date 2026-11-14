@@ -1,7 +1,7 @@
 # InsideJabuJabuBelly
 
 [regions.Root.exits]
-"InsideJabuJabuBelly" = "is_child and Deku_Tree_Clear and can_play(Zeldas_Lullaby) and (Slingshot or Boomerang or has_explosives)"
+"InsideJabuJabuBelly" = "is_child and Deku_Tree_Clear and can_play(Zeldas_Lullaby) and (Slingshot or Boomerang or has_explosives) and Item_Scale_Silver"
 
 [regions."InsideJabuJabuBelly"]
 dungeon = true
