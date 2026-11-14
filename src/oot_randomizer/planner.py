@@ -93,7 +93,7 @@ class PlanningError(RuntimeError):
 
 
 def known_locations(slots: list[ChestSlot]) -> set[str]:
-    return ({s.name for s in slots} | {song_location_name(f) for f in SONG_SLOTS}
+    return ({s.name for s in slots if s.name not in NOT_IN_GAME_SLOTS} | {song_location_name(f) for f in SONG_SLOTS}
             | {event_location_name(f) for f in EVENT_SLOTS} | set(NPC_SLOTS)
             | set(SKULL_LOCATIONS) | set(SHOP_LOCATIONS) | set(HEART_LOCATIONS))
 

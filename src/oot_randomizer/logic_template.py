@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 from collections import defaultdict
 
-from .engine import ChestSlot
+from .engine import NOT_IN_GAME_SLOTS, ChestSlot
 from .event_items import EVENT_ITEM_DISPLAY_NAMES, EVENT_SLOTS, event_location_name
 from .item_ids import ITEM_DISPLAY_NAMES
 from .npc_grants import NPC_ITEM_DISPLAY_NAMES, npc_location_name
@@ -193,48 +193,48 @@ EVENT_LOCATIONS: dict[str, tuple[str, str, str]] = {
 }
 
 # (flow file, vanilla item) -> (region, requirement, who grants it in vanilla); mirrors npc_grants.py
-NPC_LOCATIONS: dict[tuple[str, str], tuple[str, str, str]] = {
-    ("MiniGame_HitTarget.bfevfl.zs", "Item_BulletBag_Large"): (
+NPC_LOCATIONS: dict[tuple[str, str, str | None], tuple[str, str, str]] = {
+    ("MiniGame_HitTarget.bfevfl.zs", "Item_BulletBag_Large", None): (
         "Market",
         "is_child and Slingshot",
         "Shooting Gallery, Market (2nd bullet bag upgrade)",
     ),
-    ("MiniGame_HitTarget.bfevfl.zs", "Item_Quiver_Medium"): (
+    ("MiniGame_HitTarget.bfevfl.zs", "Item_Quiver_Medium", None): (
         "KakarikoVillage",
         "is_adult and Bow",
         "Shooting Gallery, Kakariko",
     ),
-    ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombBag_Medium"): (
+    ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombBag_Medium", None): (
         "Market",
         "Bomb_Bag",
         "Bombchu Bowling",
     ),
-    ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombBag_Large"): (
+    ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombBag_Large", None): (
         "Market",
         "Bomb_Bag and Bomb_Bag_Medium",
         "Bombchu Bowling",
     ),
-    ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombchuBundle_Medium"): (
+    ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombchuBundle_Medium", None): (
         "Market",
         "true",
         "Bombchu Bowling",
     ),
-    ("MiniGame_Fishing.bfevfl.zs", "Item_Scale_Gold"): (
+    ("MiniGame_Fishing.bfevfl.zs", "Item_Scale_Gold", None): (
         "LakeHylia",
         "true",
         "Fishing Pond",
     ),
-    ("MiniGame_Fishing.bfevfl.zs", "Obj_Heart_Piece"): (
+    ("MiniGame_Fishing.bfevfl.zs", "Obj_Heart_Piece", None): (
         "LakeHylia",
         "true",
         "Fishing Pond",
     ),
-    ("MiniGame_Diving.bfevfl.zs", "Item_Scale_Silver"): (
-        "ZoraRiver",
+    ("MiniGame_Diving.bfevfl.zs", "Item_Scale_Silver", None): (
+        "ZoraDomain",
         "true",
         "Diving Minigame",
     ),
-    ("Minigame_HorsebackArchery.bfevfl.zs", "Item_Quiver_Large"): (
+    ("Minigame_HorsebackArchery.bfevfl.zs", "Item_Quiver_Large", None): (
         "GerudoFortress",
         "is_adult and Bow",
         "Horseback Archery",
@@ -242,89 +242,104 @@ NPC_LOCATIONS: dict[tuple[str, str], tuple[str, str, str]] = {
     (
         "LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl.zs",
         "Item_StickBag_Medium",
+        None,
     ): ("LostWood", "is_child and Deku_Sticks", "Lost Woods Scrub Elder, Skull Mask"),
     (
         "LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl.zs",
         "Item_StickBag_Large",
+        None,
     ): (
         "LostWood",
         "is_child and Deku_Sticks and Stick_Bag_Medium",
         "Lost Woods Scrub Elder, Skull Mask",
     ),
-    ("LostWood_ScrubForestStageElder_TrueMaskFirst.bfevfl.zs", "Item_NutBag_Medium"): (
+    (
+        "LostWood_ScrubForestStageElder_TrueMaskFirst.bfevfl.zs",
+        "Item_NutBag_Medium",
+        None,
+    ): (
         "LostWood",
         "is_child and Deku_Nuts",
         "Lost Woods Scrub Elder, True Mask",
     ),
-    ("LostWood_ScrubForestStageElder_TrueMaskFirst.bfevfl.zs", "Item_NutBag_Large"): (
+    (
+        "LostWood_ScrubForestStageElder_TrueMaskFirst.bfevfl.zs",
+        "Item_NutBag_Large",
+        None,
+    ): (
         "LostWood",
         "is_child and Deku_Nuts and Nut_Bag_Medium",
         "Lost Woods Scrub Elder, True Mask",
     ),
-    ("Enemy_Scrub_Business_Common.bfevfl.zs", "Item_StickBag_Large"): (
+    ("Enemy_Scrub_Business_Common.bfevfl.zs", "Item_StickBag_Large", None): (
         "LostWood",
         "is_child and Deku_Sticks",
         "Lost Woods Business Scrub, Deku Stick bag",
     ),
-    ("Enemy_Scrub_Business_Common.bfevfl.zs", "Item_NutBag_Large"): (
+    ("Enemy_Scrub_Business_Common.bfevfl.zs", "Item_NutBag_Large", None): (
         "LostWood",
         "is_child and Deku_Nuts and Bomb_Bag",
         "Lost Woods Business Scrub, Deku Nut bag",
     ),
-    ("Dm_LostWood_0040.bfevfl.zs", "Item_BulletBag_Medium"): (
+    ("Dm_LostWood_0040.bfevfl.zs", "Item_BulletBag_Medium", None): (
         "LostWood",
         "is_child and Slingshot",
         "Lost Woods scrub target (1st bullet bag upgrade)",
     ),
-    ("Npc_Goron_Biggoron_Adult.bfevfl.zs", "Item_Sword_Biggoron"): (
+    ("Npc_Goron_Biggoron_Adult.bfevfl.zs", "Item_Sword_Biggoron", None): (
         "DeathMountainTrail",
         "is_adult and Ice_Cavern_Clear and (Eponas_Song or Longshot) and (Bomb_Bag or Megaton_Hammer)",
         "Biggoron, Death Mountain Trail",
     ),
-    ("SubEvent_FindRichard.bfevfl.zs", "Obj_Heart_Piece"): (
+    ("SubEvent_FindRichard.bfevfl.zs", "Obj_Heart_Piece", None): (
         "Market",
         "is_child and Alarm_Cucco",
         "Mamamu Yan, after finding Richard",
     ),
-    ("Npc_SkullKid_Child_02.bfevfl.zs", "Obj_Heart_Piece"): (
+    ("Npc_SkullKid_Child_02.bfevfl.zs", "Obj_Heart_Piece", None): (
         "LostWood",
         "is_child and (Fairy_Ocarina or Ocarina_of_Time)",
         "Skullkid, on playing game 3 times",
     ),
-    ("Dm_Goron_0030.bfevfl.zs", "Item_Gauntlet_Goron"): (
+    ("Dm_Goron_0030.bfevfl.zs", "Item_Gauntlet_Goron", None): (
         "GoronCity",
         "is_child and Zeldas_Lullaby and Sarias_Song",
         "Darunia, after Goron dance",
     ),
-    ("Dm_FairyFountain_Din.bfevfl.zs", "Item_DinFire"): (
+    ("Dm_FairyFountain_Din.bfevfl.zs", "Item_DinFire", None): (
         "DeathMountainTrail",
         "Bomb_Bag and (Goron_Bracelet or Silver_Gauntlets or Golden_Gauntlets) and Zeldas_Lullaby",
         "Great Fairy for 25 rupees",
     ),
-    ("Goto_HyruleCastle.bfevfl.zs", "Item_WeirdEgg"): (
+    ("Goto_HyruleCastle.bfevfl.zs", "Item_WeirdEgg", None): (
         "HyruleCastle",
         "is_child",
         "Malon, given as egg",
     ),
-    ("Dm_HrlCastle_0050.bfevfl.zs", "Item_ZeldaLetter"): (
+    ("Dm_HrlCastle_0050.bfevfl.zs", "Item_ZeldaLetter", None): (
         "HyruleCastle",
         "is_child and Alarm_Cucco",
         "Zelda, after speech",
     ),
-    ("Npc_Hylia_001_Adult.bfevfl.zs", "Obj_Heart_Piece"): (
+    ("Npc_Hylia_001_Adult.bfevfl.zs", "Obj_Heart_Piece", None): (
         "KakarikoVillage",
         "is_adult and has_hookshot",
-        "Man on a roof, as an adult"
+        "Man on a roof, as an adult",
     ),
-    ("Npc_Hylia_045_Child.bfevfl.zs", "Obj_Heart_Piece"): (
+    ("Npc_Hylia_045_Child.bfevfl.zs", "Obj_Heart_Piece", None): (
         "KakarikoVillage",
         "is_child",
         "Man on a roof, as a kid",
     ),
-    ("MiniGame_FrogTenors.bfevfl.zs", "Obj_Heart_Piece"): (
+    ("MiniGame_FrogTenors.bfevfl.zs", "Obj_Heart_Piece", "song of storms"): (
         "ZoraRiver",
-        "is_child and can_play(Zeldas_Lullaby) and can_play(Sarias_Song) and can_play(Eponas_Song) and can_play(Suns_Song) and can_play(Song_of_Time)",
-        "Frog Choir, playing minigame with all 5 songs",
+        "is_child and Song_of_Storms",
+        "Frog Choir, Song of Storms in the minigame",
+    ),
+    ("MiniGame_FrogTenors.bfevfl.zs", "Obj_Heart_Piece", "insect repellent"): (
+        "ZoraRiver",
+        "is_child and Zeldas_Lullaby and Sarias_Song and Eponas_Song and Suns_Song and Song_of_Time",
+        "Frog Choir, insect repellent game",
     ),
 }
 
@@ -357,14 +372,15 @@ def _q(text: str) -> str:
 def build_template(slots: list[ChestSlot]) -> str:
     chest_by_region: dict[str, list[ChestSlot]] = defaultdict(list)
     for slot in slots:
-        chest_by_region[slot.scene].append(slot)
+        if slot.name not in NOT_IN_GAME_SLOTS:
+            chest_by_region[slot.scene].append(slot)
     songs_by_region: dict[str, list[str]] = defaultdict(list)
     for flow, (region, _, _) in SONG_LOCATIONS.items():
         songs_by_region[region].append(flow)
     events_by_region: dict[str, list[str]] = defaultdict(list)
     for flow, (region, _, _) in EVENT_LOCATIONS.items():
         events_by_region[region].append(flow)
-    npc_by_region: dict[str, list[tuple[str, str]]] = defaultdict(list)
+    npc_by_region: dict[str, list[tuple[str, str, str | None]]] = defaultdict(list)
     for key, (region, _, _) in NPC_LOCATIONS.items():
         npc_by_region[region].append(key)
     region_names = sorted(
@@ -414,11 +430,11 @@ def build_template(slots: list[ChestSlot]) -> str:
             entries.append(
                 f"{_q(event_location_name(flow))} = {_q(req)}  # event item: {vanilla} from {who}"
             )
-        for flow, item in npc_by_region.get(name, []):
-            _, req, who = NPC_LOCATIONS[(flow, item)]
+        for flow, item, label in npc_by_region.get(name, []):
+            _, req, who = NPC_LOCATIONS[(flow, item, label)]
             vanilla = NPC_ITEM_DISPLAY_NAMES[item]
             entries.append(
-                f"{_q(npc_location_name(flow, item))} = {_q(req)}  # npc item: {vanilla} from {who}"
+                f"{_q(npc_location_name(flow, item, label))} = {_q(req)}  # npc item: {vanilla} from {who}"
             )
         if name == SKULL_REGION:
             for tokens, item in SKULL_REWARDS.items():

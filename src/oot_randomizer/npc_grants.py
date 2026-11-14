@@ -28,6 +28,7 @@ _GET_IN_EVENT_SUBFLOWS = frozenset(
         "GetInEvent_NotTurn_NotNpc",
         "GetInEventItemSwordBiggoron",  # Dm_SY_GetInEvent/GetInEventItemSwordBiggoron (stored without the flow prefix)
         "SimpleShopSub_Scrub_Business_OneTime",  # Enemy_Scrub_Business_Common bag sales (ActorName is the bag)
+        "MushiToriGame",  # MiniGame_FrogTenors insect-repellent game (ActorName is the award)
     }
 )
 _GET_IN_EVENT_KEY = "ActorName"
@@ -37,6 +38,8 @@ _GET_IN_EVENT_KEY = "ActorName"
 class NpcSlot:
     flow: str  # flow file that grants the item
     item: str  # vanilla item actor that the grant node gives
+    group: str | None = None  # sub-flow entry that makes the grant; None matches any grant of `item`
+    label: str | None = None  # tells apart two slots for the same (flow, item)
 
 
 # (flow file, vanilla item). A flow can grant several items, so locations are per (flow, item).
@@ -73,6 +76,14 @@ _NPC_GRANTS: tuple[tuple[str, str], ...] = (
 
 )
 
+# Two grants of the same item in one flow, told apart by the sub-flow that makes them. The Song of
+# Storms heart is Event384 (GetInEvent_NotTurn_NotNpc); the insect-repellent heart is in the
+# MushiToriGame sub-flows (Event161 and Event75). Their Rupee branches are not grants and stay vanilla.
+_NPC_GRANT_GROUPS: tuple[NpcSlot, ...] = (
+    NpcSlot("MiniGame_FrogTenors.bfevfl.zs", "Obj_Heart_Piece", "GetInEvent_NotTurn_NotNpc", "song of storms"),
+    NpcSlot("MiniGame_FrogTenors.bfevfl.zs", "Obj_Heart_Piece", "MushiToriGame", "insect repellent"),
+)
+
 # Friendly names usable in logic requirements (the logic uses the Medium/Large forms).
 NPC_ITEM_DISPLAY_NAMES: dict[str, str] = {
     "Item_BulletBag_Medium": "Bullet Bag Medium",
@@ -97,14 +108,17 @@ NPC_ITEM_DISPLAY_NAMES: dict[str, str] = {
 }
 
 
-def npc_location_name(flow_file: str, item: str) -> str:
-    return f"{flow_file.removesuffix('.bfevfl.zs')}: {item} (npc item)"
+def npc_location_name(flow_file: str, item: str, label: str | None = None) -> str:
+    tag = f" ({label})" if label else ""
+    return f"{flow_file.removesuffix('.bfevfl.zs')}: {item}{tag} (npc item)"
 
 
+_PLAIN_NPC_SLOTS = tuple(NpcSlot(flow, item) for flow, item in _NPC_GRANTS)
 NPC_SLOTS: dict[str, NpcSlot] = {
-    npc_location_name(flow, item): NpcSlot(flow, item) for flow, item in _NPC_GRANTS
+    npc_location_name(slot.flow, slot.item, slot.label): slot
+    for slot in (*_PLAIN_NPC_SLOTS, *_NPC_GRANT_GROUPS)
 }
-NPC_FLOWS: frozenset[str] = frozenset(flow for flow, _ in _NPC_GRANTS)
+NPC_FLOWS: frozenset[str] = frozenset(slot.flow for slot in NPC_SLOTS.values())
 
 
 def shuffle_npc_items(seed: int | random.Random) -> dict[str, str]:
@@ -115,31 +129,36 @@ def shuffle_npc_items(seed: int | random.Random) -> dict[str, str]:
     return dict(zip(NPC_SLOTS, items))
 
 
-def _grant_params(flow) -> list[tuple[dict, str]]:
-    """Return (params dict, key) for every hand-over or GetInEvent parameter that names an item."""
+def _grant_params(flow) -> list[tuple[dict, str, str]]:
+    """Return (params dict, key, sub-flow entry name) for every hand-over or GetInEvent parameter that names an item."""
     from evfl.event import SubFlowEvent
 
-    found: list[tuple[dict, str]] = []
+    found: list[tuple[dict, str, str]] = []
     for event in flow.flowchart.events:
         body = event.data
         if not isinstance(body, SubFlowEvent) or not body.params:
             continue
         if body.entry_point_name == _HAND_OVER_SUBFLOW and _HAND_OVER_KEY in body.params.data:
-            found.append((body.params.data, _HAND_OVER_KEY))
+            found.append((body.params.data, _HAND_OVER_KEY, body.entry_point_name))
         elif body.entry_point_name in _GET_IN_EVENT_SUBFLOWS and _GET_IN_EVENT_KEY in body.params.data:
-            found.append((body.params.data, _GET_IN_EVENT_KEY))
+            found.append((body.params.data, _GET_IN_EVENT_KEY, body.entry_point_name))
     return found
 
 
-def patch_npc_grants(data: bytes, changes: dict[str, str]) -> bytes:
+def patch_npc_grants(data: bytes, changes: dict[tuple[str | None, str] | str, str]) -> bytes:
     """Repoint every grant in one flow from its old item to its new item, in a single pass.
 
-    `changes` maps vanilla item -> new item. Matching happens on the original values, so a
-    Medium and Large bag can swap. Returns the input unchanged when nothing changes or when the
-    flow already grants the new items (an earlier patch). Raises ValueError when the flow grants
-    neither the old nor the new item.
+    `changes` maps (sub-flow entry, vanilla item) -> new item. A plain item string is the same as
+    (None, item), which matches any grant of that item; a named entry matches only the grant made
+    by that sub-flow. Matching happens on the original values, so a Medium and Large bag can swap.
+    Returns the input unchanged when nothing changes or when the flow already grants the new items
+    (an earlier patch). Raises ValueError when the flow grants neither the old nor the new item.
     """
-    changes = {old: new for old, new in changes.items() if old != new}
+    changes = {
+        (key if isinstance(key, tuple) else (None, key)): new
+        for key, new in changes.items()
+    }
+    changes = {key: new for key, new in changes.items() if key[1] != new}
     if not changes:
         return data
     from evfl import EventFlow
@@ -147,13 +166,19 @@ def patch_npc_grants(data: bytes, changes: dict[str, str]) -> bytes:
     flow = EventFlow()
     flow.read(data)
     params = _grant_params(flow)
-    hits = [(p, k) for p, k in params if p[k] in changes]
+    hits = []
+    for p, k, group in params:
+        new = changes.get((group, p[k]), changes.get((None, p[k])))
+        if new is not None:
+            hits.append((p, k, new))
     if not hits:
-        if any(p[k] in changes.values() for p, k in params):
+        new_items = set(changes.values())
+        if any(p[k] in new_items for p, k, _ in params):
             return data
-        raise ValueError(f"NPC flow grants neither {sorted(changes)} nor {sorted(changes.values())}")
-    for p, k in hits:
-        p[k] = changes[p[k]]
+        olds = sorted({item for _, item in changes})
+        raise ValueError(f"NPC flow grants neither {olds} nor {sorted(new_items)}")
+    for p, k, new in hits:
+        p[k] = new
     out = io.BytesIO()
     flow.write(out)
     return out.getvalue()
@@ -161,7 +186,7 @@ def patch_npc_grants(data: bytes, changes: dict[str, str]) -> bytes:
 
 def patch_npc_grant(data: bytes, old_item: str, new_item: str) -> bytes:
     """Repoint the grant of `old_item` to `new_item` in one NPC flow."""
-    return patch_npc_grants(data, {old_item: new_item})
+    return patch_npc_grants(data, {(None, old_item): new_item})
 
 
 @dataclass(frozen=True)
