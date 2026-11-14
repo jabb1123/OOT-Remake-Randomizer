@@ -6,7 +6,7 @@
 [regions."Graveyard"]
 
 [regions."Graveyard".locations]
-"Graveyard Heart Piece 1" = "true"  # loose Obj_Heart_Piece, both ages
+"Graveyard Heart Piece 1" = "is_adult"  # loose Obj_Heart_Piece, both ages
 "Dm_MelodyGet_Sun_03" = "can_play(Zeldas_Lullaby)"  # song: Sun's Song from Royal Tomb
 "Graveyard Dynamic room 0 #0 (TBox_Shield_Hylian)" = "true"
 "Graveyard Static room 0 #0 (Item_Hookshot)" = "is_adult"

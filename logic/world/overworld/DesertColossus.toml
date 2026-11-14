@@ -6,7 +6,7 @@
 [regions."DesertColossus"]
 
 [regions."DesertColossus".locations]
-"DesertColossus Heart Piece 1" = "true"  # loose Obj_Heart_Piece, both ages
+"DesertColossus Heart Piece 1" = "is_adult"  # loose Obj_Heart_Piece, both ages
 "Dm_MelodyGet_Spilit" = "is_adult"  # song: Requiem of Spirit from Sheik, Desert Colossus
 "DesertColossus Static room 0 #0 (Item_Gauntlet_Silver)" = "is_child and has_explosives and (Boomerang or Slingshot)"
 "DesertColossus Static room 0 #0 (Item_Shield_Mirror)" = "is_adult and (Silver_Gauntlets or Golden_Gauntlets) and has_explosives"

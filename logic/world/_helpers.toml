@@ -34,3 +34,6 @@ has_hookshot = "Hookshot or Longshot"
 can_shoot = "(is_child and (Slingshot or Boomerang)) or (is_adult and Bow)"
 # Any ranged attack for the current age, boomerang and hookshot included.
 ranged_weapon = "(is_child and (Slingshot or Boomerang)) or (is_adult and (Bow or has_hookshot))"
+
+# --- Swimming -------------------------------------------------------------------------
+can_dive = "Item_Scale_Silver or Item_Scale_Gold"

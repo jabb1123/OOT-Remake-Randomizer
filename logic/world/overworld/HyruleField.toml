@@ -6,8 +6,8 @@
 [regions."HyruleField"]
 
 [regions."HyruleField".locations]
-"HyruleField Heart Piece 1" = "is_adult"  # loose Obj_Heart_Piece, adult copy only
-"HyruleField Heart Piece 2" = "is_child"  # loose Obj_Heart_Piece, child copy only
+# "HyruleField Heart Piece 1" = "is_child and has_adult"  # loose Obj_Heart_Piece, adult copy only
+# "HyruleField Heart Piece 2" = "is_child and has_adult"  # loose Obj_Heart_Piece, child copy only
 "Dm_MelodyGet_Time (event item)" = "is_child and Zeldas_Lullaby and Deku_Tree_Clear and Dodongos_Cavern_Clear and Jabu_Jabu_Clear"
 "Dm_MelodyGet_Time" = "is_child and Zeldas_Lullaby and Deku_Tree_Clear and Dodongos_Cavern_Clear and Jabu_Jabu_Clear"  # song: Song of Time from Zelda at the moat, after all three stones
 "HyruleField Dynamic room 0 #0 (Item_ScrubBusinessSeed)" = "true"
@@ -15,7 +15,7 @@
 "HyruleField Dynamic room 0 #0 (TBox_Rupee_Red)" = "is_adult"
 "HyruleField Dynamic room 0 #1 (TBox_Rupee_Red)" = "is_adult"
 "HyruleField Dynamic room 0 #2 (TBox_Rupee_Red)" = "is_adult"
-# "HyruleField Static room 0 #0 (Obj_Heart_Piece)" = "is_child and has_adult"
+"HyruleField Static room 0 #0 (Obj_Heart_Piece)" = "is_child and has_adult"
 "HyruleField Static room 0 #0 (TBox_Rupee_Purple)" = "is_child and can_play(Song_of_Storms)"
 "HyruleField Static room 0 #0 (TBox_Rupee_Red)" = "true"
 

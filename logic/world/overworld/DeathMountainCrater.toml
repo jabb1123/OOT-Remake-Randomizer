@@ -7,7 +7,7 @@
 
 [regions."DeathMountainCrater".locations]
 "DeathMountainCrater Heart Piece 1" = "true"  # loose Obj_Heart_Piece, both ages
-"DeathMountainCrater Heart Piece 2" = "true"  # loose Obj_Heart_Piece, both ages
+"DeathMountainCrater Heart Piece 2" = "is_adult"  # loose Obj_Heart_Piece, both ages
 "Dm_MelodyGet_Fire" = "is_adult"  # song: Bolero of Fire from Sheik, Death Mountain Crater
 "DeathMountainCrater Dynamic room 0 #0 (Item_ScrubBusinessSeed)" = "true"
 "DeathMountainCrater Static room 0 #0 (TBox_Rupee_Purple)" = "true"

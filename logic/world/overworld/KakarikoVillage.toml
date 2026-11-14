@@ -6,7 +6,7 @@
 [regions."KakarikoVillage"]
 
 [regions."KakarikoVillage".locations]
-"KakarikoVillage Heart Piece 1" = "is_adult"  # loose Obj_Heart_Piece, both ages
+"KakarikoVillage Heart Piece 1" = "is_adult and has_hookshot"  # loose Obj_Heart_Piece, both ages
 "KakarikoVillage Heart Piece 2" = "has_bombs"  # loose Obj_Heart_Piece, both ages
 "Dm_MelodyGet_Storm" = "is_adult"  # song: Song of Storms from Windmill
 "Dm_MelodyGet_Shadow" = "is_adult and Forest_Temple_Clear and Fire_Temple_Clear and Water_Temple_Clear"  # song: Nocturne of Shadow from Sheik, Kakariko
