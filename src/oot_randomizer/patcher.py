@@ -18,7 +18,7 @@ from pathlib import Path, PurePosixPath
 from .chest_events import SWORD_EVENT_FLOW, SWORD_VANILLA_ITEM, skip_sword_demo
 from .cutscene_skips import INTRO_EVENT_FLOW, skip_intro_cutscene
 from .starting_items import patch_intro_flow
-from .kokiri_blocker import MIDO_BLOCKER_FLOW, clear_mido_blocker
+from .kokiri_blocker import MIDO_BLOCKER_FLOWS, clear_mido_blocker
 from .event_items import EVENT_SLOTS, patch_event_item
 from .npc_grants import (
     DIN_FAIRY_FLOW,
@@ -258,11 +258,12 @@ class RomPatcher:
                 applied += 1
             except NupPatchError:
                 pass  # flow absent from this NUP (e.g. test fixtures); the retail NUP always has it
-            try:
-                patcher.replace_file(MIDO_BLOCKER_FLOW, clear_mido_blocker)
-                applied += 1
-            except NupPatchError:
-                pass  # flow absent from this NUP (e.g. test fixtures); the retail NUP always has it
+            for blocker_flow in MIDO_BLOCKER_FLOWS:
+                try:
+                    patcher.replace_file(blocker_flow, clear_mido_blocker)
+                    applied += 1
+                except NupPatchError:
+                    pass  # flow absent from this NUP (e.g. test fixtures); the retail NUP always has it
             song_changes: dict[str, str] = {}
             for flow_file, new_song in (song_assignments or {}).items():
                 old_song = SONG_SLOTS[flow_file]

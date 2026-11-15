@@ -5,6 +5,7 @@ from pathlib import Path
 from oot_randomizer.kokiri_blocker import (
     MIDO_BLOCKER_FLAG,
     MIDO_BLOCKER_FLOW,
+    MIDO_BLOCKER_FLOWS,
     clear_mido_blocker,
     set_flag_before_action,
 )
@@ -13,6 +14,7 @@ RAW_DIR = Path(
     r"C:\Users\jabb1123\.copilot\session-state\aa09e5ec-62eb-4ee7-bbd4-90178d07a405\files\raw"
 )
 RAW_SARIA_FLOW = RAW_DIR / "Dm_Kokiri_0145.bfevfl"
+RAW_CASTLE_FLOW = RAW_DIR / "Goto_HyruleCastle.bfevfl"
 
 
 def _load(data: bytes):
@@ -40,16 +42,36 @@ def _saria_warps(flow):
     ]
 
 
+    def test_both_blocker_flows_are_patched(self):
+        self.assertEqual(len(MIDO_BLOCKER_FLOWS), 2)
+        self.assertIn(MIDO_BLOCKER_FLOW, MIDO_BLOCKER_FLOWS)
+        for name in MIDO_BLOCKER_FLOWS:
+            self.assertTrue(name.endswith(".bfevfl.zs"))
+
+
 @unittest.skipUnless(RAW_SARIA_FLOW.exists(), "Dm_Kokiri_0145.bfevfl not available")
 class ClearMidoBlockerTest(unittest.TestCase):
+    RAW_FLOW = RAW_SARIA_FLOW
+
     def setUp(self):
-        self.raw = RAW_SARIA_FLOW.read_bytes()
+        self.raw = self.RAW_FLOW.read_bytes()
 
     def test_flow_name_is_bfevfl_zs(self):
         self.assertTrue(MIDO_BLOCKER_FLOW.endswith(".bfevfl.zs"))
 
     def test_clears_flag_before_saria_warp(self):
         from evfl.event import ActionEvent
+
+        before = _load(self.raw)
+        warp_before = _saria_warps(before)
+        self.assertEqual(len(warp_before), 1)
+        before_events = before.flowchart.events
+        warp_idx = before_events.index(warp_before[0])
+        preds_before = [
+            i for i, e in enumerate(before_events)
+            if isinstance(e.data, ActionEvent) and e.data.nxt.v is before_events[warp_idx]
+        ]
+        self.assertTrue(preds_before)
 
         flow = _load(clear_mido_blocker(self.raw))
         chart = flow.flowchart
@@ -65,9 +87,12 @@ class ClearMidoBlockerTest(unittest.TestCase):
         self.assertIs(new.data.params.data["Value"], False)
         self.assertIs(new.data.nxt.v, warp)
 
-        preds = [e for e in chart.events if isinstance(e.data, ActionEvent) and e.data.nxt.v is new]
-        self.assertEqual(len(preds), 1)
-        self.assertEqual(preds[0].data.actor.v.identifier.name, "Npc_Kokiri_Saria_Child")
+        # The write takes over every edge that used to enter Saria's warp.
+        preds_after = [
+            i for i, e in enumerate(chart.events)
+            if isinstance(e.data, ActionEvent) and e.data.nxt.v is new
+        ]
+        self.assertEqual(preds_after, preds_before)
 
     def test_output_round_trips_and_keeps_warp_once(self):
         patched = clear_mido_blocker(self.raw)
@@ -85,6 +110,11 @@ class ClearMidoBlockerTest(unittest.TestCase):
     def test_rejects_missing_target_action(self):
         with self.assertRaises(ValueError):
             set_flag_before_action(self.raw, "Npc_Kokiri_Saria_Child", "NoSuchAction", MIDO_BLOCKER_FLAG, False)
+
+
+@unittest.skipUnless(RAW_CASTLE_FLOW.exists(), "Goto_HyruleCastle.bfevfl not available")
+class ClearMidoBlockerCastleTest(ClearMidoBlockerTest):
+    RAW_FLOW = RAW_CASTLE_FLOW
 
 
 if __name__ == "__main__":

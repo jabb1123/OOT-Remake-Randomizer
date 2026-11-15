@@ -9,7 +9,7 @@
 
 [regions."DesertColossus".locations]
 "DesertColossus Heart Piece 1" = "is_adult"  # loose Obj_Heart_Piece, both ages
-"Dm_MelodyGet_Spilit" = "is_adult"  # song: Requiem of Spirit from Sheik, Desert Colossus
+"Dm_MelodyGet_Spilit" = "true"  # song: Requiem of Spirit from Sheik, Desert Colossus
 "DesertColossus Static room 0 #0 (Item_Gauntlet_Silver)" = "is_child and SpiritTempleChildKilledIronKnuckle"
 "DesertColossus Static room 0 #0 (Item_Shield_Mirror)" = "is_adult and SpiritTempleAdultKilledIronKnuckle"
 "DesertColossus Static room 0 #0 (TBox_Rupee_Purple)" = "true"

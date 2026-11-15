@@ -3,7 +3,9 @@
 Mido's blocker flag only clears in the Mido talk path (Npc_Kokiri_Mido_Child). When the player
 leaves through Goron City and returns through the Lost Woods, that talk never happens, so Mido
 drops his pose while the blocker flag stays set and the Deku Tree stays unreachable. Saria's warp
-in Dm_Kokiri_0145 is the point where the story has moved past Mido, so the flag is cleared there.
+is the point where the story has moved past Mido, so the flag is cleared there. Saria is warped
+out in two flows: Dm_Kokiri_0145 (Saria leaves) and Goto_HyruleCastle (the Zelda trip, which can
+run before Mido is ever talked to).
 """
 
 from __future__ import annotations
@@ -13,6 +15,8 @@ import io
 from .game_flags import insert_bool_write_before
 
 MIDO_BLOCKER_FLOW = "Dm_Kokiri_0145.bfevfl.zs"
+GOTO_HYRULE_CASTLE_FLOW = "Goto_HyruleCastle.bfevfl.zs"
+MIDO_BLOCKER_FLOWS = (MIDO_BLOCKER_FLOW, GOTO_HYRULE_CASTLE_FLOW)
 MIDO_BLOCKER_FLAG = "KokiriForest_Npc_Kokiri_Mido_Child_Blocker"
 
 _SARIA_ACTOR = "Npc_Kokiri_Saria_Child"
@@ -51,5 +55,5 @@ def set_flag_before_action(data: bytes, target_actor: str, target_action: str,
 
 
 def clear_mido_blocker(data: bytes) -> bytes:
-    """Clear the Mido blocker flag right before Saria's warp to the Sacred Grove in Dm_Kokiri_0145."""
+    """Clear the Mido blocker flag right before Saria's warp out of Kokiri Forest in the flow."""
     return set_flag_before_action(data, _SARIA_ACTOR, _SARIA_WARP_ACTION, MIDO_BLOCKER_FLAG, False)
