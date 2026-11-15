@@ -35,6 +35,10 @@ can_shoot = "(is_child and (Slingshot or Boomerang)) or (is_adult and Bow)"
 # Any ranged attack for the current age, boomerang and hookshot included.
 ranged_weapon = "(is_child and (Slingshot or Boomerang)) or (is_adult and (Bow or has_hookshot))"
 
+# --- Light -------------------------------------------------------------------------------
+# Lighting torches or switches: a Deku Stick held up to a flame, or Din's Fire.
+can_light = "Sticks or Dins_Fire"
+
 # --- Swimming -------------------------------------------------------------------------
 can_dive = "Item_Scale_Silver or Item_Scale_Gold"
 

@@ -22,6 +22,7 @@
 #   [regions.X.skulltulas] Gold Skulltulas in the region (always hold a token) and what reaching them takes
 #   [regions.X.events]     story milestones (boss beaten, door opened) other rules can require
 #   dungeon = true         counts for "one major item per dungeon"
+#   dungeon = "SpiritTemple"  same, but names the dungeon: rooms that share a name share their keys
 #   excluded = true        chests here keep their vanilla item
 # The top-level [exits] table lists regions reachable from anywhere (e.g. warp songs), with the
 # requirement to get there.
@@ -29,6 +30,10 @@
 # Requirements use item names joined by `and` / `or` with parentheses, e.g.
 #   "Hookshot and (Bow or Slingshot)".  Also available: is_child, is_adult, true, false,
 #   event names, `Item:N` for counts, and the option bombchus_in_logic.
+# Dungeon keys are counted per dungeon: `Small_Key_<Dungeon>` (e.g. "Small_Key_SpiritTemple:2") and
+# `Boss_Key_<Dungeon>` (e.g. "Boss_Key_SpiritTemple"). The dungeon is the region's name, or the
+# string given to `dungeon = "..."`. Every key chest in a dungeon adds one to its
+# counter, whether or not it is shuffled. Keys are not shuffled yet.
 # Items accept friendly names (Hookshot, Bow, Zeldas_Lullaby) or actor names (Item_Range_Bow).
 # Helpers from _helpers.toml work like names, and some take arguments:
 #   "has_explosives and can_play(Song_of_Storms)"

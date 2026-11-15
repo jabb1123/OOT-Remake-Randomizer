@@ -10,7 +10,7 @@ dungeon = true
 "SacredForestMeadow" = "true"
 
 [regions."ForestTemple".events]
-"Forest_Temple_Clear" = "is_adult and Bow and Goron_Bracelet"
+"Forest_Temple_Clear" = "is_adult and Bow and Goron_Bracelet and Boss_Key_ForestTemple"
 
 [regions."ForestTemple".locations]
 "Dm_Awake_Forest_Get (event item)" = "Forest_Temple_Clear"

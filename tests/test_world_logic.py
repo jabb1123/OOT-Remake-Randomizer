@@ -39,6 +39,7 @@ class RequirementTests(unittest.TestCase):
         self.assertEqual(resolve_item("Zeldas_Lullaby"), "Item_Melody_ZeldaLullaby")
         self.assertEqual(resolve_item("Kokiri_Sword"), "Item_Sword_Kokiri")
         self.assertEqual(resolve_item("Item_Hookshot"), "Item_Hookshot")
+        self.assertEqual(resolve_item("Sticks"), "Item_DekuStickBundle_Small")
         self.assertIsNone(resolve_item("Hookshoot"))
 
     def test_and_binds_tighter_than_or(self):
@@ -95,6 +96,15 @@ class HelperTests(unittest.TestCase):
         self.assertFalse(self._check(text, ["Item_Melody_StormSong"]))
         self.assertTrue(self._check(text, ["Item_Melody_StormSong", "Item_Ocarina_Fairy"]))
         self.assertTrue(self._check(text, ["Item_Melody_ZeldaLullaby", "Item_Ocarina_Time"]))
+
+    def test_can_light_accepts_sticks_or_din_fire(self):
+        text = (
+            '[helpers]\ncan_light = "Sticks or Dins_Fire"\n'
+            '[settings]\ngoal = "can_light"\n[regions.Root.exits]\n'
+        )
+        self.assertTrue(self._check(text, ["Item_DekuStickBundle_Small"]))
+        self.assertTrue(self._check(text, ["Item_DinFire"]))
+        self.assertFalse(self._check(text, []))
 
     def test_helper_items_count_as_progression(self):
         world = _world(self.HELPERS + '[settings]\ngoal = "can_play(Song_of_Time)"\n')
@@ -416,6 +426,111 @@ class DirectoryLoadingTests(unittest.TestCase):
             "overworld/Forest.toml": self.FOREST,
         })
         self.assertTrue(any("Nowhere" in e for e in world.errors), world.errors)
+
+
+class SmallKeyTests(unittest.TestCase):
+    TEXT = (
+        '[settings]\ngoal = "Done"\n'
+        '[regions.Root.exits]\nTemple = "true"\n'
+        '[regions.Temple]\ndungeon = true\n'
+        '[regions.Temple.locations]\n'
+        '"Temple Static room 1 #0 (Item_Dungeon_SmallKey)" = "true"\n'
+        '"Temple Static room 2 #0 (Item_Dungeon_SmallKey)" = "true"\n'
+        '[regions.Temple.events]\nDone = "Small_Key_Temple:2"\n'
+    )
+    KEY_1 = "Temple Static room 1 #0 (Item_Dungeon_SmallKey)"
+    KEY_2 = "Temple Static room 2 #0 (Item_Dungeon_SmallKey)"
+
+    def test_unplaced_small_keys_count_toward_their_dungeon(self):
+        world = _world(self.TEXT)
+        self.assertEqual(world.errors, [])
+        res = world.explore({})
+        self.assertEqual(res.items["Small_Key_Temple"], 2)
+        self.assertTrue(world.goal_met(res))
+
+    def test_generic_small_key_placement_counts_toward_the_chest_dungeon(self):
+        world = _world(self.TEXT)
+        res = world.explore({self.KEY_1: "Item_Dungeon_SmallKey"})
+        self.assertEqual(res.items["Small_Key_Temple"], 2)
+        self.assertEqual(res.items["Item_Dungeon_SmallKey"], 0)
+        self.assertTrue(world.goal_met(res))
+
+    def test_empty_placement_grants_no_key(self):
+        world = _world(self.TEXT)
+        res = world.explore({self.KEY_2: None})
+        self.assertEqual(res.items["Small_Key_Temple"], 1)
+        self.assertFalse(world.goal_met(res))
+
+    def test_small_key_must_name_a_dungeon(self):
+        world = _world(
+            '[settings]\ngoal = "true"\n'
+            '[regions.Root.exits]\nField = "true"\n'
+            '[regions.Field]\n'
+            '[regions.Field.events]\nDone = "Small_Key_Nowhere:1"\n'
+        )
+        self.assertTrue(any("Small_Key_Nowhere" in e for e in world.errors), world.errors)
+
+    def test_rooms_sharing_a_dungeon_name_share_one_key_counter(self):
+        world = _world(
+            '[settings]\ngoal = "Done"\n'
+            '[regions.Root.exits]\nTempleA = "true"\n'
+            '[regions.TempleA]\ndungeon = "Temple"\n'
+            '[regions.TempleA.exits]\nTempleB = "Small_Key_Temple:1"\n'
+            '[regions.TempleA.locations]\n'
+            '"Temple Static room 1 #0 (Item_Dungeon_SmallKey)" = "true"\n'
+            '[regions.TempleB]\ndungeon = "Temple"\n'
+            '[regions.TempleB.locations]\n'
+            '"Temple Static room 2 #0 (Item_Dungeon_SmallKey)" = "true"\n'
+            '[regions.TempleB.events]\nDone = "Small_Key_Temple:2"\n'
+        )
+        self.assertEqual(world.errors, [])
+        res = world.explore({})
+        self.assertEqual(res.items["Small_Key_Temple"], 2)
+        self.assertNotIn("Small_Key_TempleA", res.items)
+        self.assertTrue(world.goal_met(res))
+
+    def test_dungeon_name_must_match_a_dungeon(self):
+        world = _world(
+            '[settings]\ngoal = "true"\n'
+            '[regions.Root.exits]\nTemple = "true"\n'
+            '[regions.Temple]\ndungeon = "Temple"\n'
+            '[regions.Temple.events]\nDone = "Small_Key_Other:1"\n'
+        )
+        self.assertTrue(any("Small_Key_Other" in e for e in world.errors), world.errors)
+
+
+class BossKeyTests(unittest.TestCase):
+    TEXT = (
+        '[settings]\ngoal = "Done"\n'
+        '[regions.Root.exits]\nTemple = "true"\n'
+        '[regions.Temple]\ndungeon = true\n'
+        '[regions.Temple.locations]\n'
+        '"Temple Static room 3 #0 (Item_Dungeon_BossKey)" = "true"\n'
+        '[regions.Temple.events]\nDone = "Boss_Key_Temple"\n'
+    )
+    BOSS_KEY = "Temple Static room 3 #0 (Item_Dungeon_BossKey)"
+
+    def test_unplaced_boss_key_counts_toward_its_dungeon(self):
+        world = _world(self.TEXT)
+        self.assertEqual(world.errors, [])
+        res = world.explore({})
+        self.assertEqual(res.items["Boss_Key_Temple"], 1)
+        self.assertTrue(world.goal_met(res))
+
+    def test_generic_boss_key_placement_counts_toward_the_chest_dungeon(self):
+        world = _world(self.TEXT)
+        res = world.explore({self.BOSS_KEY: "Item_Dungeon_BossKey"})
+        self.assertEqual(res.items["Boss_Key_Temple"], 1)
+        self.assertTrue(world.goal_met(res))
+
+    def test_boss_key_must_name_a_dungeon(self):
+        world = _world(
+            '[settings]\ngoal = "true"\n'
+            '[regions.Root.exits]\nField = "true"\n'
+            '[regions.Field]\n'
+            '[regions.Field.events]\nDone = "Boss_Key_Nowhere"\n'
+        )
+        self.assertTrue(any("Boss_Key_Nowhere" in e for e in world.errors), world.errors)
 
 
 class SlotNameTests(unittest.TestCase):

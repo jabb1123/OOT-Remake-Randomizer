@@ -7,7 +7,7 @@ dungeon = true
 "DeathMountainCrater" = "true"
 
 [regions."FireTemple".events]
-"Fire_Temple_Clear" = "is_adult and Megaton_Hammer and (Hover_Boots or (Goron_Bracelet and has_explosives))"
+"Fire_Temple_Clear" = "is_adult and Megaton_Hammer and (Hover_Boots or (Goron_Bracelet and has_explosives)) and Boss_Key_FireTemple"
 
 [regions."FireTemple".locations]
 "Dm_Awake_Fire_Get (event item)" = "Fire_Temple_Clear"

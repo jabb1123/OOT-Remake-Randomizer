@@ -7,7 +7,7 @@ dungeon = true
 "LakeHylia" = "true"
 
 [regions."WaterTemple".events]
-"Water_Temple_Clear" = "is_adult and Longshot and (Hover_Boots or (Goron_Bracelet and has_explosives))"
+"Water_Temple_Clear" = "is_adult and Longshot and (Hover_Boots or (Goron_Bracelet and has_explosives)) and Boss_Key_WaterTemple"
 
 [regions."WaterTemple".locations]
 "Dm_Awake_Water_Get (event item)" = "Water_Temple_Clear"

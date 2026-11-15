@@ -5,25 +5,139 @@ dungeon = true
 
 [regions."DodongoCavern".exits]
 "DeathMountainTrail" = "true"  # throw a bomb flower to trigger the entrance cutscene
+"DodongoCavernLobbyLower" = "true"
 
 [regions."DodongoCavern".events]
 "Dodongos_Cavern_Clear" = "is_child and has_bombs and Slingshot and has_weapon"
 
 [regions."DodongoCavern".locations]
 "Dm_DeathMtTrail_0025 (event item)" = "Dodongos_Cavern_Clear"
+
+###
+[regions."DodongoCavernLobbyLower"]
+dungeon = "DodongoCavern"
+
+[regions."DodongoCavernLobbyLower".exits]
+"DodongoCavern" = "true"
+"DodongoCavernSideHall" = "has_strength"
+"DodongoCavernLobbyUpper" = "ElevatorEvent"
+"DodongoCavernStairs" = "UnlockDoorSwitch"
+"DodongoCavernBackRoom" = "OpenFace"
+
+[regions."DodongoCavernLobbyLower".locations]
 "DodongoCavern Dynamic room 1 #0 (Item_Dungeon_Map)" = "true"
 "DodongoCavern Dynamic room 1 #0 (TBox_Rupee_Blue)" = "true"
-"DodongoCavern Dynamic room 1 #0 (TBox_Shield_Deku)" = "has_bombs and Slingshot"
-"DodongoCavern Dynamic room 10 #0 (Item_ScrubBusinessSeed)" = "has_bombs"
-"DodongoCavern Dynamic room 13 #0 (TBox_Shield_Deku)" = "true"
-"DodongoCavern Static room 11 #0 (Item_Dungeon_Compass)" = "true"
-"DodongoCavern Static room 13 #0 (Item_BombBag_Small)" = "Slingshot"
-"DodongoCavern Static room 16 #0 (Item_ScrubBusinessSeed)" = "Slingshot"
-"DodongoCavern Static room 5 #0 (TBox_Rupee_Red)" = "has_weapon"
 
-[regions."DodongoCavern".skulltulas]
+###
+[regions."DodongoCavernSideHall"]
+dungeon = "DodongoCavern"
+
+[regions."DodongoCavernSideHall".exits]
+"DodongoCavernLobbyLower" = "true"
+"DodongoCavernLizafosLower" = "true"
+
+[regions."DodongoCavernSideHall".skulltulas]
 "Dodongos Cavern GS Side Room Near Lower Lizalfos" = "true"  # original: is_adult or has_explosives or Sticks or Slingshot or Boomerang or Kokiri_Sword
 "Dodongos Cavern GS Scarecrow" = "(is_adult and has_hookshot)"  # original: can_use(Scarecrow) or can_use(Longshot) or (logic_dc_scarecrow_gs and (is_adult or can_child_attack))
+
+###
+[regions."DodongoCavernLizafosLower"]
+dungeon = "DodongoCavern"
+
+[regions."DodongoCavernLizafosLower".exits]
+"DodongoCavernSideHall" = "has_weapon"
+"DodongoCavernTorches" = "has_weapon"
+
+[regions."DodongoCavernLizafosLower".locations]
+"DodongoCavern Static room 5 #0 (TBox_Rupee_Red)" = "has_weapon"
+
+###
+[regions."DodongoCavernTorches"]
+dungeon = "DodongoCavern"
+
+[regions."DodongoCavernTorches".exits]
+"DodongoCavernLobbyLower" = "can_light"
+"DodongoCavernLizafosLower" = "true"
+
+[regions."DodongoCavernTorches".events]
+"UnlockDoorSwitch" = "can_light"
+
+###
+[regions."DodongoCavernStairs"]
+dungeon = "DodongoCavern"
+
+[regions."DodongoCavernStairs".exits]
+"DodongoCavernLobbyLower" = "true"
+"DodongoCavernLobbyUpper" = "true"
+
+[regions."DodongoCavernStairs".locations]
+"DodongoCavern Dynamic room 10 #0 (Item_ScrubBusinessSeed)" = "has_bombs"
+"DodongoCavern Static room 11 #0 (Item_Dungeon_Compass)" = "true"
+
+[regions."DodongoCavernStairs".skulltulas]
 "Dodongos Cavern GS Vines Above Stairs" = "true"  # original: at('Dodongos Cavern Climb', True) or (logic_dc_vines_gs and can_use(Longshot))
-"Dodongos Cavern GS Alcove Above Stairs" = "((is_adult and (Hover_Boots or Longshot)) or ((can_blast_or_smash or has_strength) and can_shoot)) and ((is_adult and has_hookshot) or (is_child and Boomerang))"  # original: can_use(Hookshot) or can_use(Boomerang)
+
+###
+[regions."DodongoCavernLobbyUpper"]
+dungeon = "DodongoCavern"
+
+[regions."DodongoCavernLobbyUpper".exits]
+"DodongoCavernLobbyLower" = "true"
+"DodongoCavernPlatforms" = "true"
+
+[regions."DodongoCavernLobbyUpper".events]
+"ElevatorEvent" = "true"
+"OpenFace" = "has_bombs"
+
+[regions."DodongoCavernLobbyUpper".locations]
+"DodongoCavern Dynamic room 1 #0 (TBox_Shield_Deku)" = "has_bombs and Slingshot"
+
+[regions."DodongoCavernLobbyUpper".skulltulas]
+"Dodongos Cavern GS Alcove Above Face" = "has_bombs or ((is_adult and (Hover_Boots or Longshot)) or ((can_blast_or_smash or has_strength) and can_shoot)) and ((is_adult and has_hookshot) or (is_child and Boomerang))"  # original: can_use(Hookshot) or can_use(Boomerang)
+
+###
+[regions."DodongoCavernPlatforms"]
+dungeon = "DodongoCavern"
+
+[regions."DodongoCavernPlatforms".exits]
+"DodongoCavernLobbyUpper" = "true"
+"DodongoCavernLizafosUpper" = "can_shoot"
+
+[regions."DodongoCavernPlatforms".locations]
+"DodongoCavern Dynamic room 13 #0 (TBox_Shield_Deku)" = "true"
+
+###
+[regions."DodongoCavernLizafosUpper"]
+dungeon = "DodongoCavern"
+
+[regions."DodongoCavernLizafosUpper".exits]
+"DodongoCavernPlatforms" = "has_weapon"
+"DodongoCavernBombChest" = "Slingshot"
+"DodongoCavernLizafosLower" = "has_weapon"
+
+[regions."DodongoCavernLizafosUpper".locations]
+"DodongoCavern Static room 16 #0 (Item_ScrubBusinessSeed)" = "Slingshot"
+
+###
+[regions."DodongoCavernBombChest"]
+dungeon = "DodongoCavern"
+
+[regions."DodongoCavernBombChest".events]
+"ElevatorEvent" = "true"
+
+[regions."DodongoCavernBombChest".exits]
+"DodongoCavernLobbyUpper" = "true"
+"DodongoCavernLizafosUpper" = "true"
+
+[regions."DodongoCavernBombChest".locations]
+"DodongoCavern Static room 13 #0 (Item_BombBag_Small)" = "true"
+
+###
+[regions."DodongoCavernBackRoom"]
+dungeon = "DodongoCavern"
+
+[regions."DodongoCavernBackRoom".exits]
+"DodongoCavernLobbyLower" = "true"
+
+[regions."DodongoCavernBackRoom".skulltulas]
 "Dodongos Cavern GS Back Room" = "has_explosives and ((is_adult and (Hover_Boots or Longshot or Bow)) or (is_child and Slingshot))"  # original: can_blast_or_smash

@@ -148,7 +148,8 @@ def _cmd_logic(args: argparse.Namespace) -> int:
     obtainable = {s.vanilla_item for s in slots} | set(SONG_SLOTS.values()) | set(world.start_items)
     obtainable |= set(SKULL_REWARDS.values()) | {TOKEN_ITEM} | set(EVENT_SLOTS.values())
     obtainable |= {slot.item for slot in NPC_SLOTS.values()}
-    for item in sorted(world.referenced_items - obtainable):
+    counters = set(world.key_locations.values())  # dungeon key counters are obtained through their chests
+    for item in sorted(world.referenced_items - obtainable - counters):
         print(f"warning: {item} is required somewhere but no location holds it")
 
     # The unmodified game must satisfy the rules, otherwise they are too strict.

@@ -5,21 +5,64 @@ dungeon = true
 
 [regions."InsideTheDekuTree".exits]
 "KokiriForest" = "true"
+"InsideTheDekuTreeLobby" = "true"
 
 [regions."InsideTheDekuTree".events]
 "Deku_Tree_Clear" = "is_child and Kokiri_Sword and Deku_Shield and can_shoot"
 
 [regions."InsideTheDekuTree".locations]
 "Dm_Kokiri_0130 (event item)" = "Deku_Tree_Clear"
-"InsideTheDekuTree Dynamic room 3 #0 (TBox_DekuNutBundle)" = "can_shoot"
-"InsideTheDekuTree Dynamic room 4 #0 (Item_DekuStickBundle_Small)" = "can_shoot"
+
+###
+[regions."InsideTheDekuTreeLobby"]
+dungeon = "InsideTheDekuTree"
+
+[regions."InsideTheDekuTreeLobby".exits]
+"KokiriForest" = "true"
+"InsideTheDekuTreeSlingShot" = "true"
+"InsideTheDekuTreeCompass" = "true"
+"InsideTheDekuTreeLobbyBasement" = "true"
+
+[regions."InsideTheDekuTreeLobby".locations]
 "InsideTheDekuTree Static room 0 #0 (Item_Dungeon_Map)" = "true"
+
+
+###
+[regions."InsideTheDekuTreeSlingShot"]
+dungeon = "InsideTheDekuTree"
+
+[regions."InsideTheDekuTreeSlingShot".exits]
+"InsideTheDekuTreeLobby" = "can_shoot"
+
+[regions."InsideTheDekuTreeSlingShot".locations]
 "InsideTheDekuTree Static room 2 #0 (Item_Range_SlingShot)" = "true"
 "InsideTheDekuTree Static room 2 #0 (TBox_DekuNutBundle)" = "true"
-"InsideTheDekuTree Static room 3 #0 (Item_Dungeon_Compass)" = "can_shoot"
 
-[regions."InsideTheDekuTree".skulltulas]
+###
+[regions."InsideTheDekuTreeCompass"]
+dungeon = "InsideTheDekuTree"
+
+[regions."InsideTheDekuTreeCompass".exits]
+"InsideTheDekuTreeLobby" = "true"
+
+[regions."InsideTheDekuTreeCompass".locations]
+"InsideTheDekuTree Dynamic room 3 #0 (TBox_DekuNutBundle)" = "true"
+"InsideTheDekuTree Static room 3 #0 (Item_Dungeon_Compass)" = "true"
+
+[regions."InsideTheDekuTreeCompass".skulltulas]
 "Deku Tree GS Compass Room" = "true"  # original: is_adult or can_child_attack
+
+###
+[regions."InsideTheDekuTreeLobbyBasement"]
+dungeon = "InsideTheDekuTree"
+
+[regions."InsideTheDekuTreeLobbyBasement".exits]
+"InsideTheDekuTreeLobby" = "true"
+
+[regions."InsideTheDekuTreeLobbyBasement".locations]
+"InsideTheDekuTree Dynamic room 4 #0 (Item_DekuStickBundle_Small)" = "can_shoot"
+
+[regions."InsideTheDekuTreeLobbyBasement".skulltulas]
 "Deku Tree GS Basement Gate" = "true"  # original: is_adult or can_child_attack
-"Deku Tree GS Basement Vines" = "true"  # original: can_use_projectile or can_use(Dins_Fire) or (logic_deku_basement_gs and (is_adult or Sticks or Kokiri_Sword))
-"Deku Tree GS Basement Back Room" = "can_shoot and can_blast_or_smash and ((is_adult and has_hookshot) or (is_child and Boomerang))"  # original: here(has_fire_source_with_torch or can_use(Bow)) and here(can_blast_or_smash) and (can_use(Boomerang) or ca...
+"Deku Tree GS Basement Vines" = "can_shoot and can_light"  # original: can_use_projectile or can_use(Dins_Fire) or (logic_deku_basement_gs and (is_adult or Sticks or Kokiri_Sword))
+"Deku Tree GS Basement Back Room" = "can_shoot and can_light"  # original: here(has_fire_source_with_torch or can_use(Bow)) and here(can_blast_or_smash) and (can_use(Boomerang) or ca...

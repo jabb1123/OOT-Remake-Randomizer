@@ -4,8 +4,9 @@
 
 [regions."GoronCity".exits]
 "DeathMountainTrail" = "true"
-"GoronShop" = "has_explosives or has_strength or (is_adult and Bow)"
+"GoronShop" = "has_explosives or has_strength or (is_adult and Bow) or (can_play(Zeldas_Lullaby) and Sticks) or Dins_Fire"
 "LostWood" = "has_explosives"
+"DeathMountainCrater" = "is_adult"
 
 [regions."GoronCity".locations]
 "GoronCity Dynamic room 0 #0 (TBox_Rupee_Blue)" = "has_explosives"

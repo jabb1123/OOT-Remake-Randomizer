@@ -37,6 +37,10 @@ REGION_TABLES = ("exits", "locations", "events", "skulltulas")
 AGES = ("child", "adult")
 # Identifiers that read randomizer settings instead of items.
 KNOWN_OPTIONS = frozenset({"bombchus_in_logic"})
+# Each dungeon counts its own keys as `Small_Key_<Region>` (e.g. `Small_Key_SpiritTemple:2`) and its
+# boss key as `Boss_Key_<Region>`. A generic key actor found in a dungeon's key chest counts toward that dungeon.
+KEY_ACTORS = {"Item_Dungeon_SmallKey": "Small_Key_", "Item_Dungeon_BossKey": "Boss_Key_"}
+KEY_PREFIXES = tuple(KEY_ACTORS.values())
 
 _RAW_ACTOR = re.compile(r"^(Item|Obj|TBox|Tbox)_\w+$")
 _TOKEN = re.compile(r"\s*(?:(\()|(\))|(,)|([A-Za-z_][A-Za-z0-9_]*)(?::(\d+))?)")
@@ -64,7 +68,12 @@ def _build_aliases() -> dict[str, str]:
         aliases[_norm(display)] = actor
     for actor, display in NPC_ITEM_DISPLAY_NAMES.items():
         aliases[_norm(display)] = actor
-    aliases.update({"bombs": "Item_BombBag_Small", "hammer": "Item_Hammer", "lens": "Item_GlassTruth"})
+    aliases.update({
+        "bombs": "Item_BombBag_Small",
+        "hammer": "Item_Hammer",
+        "lens": "Item_GlassTruth",
+        "sticks": "Item_DekuStickBundle_Small",  # the same Deku Sticks item as Deku_Sticks
+    })
     return aliases
 
 
@@ -215,6 +224,8 @@ def _resolve(node: Node, events: set[str], errors: list[str], where: str,
         if count != 1:
             errors.append(f"{where}: helper {word!r} cannot take a count")
         return _expand(helper, [], events, errors, where, helpers, stack)
+    if word.startswith(KEY_PREFIXES):
+        return ("item", word, count)  # dungeon key counter; validated in load_world
     actor = resolve_item(word)
     if actor is not None:
         return ("item", actor, count)
@@ -336,6 +347,7 @@ class Region:
     locations: dict[str, Node] = field(default_factory=dict)
     events: dict[str, Node] = field(default_factory=dict)
     dungeon: bool = False
+    dungeon_name: str = ""  # counter name for the dungeon's keys (`dungeon = "Name"` groups rooms under one)
     excluded: bool = False  # chests here keep their vanilla item
 
 
@@ -369,6 +381,9 @@ class World:
     helpers: dict[str, Helper] = field(default_factory=dict)
     # Top-level `[exits]`: targets reachable from any region once their requirement holds.
     global_exits: dict[str, Node] = field(default_factory=dict)
+    # Key chests (`... (Item_Dungeon_SmallKey)` / `... (Item_Dungeon_BossKey)`) mapped to their dungeon's
+    # counter. Counted even when the planner has not placed them, since keys are not shuffled yet.
+    key_locations: dict[str, str] = field(default_factory=dict)
 
     @property
     def referenced_items(self) -> set[str]:
@@ -410,6 +425,13 @@ class World:
     @property
     def excluded_locations(self) -> set[str]:
         return {loc for loc, r in self.location_region.items() if self.regions[r].excluded}
+
+    def _item_at(self, loc: str, placements: dict[str, str]) -> str | None:
+        """The item a reached location grants. Unplaced key chests grant their own dungeon's key."""
+        item = placements.get(loc, self.key_locations.get(loc))
+        if item in KEY_ACTORS:
+            item = self.key_locations.get(loc, item)
+        return item
 
     def explore(self, placements: dict[str, str], options: dict | None = None,
                 extra_items: Counter | None = None) -> SearchResult:
@@ -456,8 +478,9 @@ class World:
                             extra is None or evaluate(extra, items, events, age, options)
                         ):
                             reached.add(loc)
-                            if placements.get(loc):
-                                items[placements[loc]] += 1
+                            item = self._item_at(loc, placements)
+                            if item:
+                                items[item] += 1
                             changed = True
                     for target, req in (*region.exits.items(), *self.global_exits.items()):
                         if target not in seen and evaluate(req, items, events, age, options):
@@ -603,8 +626,13 @@ def load_world(path: Path = DEFAULT_WORLD_PATH) -> World:
     regions: dict[str, Region] = {}
     location_region: dict[str, str] = {}
     token_locations: set[str] = set()
+    key_locations: dict[str, str] = {}
     for rname, raw in raw_regions.items():
-        region = Region(rname, dungeon=bool(raw.get("dungeon", False)), excluded=bool(raw.get("excluded", False)))
+        raw_dungeon = raw.get("dungeon", False)
+        is_dungeon = bool(raw_dungeon)
+        dungeon_name = raw_dungeon if isinstance(raw_dungeon, str) else rname
+        region = Region(rname, dungeon=is_dungeon, dungeon_name=dungeon_name if is_dungeon else "",
+                        excluded=bool(raw.get("excluded", False)))
         for key in ("exits", "locations", "events"):
             table = getattr(region, key)
             for name, req in raw.get(key, {}).items():
@@ -651,6 +679,12 @@ def load_world(path: Path = DEFAULT_WORLD_PATH) -> World:
         else:
             start_items[actor] += 1
 
+    for rname, region in regions.items():
+        for loc in region.locations:
+            for actor, prefix in KEY_ACTORS.items():
+                if loc.endswith(f"({actor})"):
+                    key_locations[loc] = prefix + (region.dungeon_name or rname)
+
     world = World(
         regions=regions,
         spawns=spawns,
@@ -664,7 +698,14 @@ def load_world(path: Path = DEFAULT_WORLD_PATH) -> World:
         token_locations=token_locations,
         helpers=helpers,
         global_exits=global_exits,
+        key_locations=key_locations,
     )
+
+    dungeon_names = {r.dungeon_name for r in regions.values() if r.dungeon}
+    for item in sorted(world.referenced_items):
+        prefix = next((p for p in KEY_PREFIXES if item.startswith(p)), None)
+        if prefix and item[len(prefix):] not in dungeon_names:
+            errors.append(f"{item}: dungeon keys are counted per dungeon; {item[len(prefix):]!r} is not a dungeon")
 
     linked = {spawn for spawn in spawns.values()} | {t for r in regions.values() for t in r.exits} | set(global_exits)
     for rname in regions:

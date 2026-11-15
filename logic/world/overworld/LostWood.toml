@@ -5,8 +5,11 @@
 [regions."LostWood".exits]
 "KokiriForest" = "true"
 "GoronCity" = "has_explosives"
-"SacredForestMeadow" = "true"
+"SacredForestMeadow" = "is_child or LostWoodMidoMove"
 "ZoraRiver" = "Item_Scale_Silver"
+
+[regions."LostWood".events]
+"LostWoodMidoMove" = "is_adult and can_play(Sarias_Song)"
 
 [regions."LostWood".locations]
 "LostWood Dynamic room 0 #0 (TBox_Rupee_Purple)" = "is_adult"

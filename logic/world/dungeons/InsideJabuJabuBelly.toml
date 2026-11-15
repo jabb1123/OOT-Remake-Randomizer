@@ -5,18 +5,157 @@ dungeon = true
 
 [regions."InsideJabuJabuBelly".exits]
 "ZoraFountain" = "true"
+"InsideJabuJabuBellyEntrance" = "true"
 
-[regions."InsideJabuJabuBelly".events]
-"Jabu_Jabu_Clear" = "is_child and Boomerang and has_weapon"
+###
+[regions."InsideJabuJabuBellyEntrance"]
+dungeon = "InsideJabuJabuBelly"
 
-[regions."InsideJabuJabuBelly".locations]
-"InsideJabuJabuBelly Static room 12 #0 (Item_Dungeon_Compass)" = "Boomerang"
-"InsideJabuJabuBelly Static room 13 #0 (TBox_Rupee_Red)" = "Boomerang"
-"InsideJabuJabuBelly Static room 14 #0 (Item_Dungeon_Map)" = "can_shoot"
-"InsideJabuJabuBelly Static room 9 #0 (Item_Boomerang)" = "can_shoot"
+[regions."InsideJabuJabuBellyEntrance".exits]
+"InsideJabuJabuBelly" = "true"
+"InsideJabuJabuBellyElevator" = "can_shoot"
 
-[regions."InsideJabuJabuBelly".skulltulas]
-"Jabu Jabus Belly GS Water Switch Room" = "true"  # original: True
+###
+[regions."InsideJabuJabuBellyElevator"]
+dungeon = "InsideJabuJabuBelly"
+
+[regions."InsideJabuJabuBellyElevator".exits]
+"InsideJabuJabuBellyEntrance" = "true"
+"InsideJabuJabuBellyCentralUpper" = "true"
+"InsideJabuJabuBellyWaterSwitch" = "JabuJabuActivateElevator"
+
+###
+[regions."InsideJabuJabuBellyCentralUpper"]
+dungeon = "InsideJabuJabuBelly"
+
+[regions."InsideJabuJabuBellyCentralUpper".exits]
+"InsideJabuJabuBellyElevator" = "true"
+"InsideJabuJabuBellyCentralLower" = "true"
+"InsideJabuJabuBellyHallway" = "true"
+
+###
+[regions."InsideJabuJabuBellyCentralLower"]
+dungeon = "InsideJabuJabuBelly"
+
+[regions."InsideJabuJabuBellyCentralLower".exits]
+"InsideJabuJabuBellyCentralUpper" = "true"
+"InsideJabuJabuBellyWaterSwitch" = "true"
+"InsideJabuJabuBellyOcto" = "JabuJabuClearGreen"
+"InsideJabuJabuBellySmallChest" = "true"
+
+[regions."InsideJabuJabuBellyCentralLower".skulltulas]
 "Jabu Jabus Belly GS Lobby Basement Lower" = "((is_adult and has_hookshot) or (is_child and Boomerang))"  # original: can_use(Boomerang) or can_use(Hookshot)
 "Jabu Jabus Belly GS Lobby Basement Upper" = "((is_adult and has_hookshot) or (is_child and Boomerang))"  # original: can_use(Boomerang) or can_use(Hookshot)
+
+###
+[regions."InsideJabuJabuBellySmallChest"]
+dungeon = "InsideJabuJabuBelly"
+
+[regions."InsideJabuJabuBellySmallChest".exits]
+"InsideJabuJabuBellyCentralLower" = "true"
+
+[regions."InsideJabuJabuBellySmallChest".locations]
+"InsideJabuJabuBelly Static room 13 #0 (TBox_Rupee_Red)" = "Boomerang"
+
+###
+[regions."InsideJabuJabuBellyWaterSwitch"]
+dungeon = "InsideJabuJabuBelly"
+
+[regions."InsideJabuJabuBellyWaterSwitch".exits]
+"InsideJabuJabuBellyCentralLower" = "true"
+"InsideJabuJabuBellyElevator" = "JabuJabuActivateElevator"
+
+[regions."InsideJabuJabuBellyWaterSwitch".events]
+"JabuJabuActivateElevator" = "can_shoot"
+
+[regions."InsideJabuJabuBellyWaterSwitch".locations]
+"InsideJabuJabuBelly Static room 14 #0 (Item_Dungeon_Map)" = "can_shoot"
+
+[regions."InsideJabuJabuBellyWaterSwitch".skulltulas]
+"Jabu Jabus Belly GS Water Switch Room" = "true"  # original: True
+
+###
+[regions."InsideJabuJabuBellyHallway"]
+dungeon = "InsideJabuJabuBelly"
+
+[regions."InsideJabuJabuBellyHallway".exits]
+"InsideJabuJabuBellyCentralUpper" = "true"
+"InsideJabuJabuBellyBoomerangChest" = "JabuJabuActivateElevator"
+"InsideJabuJabuBellyPurple" = "JabuJabuActivateElevator"
+"InsideJabuJabuBellyBlue" = "JabuJabuClearPurple"
+"InsideJabuJabuBellyBubbles" = "JabuJabuClearBlue"
+"InsideJabuJabuBellyGreen" = "JabuJabuClearBlue"
+
+###
+[regions."InsideJabuJabuBellyBoomerangChest"]
+dungeon = "InsideJabuJabuBelly"
+
+[regions."InsideJabuJabuBellyBoomerangChest".exits]
+"InsideJabuJabuBellyHallway" = "has_weapon"
+
+[regions."InsideJabuJabuBellyBoomerangChest".locations]
+"InsideJabuJabuBelly Static room 9 #0 (Item_Boomerang)" = "has_weapon"
+
+###
+[regions."InsideJabuJabuBellyPurple"]
+dungeon = "InsideJabuJabuBelly"
+
+[regions."InsideJabuJabuBellyPurple".exits]
+"InsideJabuJabuBellyHallway" = "Boomerang"
+
+[regions."InsideJabuJabuBellyPurple".events]
+"JabuJabuClearPurple" = "Boomerang"
+
+###
+[regions."InsideJabuJabuBellyBlue"]
+dungeon = "InsideJabuJabuBelly"
+
+[regions."InsideJabuJabuBellyBlue".exits]
+"InsideJabuJabuBellyHallway" = "Boomerang"
+
+[regions."InsideJabuJabuBellyBlue".events]
+"JabuJabuClearBlue" = "Boomerang"
+
+###
+[regions."InsideJabuJabuBellyBubbles"]
+dungeon = "InsideJabuJabuBelly"
+
+[regions."InsideJabuJabuBellyBubbles".exits]
+"InsideJabuJabuBellyHallway" = "Boomerang"
+
+[regions."InsideJabuJabuBellyBubbles".locations]
+"InsideJabuJabuBelly Static room 12 #0 (Item_Dungeon_Compass)" = "Boomerang"
+
+###
+[regions."InsideJabuJabuBellyGreen"]
+dungeon = "InsideJabuJabuBelly"
+
+[regions."InsideJabuJabuBellyGreen".exits]
+"InsideJabuJabuBellyHallway" = "Boomerang"
+
+[regions."InsideJabuJabuBellyGreen".events]
+"JabuJabuClearGreen" = "Boomerang"
+
+###
+[regions."InsideJabuJabuBellyOcto"]
+dungeon = "InsideJabuJabuBelly"
+
+[regions."InsideJabuJabuBellyOcto".exits]
+"InsideJabuJabuBellyCentralLower" = "Boomerang"
+"InsideJabuJabuBellyPreBoss" = "Boomerang"
+
+[regions."InsideJabuJabuBellyOcto".events]
+"JabuJabuOcto" = "Boomerang"
+
+###
+[regions."InsideJabuJabuBellyPreBoss"]
+dungeon = "InsideJabuJabuBelly"
+
+[regions."InsideJabuJabuBellyPreBoss".exits]
+"InsideJabuJabuBellyOcto" = "true"
+
+[regions."InsideJabuJabuBellyPreBoss".events]
+"Jabu_Jabu_Clear" = "is_child and Boomerang and has_weapon"
+
+[regions."InsideJabuJabuBellyPreBoss".skulltulas]
 "Jabu Jabus Belly GS Near Boss" = "is_child and Boomerang"  # original: can_use_projectile or can_use(Dins_Fire)

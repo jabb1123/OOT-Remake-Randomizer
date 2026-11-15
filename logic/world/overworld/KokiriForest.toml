@@ -9,7 +9,10 @@
 "HyruleField" = "Deku_Tree_Clear"
 "LostWood" = "true"
 "KokiriShop" = "true"
-"InsideTheDekuTree" = "Kokiri_Sword and (Deku_Shield or TBox_Shield_Hylian)"
+"InsideTheDekuTree" = "KokiriMidoMove"
+
+[regions."KokiriForest".events]
+"KokiriMidoMove" = "is_child and Kokiri_Sword and (Deku_Shield or TBox_Shield_Hylian)"
 
 [regions."KokiriForest".locations]
 "Dm_Kokiri_0155 (event item)" = "(is_child and Deku_Tree_Clear) or can_get_to_hyrule_field"
@@ -29,11 +32,11 @@
 # Kokiri Shop (shopsanity). Slot numbers are the shelf ShopItemIndex; only slots listed here
 # can hold randomized items, and a slot's price adds a wallet requirement per seed.
 [regions."KokiriShop".locations]
-"Kokiri Shop Slot 0" = "Deku_Tree_Clear"  # vanilla: Shop_Heart; shelf appears after the Deku Tree
-"Kokiri Shop Slot 1" = "Deku_Tree_Clear"  # vanilla: Shop_DekuSeedBundle_02; shelf appears after the Deku Tree
+"Kokiri Shop Slot 0" = "KokiriMidoMove"  # vanilla: Shop_Heart; shelf appears after the Deku Tree
+"Kokiri Shop Slot 1" = "KokiriMidoMove"  # vanilla: Shop_DekuSeedBundle_02; shelf appears after the Deku Tree
 "Kokiri Shop Slot 2" = "true"  # vanilla: Shop_DekuNutBundle_01
-"Kokiri Shop Slot 3" = "Deku_Tree_Clear"  # vanilla: Shop_DekuNutBundle_02; shelf appears after the Deku Tree
-"Kokiri Shop Slot 4" = "Deku_Tree_Clear"  # vanilla: Shop_DekuSeedBundle_01; shelf appears after the Deku Tree
-"Kokiri Shop Slot 5" = "Deku_Tree_Clear"  # vanilla: Shop_DekuStickBundle_Medium; shelf appears after the Deku Tree
+"Kokiri Shop Slot 3" = "KokiriMidoMove"  # vanilla: Shop_DekuNutBundle_02; shelf appears after the Deku Tree
+"Kokiri Shop Slot 4" = "KokiriMidoMove"  # vanilla: Shop_DekuSeedBundle_01; shelf appears after the Deku Tree
+"Kokiri Shop Slot 5" = "KokiriMidoMove"  # vanilla: Shop_DekuStickBundle_Medium; shelf appears after the Deku Tree
 "Kokiri Shop Slot 6" = "true"  # vanilla: Shop_Weapon_Shield_Deku
 "Kokiri Shop Slot 7" = "true"  # vanilla: Shop_DekuStick
