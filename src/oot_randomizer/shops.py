@@ -555,8 +555,10 @@ def build_rsdb_rows(tables: Mapping[str, bytes | Any], template: str, item_actor
 Selector = int | Mapping[str, Any] | Callable[[Mapping[str, Any], int], bool]
 
 
-def _actor_gyaml_slots(buf: bytes) -> tuple[list[str], list[int | None]]:
-    """(value string table, per Actors[i] byte offset of its Gyaml string index or None)."""
+def _bcett_actor_tables(buf: bytes):
+    """(value string table, key lookup(hash_off, key) -> (type, value_off) or None,
+    per Actors[i] hash offset or None). Walks the BYML in place without re-serializing.
+    """
     if buf[:2] != b"YB":
         raise ShopError(f"expected a little-endian BYML (YB), got {bytes(buf[:2])!r}")
     hk_off, st_off, root_off = struct.unpack_from("<III", buf, 4)
@@ -591,12 +593,23 @@ def _actor_gyaml_slots(buf: bytes) -> tuple[list[str], list[int | None]]:
     arr = struct.unpack_from("<I", buf, found[1])[0]
     count = u24(arr + 1)
     slots_base = (arr + 4 + count + 3) & ~3
-    slots: list[int | None] = []
+    actors: list[int | None] = []
     for i in range(count):
-        slot = None
+        hash_off = None
         if buf[arr + 4 + i] == 0xC1:
-            actor = struct.unpack_from("<I", buf, slots_base + 4 * i)[0]
-            g = lookup(actor, "Gyaml")
+            hash_off = struct.unpack_from("<I", buf, slots_base + 4 * i)[0]
+        actors.append(hash_off)
+    return strings, lookup, actors
+
+
+def _actor_gyaml_slots(buf: bytes) -> tuple[list[str], list[int | None]]:
+    """(value string table, per Actors[i] byte offset of its Gyaml string index or None)."""
+    strings, lookup, actors = _bcett_actor_tables(buf)
+    slots: list[int | None] = []
+    for hash_off in actors:
+        slot = None
+        if hash_off is not None:
+            g = lookup(hash_off, "Gyaml")
             if g is not None and g[0] == 0xA0:
                 slot = g[1]
         slots.append(slot)
@@ -677,9 +690,96 @@ def set_actor_gyaml(bcett_bytes: bytes, indices: Sequence[int], new_gyaml: str, 
     return bytes(buf)
 
 
-# ---------------------------------------------------------------------------
-# NUP application
-# ---------------------------------------------------------------------------
+def _append_f32_array(buf: bytearray, values: Sequence[float]) -> int:
+    """Append a float32 BYML array to `buf` (4-byte aligned); returns its offset."""
+    buf.extend(b"\x00" * (-len(buf) % 4))
+    off = len(buf)
+    buf.extend(bytes([0xC0]) + len(values).to_bytes(3, "little"))
+    buf.extend(bytes([0xD2]) * len(values))
+    buf.extend(b"\x00" * (-len(buf) % 4))
+    buf.extend(struct.pack(f"<{len(values)}f", *values))
+    return off
+
+
+def shift_actor_y(bcett_bytes: bytes, indices: Sequence[int], dy: float) -> bytes:
+    """Add `dy` to the Y position (Translate[1]) of the Actors[i] entries in `indices`.
+
+    BYML writers share identical containers, so an actor's Translate array may be used by
+    other actors too. Each lifted actor therefore gets a fresh copy of its array (appended to
+    the buffer) and only its own Translate pointer is repointed.
+    """
+    buf = bytearray(bcett_bytes)
+    _, lookup, actors = _bcett_actor_tables(buf)
+    for i in indices:
+        if not 0 <= i < len(actors):
+            raise ShopError(f"actor index {i} out of range")
+        found = lookup(actors[i], "Translate") if actors[i] is not None else None
+        if found is None or found[0] != 0xC0:
+            raise ShopError(f"actor {i} has no Translate array")
+        arr = struct.unpack_from("<I", buf, found[1])[0]
+        count = int.from_bytes(buf[arr + 1 : arr + 4], "little")
+        if count < 2 or any(buf[arr + 4 + k] != 0xD2 for k in range(count)):
+            raise ShopError(f"actor {i} Translate is not a float array")
+        base = (arr + 4 + count + 3) & ~3
+        values = list(struct.unpack_from(f"<{count}f", buf, base))
+        values[1] += dy
+        struct.pack_into("<I", buf, found[1], _append_f32_array(buf, values))
+    return bytes(buf)
+
+
+# Shop/heart items that are regular shop stock (vanilla shelves sell these) keep their height.
+# Any other item (gauntlets, boots, masks, medals, swords, ...) is lifted by ITEM_LIFT_Y so its
+# model sits on the shelf or floor instead of half-sunk into it.
+REGULAR_SHOP_ITEMS: frozenset[str] = frozenset(
+    {
+        "Item_Arrow_Normal",
+        "Item_Bomb",
+        "Item_BombBundle_Small",
+        "Item_Bombchu",
+        "Item_BombchuBundle_Small",
+        "Item_BombchuBundle_Medium",
+        "Item_BombchuBundle_Large",
+        "Item_DekuNut",
+        "Item_DekuSeed",
+        "Item_DekuStick",
+        "Item_DekuStickBundle_Small",
+    }
+)
+REGULAR_SHOP_ITEM_PREFIXES: tuple[str, ...] = ("Item_Bottle",)
+ITEM_LIFT_Y = 0.3
+
+
+def needs_lift(item: str) -> bool:
+    """True when `item` is placed higher than regular shop stock (see ITEM_LIFT_Y)."""
+    return item not in REGULAR_SHOP_ITEMS and not item.startswith(
+        REGULAR_SHOP_ITEM_PREFIXES
+    )
+
+
+def place_shelf_actor(
+    data: bytes,
+    shelf: "Shelf",
+    new_name: str,
+    set_actor: Callable[..., bytes],
+    *,
+    lift: bool,
+    changed: list[int] | None = None,
+) -> bytes:
+    """Run `set_actor` for one shelf edit, then lift the placed actors when `lift` is set."""
+    placed: list[int] = []
+    data = set_actor(
+        data,
+        shelf.select,
+        new_name,
+        allow_multiple=shelf.allow_multiple,
+        changed=placed,
+    )
+    if lift and placed:
+        data = shift_actor_y(data, placed, ITEM_LIFT_Y)
+    if changed is not None:
+        changed.extend(placed)
+    return data
+
 
 @dataclass(frozen=True, slots=True)
 class Shelf:
@@ -804,7 +904,8 @@ def apply_shop_items(nup_path: str | Path, zsdic_bytes: bytes,
     (scene, select[, allow_multiple]) tuple or a list of them; `scene` is the bcett file name
     (e.g. "KokiriForest_Child_Static.bcett.byml.zs") and is patched in every package copy.
     name_for gives each clone's actor name; set_actor(bytes, select, name, allow_multiple=,
-    changed=) writes it into a scene (the heart pickups use their own placement check).
+    changed=) writes it into a scene (the heart pickups use their own placement check). Shelf
+    and heart actors of items that are not regular shop stock are then raised by ITEM_LIFT_Y.
 
     Everything is read and validated first. Then, in order: (1) new packs are added with
     add_files (it rewrites the whole TOC and may relocate meta blocks, so it runs before
@@ -812,6 +913,7 @@ def apply_shop_items(nup_path: str | Path, zsdic_bytes: bytes,
     and (3) the shelf bcetts are rewritten via NupChestPatcher.replace_file; (4) RESTBL sizes
     are inserted for the new packs and (5) grown for the rewritten files.
     """
+
     from nup.read import NupReader
     from .nup_files import add_files
 
@@ -857,18 +959,22 @@ def apply_shop_items(nup_path: str | Path, zsdic_bytes: bytes,
                 data = _decompress(r.read_file(fi), dicts)
                 for item, price, _ in plan:
                     build_rsdb_rows({kind: data}, template, item, name_for(item), price)
-        scene_edits: dict[str, list[tuple[Shelf, str]]] = {}
+        scene_edits: dict[str, list[tuple[Shelf, str, bool]]] = {}
         for (item, _, shelves), actor in zip(plan, actors):
             for shelf in shelves:
-                scene_edits.setdefault(shelf.filename, []).append((shelf, actor.name))
+                scene_edits.setdefault(shelf.filename, []).append(
+                    (shelf, actor.name, needs_lift(item))
+                )
         for filename, edits in scene_edits.items():
             copies = [fi for p in r.packages for fi in _find_by_name(r, p.romfs_dir, filename)]
             if not copies:
                 raise ShopError(f"{filename} not found in any package")
             for fi in copies:
                 data = _decompress(r.read_file(fi), dicts)
-                for shelf, new_name in edits:
-                    data = set_actor(data, shelf.select, new_name, allow_multiple=shelf.allow_multiple)
+                for shelf, new_name, lift in edits:
+                    data = place_shelf_actor(
+                        data, shelf, new_name, set_actor, lift=lift
+                    )
 
     result = ShopApplyResult(package_index=target, package_reason=reason, actors=actors)
 
@@ -906,9 +1012,10 @@ def apply_shop_items(nup_path: str | Path, zsdic_bytes: bytes,
 
         def transform(data: bytes, edits=edits, per_copy=per_copy) -> bytes:
             changed: list[int] = []
-            for shelf, new_name in edits:
-                data = set_actor(data, shelf.select, new_name,
-                                 allow_multiple=shelf.allow_multiple, changed=changed)
+            for shelf, new_name, lift in edits:
+                data = place_shelf_actor(
+                    data, shelf, new_name, set_actor, lift=lift, changed=changed
+                )
             per_copy.append(changed)
             return data
 

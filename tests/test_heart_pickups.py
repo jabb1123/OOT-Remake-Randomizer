@@ -58,6 +58,10 @@ class SlotTableTests(unittest.TestCase):
             self.assertFalse(can_pickup(item), item)
         self.assertEqual(heart_actor_name("Item_Hookshot"), "Obj_HeartRando_Item_Hookshot")
 
+    def test_gauntlets_are_heart_pickups(self):
+        for item in ("Item_Gauntlet_Silver", "Item_Gauntlet_Gold", "Item_Gauntlet_Goron"):
+            self.assertTrue(can_pickup(item), item)
+
 
 class SetHeartActorTests(unittest.TestCase):
     def setUp(self):

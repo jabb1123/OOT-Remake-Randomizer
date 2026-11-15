@@ -17,6 +17,7 @@ from oot_randomizer.nup_chest_patcher import (
 )
 from oot_randomizer.sarc import read_sarc, write_sarc
 from oot_randomizer.shops import (
+    ITEM_LIFT_Y,
     Shelf,
     ShopError,
     add_rsdb_rows,
@@ -25,10 +26,13 @@ from oot_randomizer.shops import (
     build_shop_actor,
     encode_tag_tables,
     find_shelf_actors,
+    needs_lift,
     pack_path_to_work_ref,
+    place_shelf_actor,
     ref_closure,
     ref_to_pack_path,
     set_shelf_item,
+    shift_actor_y,
     tag_names,
 )
 
@@ -190,8 +194,8 @@ SHOP_ACTORS = [
     {"Gyaml": "Npc_Shopkeeper", "Hash": U64(1), "Translate": [0.0, 0.0, 0.0]},
     {"Dynamic": {"ShopItemIndex": 1}, "Gyaml": "Shop_Seeds", "Hash": U64(2), "Translate": [1.0, 0.0, 0.0]},
     {"Gyaml": "Shop_Board_Bundle_10", "Hash": U64(3)},
-    {"Dynamic": {"ShopItemIndex": 2}, "Gyaml": "Shop_Nuts", "Hash": U64(4)},
-    {"Dynamic": {"ShopItemIndex": 1}, "Gyaml": "Shop_Seeds", "Hash": U64(5),
+    {"Dynamic": {"ShopItemIndex": 2}, "Gyaml": "Shop_Nuts", "Hash": U64(4), "Translate": [2.0, 0.0, 0.0]},
+    {"Dynamic": {"ShopItemIndex": 1}, "Gyaml": "Shop_Seeds", "Hash": U64(5), "Translate": [3.0, 0.0, 0.0],
      "Presence": {"FlagName": "F", "IsNegation": True}},
 ]
 
@@ -438,6 +442,46 @@ class ShelfTests(unittest.TestCase):
             set_shelf_item(self.data, {"Gyaml": "Shop_Board_Bundle_10"}, "Shop_New")
         with self.assertRaises(ShopError):
             set_shelf_item(self.data, 99, "Shop_New")
+
+    def test_needs_lift_skips_regular_shop_stock(self):
+        for item in ("Item_DekuStickBundle_Small", "Item_BombBundle_Small", "Item_Bottle_Fairy",
+                     "Item_BombchuBundle_Small", "Item_DekuNut", "Item_Arrow_Normal"):
+            self.assertFalse(needs_lift(item), item)
+        for item in ("Item_Gauntlet_Silver", "Item_HeavyBoot", "Item_Mask_Truth", "Item_Hookshot",
+                     "Item_Arrow_Fire", "Item_BulletBag_Large"):
+            self.assertTrue(needs_lift(item), item)
+
+    def test_shift_y_changes_only_translate_y(self):
+        out = shift_actor_y(self.data, [1], ITEM_LIFT_Y)
+        before, after = parse_byml7_typed(self.data), parse_byml7_typed(out)
+        self.assertEqual(after["Actors"][1]["Translate"], [1.0, ITEM_LIFT_Y, 0.0])
+        after["Actors"][1]["Translate"] = before["Actors"][1]["Translate"]
+        self.assertEqual(after, before)
+
+    def test_shift_y_rejects_actor_without_translate(self):
+        with self.assertRaises(ShopError):
+            shift_actor_y(self.data, [2], ITEM_LIFT_Y)
+
+    def test_shift_y_does_not_move_actors_sharing_a_translate_array(self):
+        data = scene([
+            {"Gyaml": "Npc_Shopkeeper", "Hash": U64(1), "Translate": [0.0, 0.0, 0.0]},
+            {"Dynamic": {"ShopItemIndex": 1}, "Gyaml": "Shop_Seeds", "Hash": U64(2), "Translate": [0.0, 0.0, 0.0]},
+        ])
+        out = parse_byml7_typed(shift_actor_y(data, [1], ITEM_LIFT_Y))["Actors"]
+        self.assertEqual(out[0]["Translate"], [0.0, 0.0, 0.0])
+        self.assertEqual(out[1]["Translate"], [0.0, ITEM_LIFT_Y, 0.0])
+
+    def test_place_shelf_actor_lifts_only_when_asked(self):
+        shelf = Shelf("KokiriForest_Child_Static.bcett.byml.zs", 1)
+        lifted = place_shelf_actor(self.data, shelf, "Shop_New", set_shelf_item, lift=True)
+        plain = place_shelf_actor(self.data, shelf, "Shop_New", set_shelf_item, lift=False)
+        self.assertEqual(parse_byml7(lifted)["Actors"][1]["Translate"], [1.0, ITEM_LIFT_Y, 0.0])
+        self.assertEqual(parse_byml7(plain)["Actors"][1]["Translate"], [1.0, 0.0, 0.0])
+        for out in (lifted, plain):
+            self.assertEqual(parse_byml7(out)["Actors"][1]["Gyaml"], "Shop_New")
+        changed = []
+        place_shelf_actor(self.data, shelf, "Shop_New", set_shelf_item, lift=True, changed=changed)
+        self.assertEqual(changed, [1])
 
 
 # ---------------------------------------------------------------------------

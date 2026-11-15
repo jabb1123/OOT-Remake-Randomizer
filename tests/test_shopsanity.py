@@ -475,7 +475,8 @@ class ShippedShopPlanningTests(unittest.TestCase):
             plan = plan_seed(seed, self.slots, self.world,
                              PlanOptions(shop_slots_per_shop=0, shuffle_heart_pieces=False))
             self.assertEqual(plan.shop_assignments, [])
-            self.assertEqual(plan.extra_requirements, {})
+            # The always-shuffled Fire Arrow slot may take an item with an item rule (e.g. bombs).
+            self.assertEqual(set(plan.extra_requirements) - {"LakeHylia Fire Arrow 1"}, set())
             placed = (Counter([i for _, i in plan.chest_assignments] + list(plan.skull_assignments.values())
                               + list(plan.song_assignments.values()) + list(plan.event_assignments.values())
                               + list(plan.npc_assignments.values()) + [i for _, i in plan.heart_assignments]))
