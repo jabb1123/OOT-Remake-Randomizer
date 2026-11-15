@@ -21,6 +21,7 @@ from oot_randomizer.npc_grants import (
     patch_din_fairy_received,
     shuffle_npc_items,
 )
+from oot_randomizer.heart_pickups import FIRE_ARROW_ITEM
 from oot_randomizer.planner import PlanOptions, known_locations, plan_seed
 from oot_randomizer.skulltula_rewards import SKULL_FLOW, SKULL_REWARDS
 from oot_randomizer.songs import SONG_SLOTS
@@ -375,10 +376,10 @@ class PlannerTest(unittest.TestCase):
         self.assertEqual(set(plan.npc_assignments), set(NPC_SLOTS))
         placed = Counter([i for _, i in plan.chest_assignments] + list(plan.skull_assignments.values())
                          + list(plan.song_assignments.values()) + list(plan.event_assignments.values())
-                         + list(plan.npc_assignments.values()))
+                         + list(plan.npc_assignments.values()) + [i for _, i in plan.heart_assignments])
         expected = Counter(s.vanilla_item for s in self.slots) + Counter(SKULL_REWARDS.values())
         expected += Counter(SONG_SLOTS.values()) + Counter(EVENT_SLOTS.values())
-        expected += Counter(s.item for s in NPC_SLOTS.values())
+        expected += Counter(s.item for s in NPC_SLOTS.values()) + Counter([FIRE_ARROW_ITEM])
         self.assertEqual(placed, expected)
 
     def test_disabled_keeps_vanilla_npc_items(self):
@@ -389,10 +390,10 @@ class PlannerTest(unittest.TestCase):
         on = plan_seed(7, self.slots, None, PlanOptions(shop_slots_per_shop=0, shuffle_heart_pieces=False))
         placed = Counter([i for _, i in on.chest_assignments] + list(on.skull_assignments.values())
                          + list(on.song_assignments.values()) + list(on.event_assignments.values())
-                         + list(on.npc_assignments.values()))
+                         + list(on.npc_assignments.values()) + [i for _, i in on.heart_assignments])
         expected = Counter(s.vanilla_item for s in self.slots) + Counter(SKULL_REWARDS.values())
         expected += Counter(SONG_SLOTS.values()) + Counter(EVENT_SLOTS.values())
-        expected += Counter(s.item for s in NPC_SLOTS.values())
+        expected += Counter(s.item for s in NPC_SLOTS.values()) + Counter([FIRE_ARROW_ITEM])
         self.assertEqual(placed, expected)
 
     def test_weird_egg_only_goes_to_malons_slot(self):

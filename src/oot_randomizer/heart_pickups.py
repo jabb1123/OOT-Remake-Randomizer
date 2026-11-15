@@ -1,4 +1,4 @@
-"""Randomized loose overworld heart pieces (Obj_Heart_Piece actors placed in the world).
+"""Randomized loose overworld pickups (Obj_Heart_Piece actors placed in the world).
 
 Each physical piece is a logic location. The planner gives it any item that shops can sell
 (`can_pickup`). The patcher clones Obj_Heart_Piece once per distinct item, named
@@ -8,6 +8,10 @@ not in this table.
 
 The Gerudo Valley piece is its own class (Obj_GerudoValley_Heart_Piece), but it is a loose
 piece too, so it is listed here and its Gyaml is swapped the same way.
+
+The Lake Hylia Fire Arrow (Obj_Arrow_Fire, the sun reward) is a loose actor too. It is in
+HEART_SLOTS so it uses the same swap, but it is not a heart: it is always shuffled and its
+vanilla item is FIRE_ARROW_ITEM (see FIRE_ARROW_LOCATIONS).
 
 The slot table was produced by scripts/scan_loose_hearts.py (see loose_heart_pieces.json).
 """
@@ -22,8 +26,9 @@ from .shop_slots import can_sell
 from .shops import Shelf, ShopError, apply_shop_items, set_actor_gyaml
 
 # Loose heart classes: a placed actor of one of these with no Dynamic block is a free piece.
-HEART_GYAMLS: frozenset[str] = frozenset({"Obj_Heart_Piece", "Obj_GerudoValley_Heart_Piece"})
+HEART_GYAMLS: frozenset[str] = frozenset({"Obj_Heart_Piece", "Obj_GerudoValley_Heart_Piece", "Obj_Arrow_Fire"})
 NAME_PREFIX = "Obj_HeartRando_"
+FIRE_ARROW_ITEM = "Item_Arrow_Fire"
 
 # slot name -> [(scene bcett file, Actors index)]; one entry per scene copy that holds the piece.
 # Slot names follow the logic region the piece sits in, which can differ from the scene file
@@ -78,11 +83,18 @@ class HeartSlot:
     shelves: tuple[Shelf, ...]
 
 
+# The Lake Hylia sun reward. Its Gyaml is Obj_Arrow_Fire, placed in the adult HyruleField scene.
+_FIRE_ARROW_TARGETS: dict[str, list[tuple[str, int]]] = {
+    "LakeHylia Fire Arrow 1": [
+        ("HyruleField_Adult_Static.bcett.byml.zs", 1732)],
+}
+
 HEART_SLOTS: dict[str, HeartSlot] = {
     name: HeartSlot(name, tuple(Shelf(scene, index) for scene, index in targets))
-    for name, targets in _HEART_TARGETS.items()
+    for name, targets in {**_HEART_TARGETS, **_FIRE_ARROW_TARGETS}.items()
 }
-HEART_LOCATIONS: frozenset[str] = frozenset(HEART_SLOTS)
+HEART_LOCATIONS: frozenset[str] = frozenset(_HEART_TARGETS)
+FIRE_ARROW_LOCATIONS: frozenset[str] = frozenset(_FIRE_ARROW_TARGETS)
 
 
 def can_pickup(item: str) -> bool:

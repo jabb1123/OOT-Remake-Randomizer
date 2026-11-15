@@ -107,7 +107,7 @@ def _cmd_randomize(args: argparse.Namespace) -> None:
 def _cmd_logic(args: argparse.Namespace) -> int:
     from .engine import load_default_slots
     from .event_items import EVENT_SLOTS, event_location_name
-    from .heart_pickups import HEART_LOCATIONS
+    from .heart_pickups import FIRE_ARROW_ITEM, FIRE_ARROW_LOCATIONS, HEART_LOCATIONS
     from .logic_template import build_template
     from .npc_grants import NPC_SLOTS
     from .planner import known_locations
@@ -147,7 +147,7 @@ def _cmd_logic(args: argparse.Namespace) -> int:
 
     obtainable = {s.vanilla_item for s in slots} | set(SONG_SLOTS.values()) | set(world.start_items)
     obtainable |= set(SKULL_REWARDS.values()) | {TOKEN_ITEM} | set(EVENT_SLOTS.values())
-    obtainable |= {slot.item for slot in NPC_SLOTS.values()}
+    obtainable |= {slot.item for slot in NPC_SLOTS.values()} | {FIRE_ARROW_ITEM}
     counters = set(world.key_locations.values())  # dungeon key counters are obtained through their chests
     for item in sorted(world.referenced_items - obtainable - counters):
         print(f"warning: {item} is required somewhere but no location holds it")
@@ -162,6 +162,7 @@ def _cmd_logic(args: argparse.Namespace) -> int:
     # Shop slots keep their vanilla shelf item, which is not an item actor in the logic.
     vanilla |= {loc: None for loc in SHOP_SLOTS}
     vanilla |= {loc: None for loc in HEART_LOCATIONS}  # loose heart pieces hold no logic item
+    vanilla |= {loc: FIRE_ARROW_ITEM for loc in FIRE_ARROW_LOCATIONS}  # the sun reward is the only copy
     vanilla |= VANILLA_SHOP_LOGIC_ITEMS
     options = {"bombchus_in_logic": True}
     result = world.explore(vanilla, options)

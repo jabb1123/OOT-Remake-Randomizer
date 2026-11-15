@@ -54,6 +54,7 @@ Status key: **done** means in `_HEART_TARGETS` and the region TOML. **Open** mea
 | GerudoValley Heart Piece 1 | GerudoValley.toml | done (`Obj_GerudoValley_Heart_Piece`) |
 | Graveyard Heart Piece 1 | Graveyard.toml | done |
 | LakeHylia Heart Piece 1 | LakeHylia.toml | done (adult copy, stored in `HyruleField_Adult_Static`) |
+| LakeHylia Fire Arrow 1 | LakeHylia.toml | done (`Obj_Arrow_Fire`, adult copy, always randomized, not gated by `shuffle_heart_pieces`) |
 | LonLonRanch Heart Piece 1 | LonLonRanch.toml | done (child copy, stored in `HyruleField_Child_Static`) |
 | KakarikoVillage Heart Piece 1 | KakarikoVillage.toml | done |
 | KakarikoVillage Heart Piece 2 | KakarikoVillage.toml | done |

@@ -3,6 +3,8 @@ import unittest
 from oot_randomizer.byml7 import U64, dump_byml7, parse_byml7_typed
 from oot_randomizer.engine import load_default_slots
 from oot_randomizer.heart_pickups import (
+    FIRE_ARROW_ITEM,
+    FIRE_ARROW_LOCATIONS,
     HEART_LOCATIONS,
     HEART_SLOTS,
     can_pickup,
@@ -38,9 +40,17 @@ class SlotTableTests(unittest.TestCase):
     def test_fourteen_slots_each_with_shelves(self):
         self.assertEqual(len(HEART_LOCATIONS), 14)
         self.assertIn("GerudoValley Heart Piece 1", HEART_LOCATIONS)
+        self.assertEqual(FIRE_ARROW_LOCATIONS, {"LakeHylia Fire Arrow 1"})
+        self.assertFalse(FIRE_ARROW_LOCATIONS & HEART_LOCATIONS)
         for name, slot in HEART_SLOTS.items():
             self.assertEqual(slot.name, name)
             self.assertTrue(slot.shelves, name)
+
+    def test_fire_arrow_slot_points_at_the_sun_reward_actor(self):
+        shelves = HEART_SLOTS["LakeHylia Fire Arrow 1"].shelves
+        self.assertEqual([(s.scene, s.select) for s in shelves],
+                         [("HyruleField_Adult_Static.bcett.byml.zs", 1732)])
+        self.assertEqual(FIRE_ARROW_ITEM, "Item_Arrow_Fire")
 
     def test_pickups_are_the_shop_pickup_set(self):
         self.assertTrue(can_pickup("Item_Hookshot"))
@@ -66,6 +76,12 @@ class SetHeartActorTests(unittest.TestCase):
         for index in (0, 2, 3):
             with self.assertRaises(ShopError, msg=f"index {index}"):
                 set_heart_actor(self.data, index, "Obj_HeartRando_Item_Hookshot")
+
+    def test_accepts_the_fire_arrow_loose_actor(self):
+        arrow = {"Gyaml": "Obj_Arrow_Fire", "Hash": U64(11), "Translate": [0.0, 0.0, 0.0]}
+        data = scene([arrow])
+        out = set_heart_actor(data, 0, "Obj_HeartRando_Item_Hookshot")
+        self.assertEqual(parse_byml7_typed(out)["Actors"][0]["Gyaml"], "Obj_HeartRando_Item_Hookshot")
 
     def test_accepts_the_gerudo_valley_loose_piece(self):
         out = set_heart_actor(self.data, 4, "Obj_HeartRando_Item_Hookshot")
@@ -109,15 +125,20 @@ class PlannerHeartTests(unittest.TestCase):
             self.skipTest("chest_locations_summary.json not available")
         for seed in range(5):
             plan = plan_seed(seed, self.slots, None, PlanOptions())
-            self.assertEqual({name for name, _ in plan.heart_assignments}, HEART_LOCATIONS, seed)
+            self.assertEqual({name for name, _ in plan.heart_assignments}, HEART_LOCATIONS | FIRE_ARROW_LOCATIONS, seed)
             for name, item in plan.heart_assignments:
                 self.assertTrue(can_pickup(item), (seed, name, item))
 
-    def test_hearts_off_leaves_no_heart_assignments(self):
+    def test_hearts_off_leaves_only_the_fire_arrow(self):
         if not self.slots:
             self.skipTest("chest_locations_summary.json not available")
         plan = plan_seed(1, self.slots, None, PlanOptions(shuffle_heart_pieces=False))
-        self.assertEqual(plan.heart_assignments, [])
+        self.assertEqual({name for name, _ in plan.heart_assignments}, FIRE_ARROW_LOCATIONS)
+        placed = ({item for _, item in plan.chest_assignments} | {item for _, item in plan.heart_assignments}
+                  | {item for _, item, _ in plan.shop_assignments} | set(plan.npc_assignments.values())
+                  | set(plan.song_assignments.values()) | set(plan.event_assignments.values())
+                  | set(plan.skull_assignments.values()))
+        self.assertIn(FIRE_ARROW_ITEM, placed)
 
 
 if __name__ == "__main__":

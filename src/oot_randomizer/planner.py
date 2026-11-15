@@ -28,7 +28,7 @@ from dataclasses import dataclass, field
 
 from .engine import NOT_IN_GAME_SLOTS, UNSHUFFLED_ITEMS, ChestSlot
 from .event_items import EVENT_SLOTS, event_location_name
-from .heart_pickups import HEART_LOCATIONS, can_pickup
+from .heart_pickups import FIRE_ARROW_ITEM, FIRE_ARROW_LOCATIONS, HEART_LOCATIONS, can_pickup
 from .item_ids import CANNOT_NAME_GRANT, MAJOR_ITEM_ACTORS
 from .npc_grants import NPC_SLOTS
 from .shop_slots import (
@@ -97,7 +97,7 @@ class PlanningError(RuntimeError):
 def known_locations(slots: list[ChestSlot]) -> set[str]:
     return ({s.name for s in slots if s.name not in NOT_IN_GAME_SLOTS} | {song_location_name(f) for f in SONG_SLOTS}
             | {event_location_name(f) for f in EVENT_SLOTS} | set(NPC_SLOTS)
-            | set(SKULL_LOCATIONS) | set(SHOP_LOCATIONS) | set(HEART_LOCATIONS))
+            | set(SKULL_LOCATIONS) | set(SHOP_LOCATIONS) | set(HEART_LOCATIONS) | set(FIRE_ARROW_LOCATIONS))
 
 
 def shop_requirements(shop_assignments: list[tuple[str, str, int]]) -> dict[str, str]:
@@ -195,6 +195,14 @@ def plan_seed(seed: int, slots: list[ChestSlot], world: World | None, options: P
         for name in heart_names:
             pool.append((rng.choice(SHOP_FILLER_ITEMS), "chest"))
             open_locations["chest"].append(name)
+    # The Fire Arrow is always shuffled: it is the only copy of Item_Arrow_Fire, so it enters the pool
+    # as its vanilla item and the slot gets whatever item the fill places there.
+    fire_arrow_allowed = ((set(world.location_region) - excluded) & FIRE_ARROW_LOCATIONS
+                          if world else FIRE_ARROW_LOCATIONS)
+    for name in sorted(fire_arrow_allowed):
+        pool.append((FIRE_ARROW_ITEM, "chest"))
+        open_locations["chest"].append(name)
+        heart_names.append(name)
     heart_locs = frozenset(heart_names)
     extra = shop_requirements([(n, "", p) for n, p in prices.items()])
     seed_world = world.with_requirements(extra) if (world is not None and extra) else world

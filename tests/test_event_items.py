@@ -14,6 +14,7 @@ from oot_randomizer.event_items import (
 )
 from oot_randomizer.item_ids import CANNOT_NAME_GRANT
 from oot_randomizer.npc_grants import NPC_SLOTS
+from oot_randomizer.heart_pickups import FIRE_ARROW_ITEM
 from oot_randomizer.planner import PlanOptions, known_locations, plan_seed
 from oot_randomizer.skulltula_rewards import SKULL_REWARDS
 from oot_randomizer.songs import SONG_SLOTS, patch_bfevfl_song
@@ -187,10 +188,10 @@ class PlannerEventTest(unittest.TestCase):
         self.assertEqual(set(plan.event_assignments), set(EVENT_SLOTS))
         placed = Counter([i for _, i in plan.chest_assignments] + list(plan.skull_assignments.values())
                          + list(plan.song_assignments.values()) + list(plan.event_assignments.values())
-                         + list(plan.npc_assignments.values()))
+                         + list(plan.npc_assignments.values()) + [i for _, i in plan.heart_assignments])
         expected = Counter(s.vanilla_item for s in self.slots) + Counter(SKULL_REWARDS.values())
         expected += Counter(SONG_SLOTS.values()) + Counter(EVENT_SLOTS.values())
-        expected += Counter(s.item for s in NPC_SLOTS.values())
+        expected += Counter(s.item for s in NPC_SLOTS.values()) + Counter([FIRE_ARROW_ITEM])
         self.assertEqual(placed, expected)
 
     def test_disabled_keeps_vanilla_event_items(self):

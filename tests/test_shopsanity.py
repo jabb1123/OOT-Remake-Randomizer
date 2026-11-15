@@ -19,6 +19,7 @@ from oot_randomizer.item_ids import MAJOR_ITEM_ACTORS
 from oot_randomizer.npc_grants import NPC_SLOTS
 from oot_randomizer.nup_chest_patcher import _decompress, _load_dicts_from_sarc, _restbl_entry_offset
 from oot_randomizer.patcher import PatchRecord, RomPatcher
+from oot_randomizer.heart_pickups import FIRE_ARROW_ITEM, FIRE_ARROW_LOCATIONS
 from oot_randomizer.planner import PlanningError, PlanOptions, known_locations, plan_seed, shop_requirements
 from oot_randomizer.shop_slots import (
     ALL_SHOP_SLOTS,
@@ -380,7 +381,9 @@ class ToyShopPlanningTests(unittest.TestCase):
             items = [item for _, item, _ in plan.shop_assignments]
 
             self.assertTrue(all(can_sell(i) for i in items))
-            self.assertEqual(len(items), len(set(items)))
+            # Filler bundles may repeat (one shop actor each, so every copy shares its price).
+            others = [i for i in items if i not in SHOP_FILLER_ITEMS]
+            self.assertEqual(len(others), len(set(others)))
 
 
 @unittest.skipUnless(load_default_slots(), "chest_locations_summary.json not available")
@@ -438,18 +441,20 @@ class ShippedShopPlanningTests(unittest.TestCase):
                     self.assertIn(item_requirement(item), plan.extra_requirements[name])
 
     def test_fillers_only_in_chests_and_counts_balance(self):
-        # Each new shop or heart slot adds one pool entry (SHOP_FILLER_ITEMS); nothing else is added.
+        # Each new shop or heart slot adds one pool entry (SHOP_FILLER_ITEMS); nothing else is added,
+        # except the Fire Arrow, which is the one copy of Item_Arrow_Fire.
         fillers = set(SHOP_FILLER_ITEMS)
         expected = (Counter(s.vanilla_item for s in self.slots) + Counter(SKULL_REWARDS.values())
                     + Counter(SONG_SLOTS.values()) + Counter(EVENT_SLOTS.values())
-                    + Counter(s.item for s in NPC_SLOTS.values()))
+                    + Counter(s.item for s in NPC_SLOTS.values()) + Counter([FIRE_ARROW_ITEM]))
         for seed, plan in self.plans.items():
             placed = (Counter(i for _, i in plan.chest_assignments) + Counter(plan.skull_assignments.values())
                       + Counter(plan.song_assignments.values()) + Counter(plan.event_assignments.values())
                       + Counter(plan.npc_assignments.values())
                       + Counter(i for _, i, _ in plan.shop_assignments) + Counter(i for _, i in plan.heart_assignments))
             added = placed - expected
-            self.assertEqual(sum(added.values()), len(plan.shop_assignments) + len(plan.heart_assignments), seed)
+            filler_hearts = [n for n, _ in plan.heart_assignments if n not in FIRE_ARROW_LOCATIONS]
+            self.assertEqual(sum(added.values()), len(plan.shop_assignments) + len(filler_hearts), seed)
             self.assertTrue(set(added) <= fillers, (seed, added))
             self.assertEqual(expected - placed, Counter(), seed)
 
@@ -465,7 +470,7 @@ class ShippedShopPlanningTests(unittest.TestCase):
     def test_disabled(self):
         expected = (Counter(s.vanilla_item for s in self.slots) + Counter(SKULL_REWARDS.values())
                     + Counter(SONG_SLOTS.values()) + Counter(EVENT_SLOTS.values())
-                    + Counter(s.item for s in NPC_SLOTS.values()))
+                    + Counter(s.item for s in NPC_SLOTS.values()) + Counter([FIRE_ARROW_ITEM]))
         for seed in range(5):
             plan = plan_seed(seed, self.slots, self.world,
                              PlanOptions(shop_slots_per_shop=0, shuffle_heart_pieces=False))
@@ -473,7 +478,7 @@ class ShippedShopPlanningTests(unittest.TestCase):
             self.assertEqual(plan.extra_requirements, {})
             placed = (Counter([i for _, i in plan.chest_assignments] + list(plan.skull_assignments.values())
                               + list(plan.song_assignments.values()) + list(plan.event_assignments.values())
-                              + list(plan.npc_assignments.values())))
+                              + list(plan.npc_assignments.values()) + [i for _, i in plan.heart_assignments]))
             self.assertEqual(placed, expected)
 
     def test_max_slots_and_one_major_per_dungeon(self):

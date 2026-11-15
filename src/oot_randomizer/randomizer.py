@@ -9,7 +9,7 @@ from pathlib import Path
 from .config import RandomizerConfig
 from .engine import SeedEngine, build_shuffle_patches, load_default_slots
 from .event_items import EVENT_SLOTS, event_location_name
-from .heart_pickups import HEART_SLOTS, heart_actor_name
+from .heart_pickups import FIRE_ARROW_ITEM, FIRE_ARROW_LOCATIONS, HEART_SLOTS, heart_actor_name
 from .npc_grants import NPC_SLOTS
 from .logic import LogicEngine
 from .nup_parser import parse_nup_header, NupHeader
@@ -266,7 +266,7 @@ class OOTRandomizer:
             placements += [
                 {
                     "location": name,
-                    "vanilla_item": "Obj_Heart_Piece",
+                    "vanilla_item": FIRE_ARROW_ITEM if name in FIRE_ARROW_LOCATIONS else "Obj_Heart_Piece",
                     "item": item,
                     "heart_actor": heart_actor_name(item),
                     "scene_files": [shelf.scene for shelf in HEART_SLOTS[name].shelves],
