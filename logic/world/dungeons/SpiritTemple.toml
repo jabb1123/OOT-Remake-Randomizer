@@ -1,7 +1,7 @@
 # SpiritTemple
 
 [regions.Root.exits]
-"SpiritTemple" = "can_play(Requiem_of_Spirit) or (is_adult and (Longshot or can_play(Eponas_Song)) and (Longshot or Hover_Boots))"
+"SpiritTemple" = "(is_child and can_play(Requiem_of_Spirit) and Boomerang) or (is_adult and (can_play(Requiem_of_Spirit) or (Longshot or can_play(Eponas_Song))) and (Longshot or Hover_Boots))"
 
 [regions."SpiritTemple"]
 dungeon = true

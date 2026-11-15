@@ -300,13 +300,8 @@ NPC_LOCATIONS: dict[tuple[str, str, str | None], tuple[str, str, str]] = {
     ),
     ("Npc_Hylia_001_Adult.bfevfl.zs", "Obj_Heart_Piece", None): (
         "KakarikoVillage",
-        "is_adult and Hookshot",
+        "is_child or is_adult and Hookshot",
         "Man on a roof, as an adult",
-    ),
-    ("Npc_Hylia_045_Child.bfevfl.zs", "Obj_Heart_Piece", None): (
-        "KakarikoVillage",
-        "is_child",
-        "Man on a roof, as a kid",
     ),
     ("MiniGame_FrogTenors.bfevfl.zs", "Obj_Heart_Piece", "song of storms"): (
         "ZoraRiver",

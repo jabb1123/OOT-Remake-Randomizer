@@ -17,6 +17,7 @@ from pathlib import Path, PurePosixPath
 
 from .chest_events import SWORD_EVENT_FLOW, SWORD_VANILLA_ITEM, skip_sword_demo
 from .cutscene_skips import INTRO_EVENT_FLOW, skip_intro_cutscene
+from .starting_items import patch_intro_flow
 from .kokiri_blocker import MIDO_BLOCKER_FLOW, clear_mido_blocker
 from .event_items import EVENT_SLOTS, patch_event_item
 from .npc_grants import (
@@ -247,9 +248,16 @@ class RomPatcher:
             if sword_chest_moved(patches):
                 patcher.replace_file(SWORD_EVENT_FLOW, skip_sword_demo)
                 applied += 1
-            if skip_intro:
-                patcher.replace_file(INTRO_EVENT_FLOW, skip_intro_cutscene)
+            # One transform for the intro: replace_file re-reads the NUP, so a second call on the
+            # same file would drop the first edit.
+            try:
+                patcher.replace_file(
+                    INTRO_EVENT_FLOW,
+                    lambda data, skip=skip_intro: patch_intro_flow(data, skip),
+                )
                 applied += 1
+            except NupPatchError:
+                pass  # flow absent from this NUP (e.g. test fixtures); the retail NUP always has it
             try:
                 patcher.replace_file(MIDO_BLOCKER_FLOW, clear_mido_blocker)
                 applied += 1

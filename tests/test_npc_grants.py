@@ -100,7 +100,17 @@ class DinFairyReceivedTest(unittest.TestCase):
         self.assertEqual(len(writers), 1)
         writer = writers[0]
         self.assertIs(writer.data.nxt.v, grant)
-        self.assertIs(events["Event403"].data.nxt.v, writer)
+        owned = [
+            e
+            for e in events.values()
+            if isinstance(e.data, ActionEvent)
+            and e.data.params is not None
+            and e.data.params.data.get("GameDataName") == "IsGet.Item_DinFire"
+        ]
+        self.assertEqual(len(owned), 1)
+        self.assertIs(owned[0].data.nxt.v, writer)
+        self.assertIs(events["Event403"].data.nxt.v, owned[0])
+        self.assertIs(owned[0].data.params.data["Value"], True)
         self.assertIs(writer.data.params.data["Value"], True)
 
     def test_owned_path_is_unchanged(self):
@@ -125,9 +135,9 @@ class DinFairyReceivedTest(unittest.TestCase):
 
 class SlotTableTest(unittest.TestCase):
     def test_twenty_five_locations_one_per_flow_item_label(self):
-        self.assertEqual(len(NPC_SLOTS), 30)
+        self.assertEqual(len(NPC_SLOTS), 29)
         keys = [(slot.flow, slot.item, slot.label) for slot in NPC_SLOTS.values()]
-        self.assertEqual(len(set(keys)), 30)
+        self.assertEqual(len(set(keys)), 29)
 
     def test_frog_choir_hearts_are_two_slots_with_different_groups(self):
         frog = [s for s in NPC_SLOTS.values() if s.flow == FROG + ".zs" and s.item == "Obj_Heart_Piece"]

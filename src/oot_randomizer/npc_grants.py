@@ -75,7 +75,6 @@ _NPC_GRANTS: tuple[tuple[str, str], ...] = (
     ("Goto_HyruleCastle.bfevfl.zs", "Item_WeirdEgg"),
     ("Dm_HrlCastle_0050.bfevfl.zs", "Item_ZeldaLetter"),
     ("Npc_Hylia_001_Adult.bfevfl.zs", "Obj_Heart_Piece"),
-    ("Npc_Hylia_045_Child.bfevfl.zs", "Obj_Heart_Piece"),
     ("Dm_FairyFountain_Din.bfevfl.zs", "Item_DinFire"),
     ("Dm_FairyFountain_Frore.bfevfl.zs", "Item_FaroreWind"),
     ("Dm_FairyFountain_Nayru.bfevfl.zs", "Item_NayruLove"),
@@ -375,6 +374,14 @@ def patch_din_fairy_received(data: bytes) -> bytes:
 
     params["GameDataName"] = DIN_FAIRY_RECEIVED_BOOL
     insert_bool_write_before(flow.flowchart, grant, DIN_FAIRY_RECEIVED_BOOL, True)
+    # Din's Fire counts as owned once the fairy hands over its item. Setting the vanilla flag too makes
+    # every check that reads IsGet.Item_DinFire (the owl, Death Mountain, scrub, Goron) follow the grant.
+    received = next(
+        e
+        for e in flow.flowchart.events
+        if e.name == f"AutoEvent_Set_{DIN_FAIRY_RECEIVED_BOOL}"
+    )
+    insert_bool_write_before(flow.flowchart, received, _DIN_OLD_FLAG, True)
     out = io.BytesIO()
     flow.write(out)
     return out.getvalue()

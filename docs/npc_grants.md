@@ -121,9 +121,14 @@ grant, the fairy asked again on every visit.
   registered in GameDataList by `add_npc_grant_bools`.
 - A set-True write to that bool is inserted before the grant (Event212) by
   `insert_bool_write_before` in `game_flags.py`.
+- A second set-True write sets the vanilla `IsGet.Item_DinFire` flag, inserted between the first
+  write and the grant. Every other flow that reads `IsGet.Item_DinFire` (the owl, Death Mountain,
+  scrubs, Goron, Gerudo, TriForce) therefore sees Din's Fire as owned once the fairy has handed
+  over its randomized item, with no per-flow edits.
 
-The bool is registered only when the Din's Fire fairy slot is randomized. `IsGet.Item_DinFire` is
-still read by other flows that check whether Din's is owned (see below).
+The bool is registered only when the Din's Fire fairy slot is randomized. The fairy's own check
+stays on the custom bool, so a Din's Fire elsewhere (for example in a chest) does not hide the
+fairy's offer.
 
 ## Gates not converted (for Stage B)
 
@@ -131,10 +136,12 @@ These checks read the game's own state and are left alone. They need a decision 
 granted item moves. `Dm_LostWood_0040` Event83 and the shooting gallery's Event70 are handled
 by the progressive bullet bag fix above.
 
-- Global "owns Din's Fire" checks on `IsGet.Item_DinFire` in other flows: Dm_DeathMtTrail_0025
-  (Event113), Dm_SY_BancChange_EscapeDungeon, Enemy_Scrub_Business_Common (Event407, Event435),
-  Enemy_Scrub_Business_Seed (Event147), Npc_Gerudo_012 (Event37), Npc_Goron_008_Child (Event57),
-  Npc_Kaepora_DeathMountainTrail (Event4), and TriForcePoint. These still follow the vanilla item.
+- Owns-Din's-Fire checks on `IsGet.Item_DinFire` in other flows (Dm_DeathMtTrail_0025 Event113,
+  Dm_SY_BancChange_EscapeDungeon, Enemy_Scrub_Business_Common Event407 and Event435,
+  Enemy_Scrub_Business_Seed Event147, Npc_Gerudo_012 Event37, Npc_Goron_008_Child Event57,
+  Npc_Kaepora_DeathMountainTrail Event4, TriForcePoint Event8 and Event137) now follow the fairy's
+  grant too, because of the flag write above. Their logic gates in the TOMLs should be checked to
+  match, since they open after the fairy visit, not after Din's Fire is found elsewhere.
 
 - Pouch queries (`PouchSystemActor.EventQueryIsExistInPouch`) for upgrade and base items:
   shooting gallery quivers (Event181: Medium owned picks the Large grant, the same

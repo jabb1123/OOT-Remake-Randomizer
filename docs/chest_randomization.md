@@ -56,6 +56,7 @@ The loose overworld `Obj_Heart_Piece` pickups (not chests) are randomized as pic
 - **Slots:** 14 physical pieces, listed in `_HEART_TARGETS`. Each has a `Heart Piece N` logic location in its region TOML. Child and Adult copies are merged into one slot. [scan_loose_hearts.py](../scripts/scan_loose_hearts.py) produces the reference list in `loose_heart_pieces.json`. To add a piece, follow [adding_heart_pieces.md](./adding_heart_pieces.md).
 - **Patching:** each distinct item gets a clone actor, `Obj_HeartRando_<item>`, built from the `Obj_Heart_Piece` template with the item's model and pouch content. Only the Gyaml string index in the scene changes. Actor positions are kept. The clones are added through the same path as shopsanity (`apply_shop_items`).
 - **Planning:** the planner draws heart items after shop items. Each heart slot adds one filler (`SHOP_FILLER_ITEMS`, bombs or sticks) to the pool. Heart slots only accept pickupable items.
+- **Stick and nut bundles:** a heart pickup does not give the Small Stick Bag or Small Nut Bag that the first Deku Stick and Deku Nut pickups and shop purchases give. Every seed grants both bags at the start of a new game instead (see the README's "Starting Small Stick Bag and Small Nut Bag").
 - **Logic:** the rules are placeholders. Adjust them in the region TOMLs.
 - **Disable:** `--no-heart-shuffle` on the CLI, or `shuffle_heart_pieces = false` in the config.
 - **Not included:** the Goron large-pot drop (`EventGoronLargePotDropPrize`), dungeon heart containers, and the Market minigame rewards.
