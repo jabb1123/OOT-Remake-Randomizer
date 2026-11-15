@@ -1,10 +1,10 @@
 # DodongoCavern
 
-[regions.Root.exits]
-"DodongoCavern" = "(is_adult or Deku_Tree_Clear) and has_strength"  # throw a bomb flower to trigger the entrance cutscene
-
 [regions."DodongoCavern"]
 dungeon = true
+
+[regions."DodongoCavern".exits]
+"DeathMountainTrail" = "true"  # throw a bomb flower to trigger the entrance cutscene
 
 [regions."DodongoCavern".events]
 "Dodongos_Cavern_Clear" = "is_child and has_bombs and Slingshot and has_weapon"

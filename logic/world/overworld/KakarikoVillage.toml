@@ -5,6 +5,11 @@
 
 [regions."KakarikoVillage"]
 
+[regions."KakarikoVillage".exits]
+"Graveyard" = "true"
+"DeathMountainTrail" = "Item_ZeldaLetter"
+"BottomOfTheWell" = "is_child and can_play(Song_of_Storms)"
+
 [regions."KakarikoVillage".locations]
 "KakarikoVillage Heart Piece 1" = "is_adult and has_hookshot"  # loose Obj_Heart_Piece, both ages
 "KakarikoVillage Heart Piece 2" = "has_bombs"  # loose Obj_Heart_Piece, both ages
@@ -29,7 +34,3 @@
 "Kak GS Tree" = "is_child"  # original: is_child and at_night and can_bonk
 "Kak GS Watchtower" = "is_child and (Slingshot or has_bombchus)"  # original: is_child and at_night and (Slingshot or has_bombchus or (logic_kakariko_tower_gs and (Sticks or Kokiri_Swor...
 "Kak GS Above Impas House" = "(is_adult and has_hookshot)"  # original: is_adult and at_night
-
-# Adult Bazaar (shopsanity); the region and its slots are in Market.toml.
-[regions."KakarikoVillage".exits]
-"Bazaar" = "is_adult"

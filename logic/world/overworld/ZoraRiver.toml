@@ -1,9 +1,11 @@
 # ZoraRiver
 
-[regions.Root.exits]
-"ZoraRiver" = "has_bombs or Item_Scale_Silver"
-
 [regions."ZoraRiver"]
+
+[regions."ZoraRiver".exits]
+"ZoraDomain" = "can_play(Item_Melody_ZeldaLullaby)"
+"LostWood" = "Item_Scale_Silver or Item_Scale_Gold"
+"HyruleField" = "has_explosives"
 
 [regions."ZoraRiver".locations]
 "ZoraRiver Heart Piece 1" = "true"  # loose Obj_Heart_Piece, both ages

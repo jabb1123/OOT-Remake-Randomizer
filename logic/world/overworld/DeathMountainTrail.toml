@@ -1,9 +1,12 @@
 # DeathMountainTrail
 
-[regions.Root.exits]
-"DeathMountainTrail" = "is_adult or (Deku_Tree_Clear and Zeldas_Letter) or has_bombs"
-
 [regions."DeathMountainTrail"]
+
+[regions."DeathMountainTrail".exits]
+"GoronCity" = "true"
+"KakarikoVillage" = "true"
+"DeathMountainCrater" = "has_explosives"
+"DodongoCavern" = "has_strength"
 
 [regions."DeathMountainTrail".locations]
 "DeathMountainTrail Heart Piece 1" = "is_adult"  # loose Obj_Heart_Piece, both ages

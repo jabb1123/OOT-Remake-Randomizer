@@ -1,9 +1,11 @@
 # DesertColossus
 
-[regions.Root.exits]
-"DesertColossus" = "can_play(Requiem_of_Spirit) or (is_adult and (Longshot or can_play(Eponas_Song)) and (Longshot or Hover_Boots))"
 
 [regions."DesertColossus"]
+
+[regions."DesertColossus".exits]
+"HountedWasteland" = "true"
+"SpiritTemple" = "true"
 
 [regions."DesertColossus".locations]
 "DesertColossus Heart Piece 1" = "is_adult"  # loose Obj_Heart_Piece, both ages

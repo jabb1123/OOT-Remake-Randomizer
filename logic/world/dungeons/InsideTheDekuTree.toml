@@ -1,10 +1,10 @@
 # InsideTheDekuTree
 
-[regions.Root.exits]
-"InsideTheDekuTree" = "is_child and Kokiri_Sword and (Deku_Shield or TBox_Shield_Hylian)"
-
 [regions."InsideTheDekuTree"]
 dungeon = true
+
+[regions."InsideTheDekuTree".exits]
+"KokiriForest" = "true"
 
 [regions."InsideTheDekuTree".events]
 "Deku_Tree_Clear" = "is_child and Kokiri_Sword and Deku_Shield and can_shoot"

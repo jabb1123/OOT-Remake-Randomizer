@@ -385,6 +385,38 @@ class DirectoryLoadingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d, self.assertRaises(LogicError):
             load_world(Path(d))
 
+    def test_top_level_exit_reaches_region_without_a_direct_exit(self):
+        world = self._load({
+            "_settings.toml": self.SETTINGS,
+            "_warps.toml": '[exits]\nForest = "true"\n',
+            "overworld/Forest.toml": '[regions.Forest]\n[regions.Forest.locations]\nF1 = "true"\n',
+            "dungeons/Temple.toml": self.TEMPLE,
+        })
+        self.assertEqual(world.errors, [])
+        self.assertEqual(set(world.regions["Root"].exits), {"Temple"})
+        self.assertIn("Forest", world.global_exits)
+        res = world.explore({"F1": "Item_Range_Bow", "T1": "TBox_Rupee_Red"})
+        self.assertIn("F1", res.locations)
+
+    def test_duplicate_top_level_exit_names_both_files(self):
+        with self.assertRaises(LogicError) as ctx:
+            self._load({
+                "_settings.toml": self.SETTINGS,
+                "_warps.toml": '[exits]\nForest = "true"\n',
+                "_more_warps.toml": '[exits]\nForest = "Bow"\n',
+            })
+        msg = str(ctx.exception)
+        self.assertIn("_warps.toml", msg)
+        self.assertIn("_more_warps.toml", msg)
+
+    def test_top_level_exit_to_undefined_region_is_an_error(self):
+        world = self._load({
+            "_settings.toml": self.SETTINGS,
+            "_warps.toml": '[exits]\nNowhere = "true"\n',
+            "overworld/Forest.toml": self.FOREST,
+        })
+        self.assertTrue(any("Nowhere" in e for e in world.errors), world.errors)
+
 
 class SlotNameTests(unittest.TestCase):
     def test_static_and_dynamic_layers_get_distinct_names(self):

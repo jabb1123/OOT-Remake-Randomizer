@@ -1,9 +1,10 @@
 # Graveyard
 
-[regions.Root.exits]
-"Graveyard" = "is_adult or Deku_Tree_Clear and Zeldas_Letter"
-
 [regions."Graveyard"]
+
+[regions."Graveyard".exits]
+"KakarikoVillage" = "true"
+"ShadowTemple" = "can_play(Nocturne_of_Shadow)"
 
 [regions."Graveyard".locations]
 "Graveyard Heart Piece 1" = "is_adult"  # loose Obj_Heart_Piece, both ages

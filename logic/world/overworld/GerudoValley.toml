@@ -1,9 +1,11 @@
 # GerudoValley
 
-[regions.Root.exits]
-"GerudoValley" = "is_adult or Deku_Tree_Clear or has_explosives"
-
 [regions."GerudoValley"]
+
+[regions."GerudoValley".exits]
+"HyruleField" = "true"
+"LakeHylia" = "true"
+"GerudoFortress" = "is_adult and (Longshot or can_play(Eponas_Song))"
 
 [regions."GerudoValley".locations]
 "GerudoValley Dynamic room 0 #0 (Item_ScrubBusinessSeed)" = "is_adult and Silver_Gauntlets and Iron_Boots"

@@ -8,6 +8,7 @@
 # Every *.toml under logic/world/ is loaded recursively in sorted path order and deep-merged:
 #   * [settings] may appear in only one file.
 #   * [helpers] may be split across files, but each helper name is defined once.
+#   * Top-level [exits] may be split across files; each target is defined once.
 #   * Per region, the exits / locations / events / skulltulas tables are merged across files;
 #     the same key defined in two files is an error that names both files.
 #   * Scalar flags (dungeon, excluded) may be repeated but must agree.
@@ -22,6 +23,8 @@
 #   [regions.X.events]     story milestones (boss beaten, door opened) other rules can require
 #   dungeon = true         counts for "one major item per dungeon"
 #   excluded = true        chests here keep their vanilla item
+# The top-level [exits] table lists regions reachable from anywhere (e.g. warp songs), with the
+# requirement to get there.
 #
 # Requirements use item names joined by `and` / `or` with parentheses, e.g.
 #   "Hookshot and (Bow or Slingshot)".  Also available: is_child, is_adult, true, false,

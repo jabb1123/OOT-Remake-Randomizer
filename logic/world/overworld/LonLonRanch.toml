@@ -1,9 +1,9 @@
 # LonLonRanch
 
-[regions.Root.exits]
-"LonLonRanch" = "is_adult or Deku_Tree_Clear or has_bombs"
-
 [regions."LonLonRanch"]
+
+[regions."LonLonRanch".exits]
+"HyruleField" = "true"
 
 [regions."LonLonRanch".locations]
 "Dm_MelodyGet_Epona" = "is_child and Zeldas_Lullaby"  # song: Epona's Song from Malon, Lon Lon Ranch

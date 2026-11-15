@@ -1,9 +1,14 @@
 # Market
 
-[regions."HyruleField".exits]
-"Market" = "is_adult or Deku_Tree_Clear"
-
 [regions."Market"]
+
+[regions."Market".exits]
+"Bazaar" = "is_child"
+"PotionShop" = "is_child"
+"HyruleField" = "true"
+"HyruleCastle" = "is_child"
+"OutsideGanonCastle" = "is_adult"
+"TempleOfTime" = "true"
 
 [regions."Market".skulltulas]
 "Market GS Guard House" = "is_child"  # original: is_child and can_break_crate
@@ -16,10 +21,6 @@
 # (npc_grants.PROGRESSIVE_BRANCHES), so the Medium bag is not needed first.
 "MiniGame_HitTarget: Item_BulletBag_Large (npc item)" = "is_child and Slingshot"
 "SubEvent_FindRichard: Obj_Heart_Piece (npc item)" = "is_child and moving_time"
-
-[regions."Market".exits]
-"Bazaar" = "is_child"
-"PotionShop" = "is_child"
 
 [regions."Bazaar".locations]
 "Bazaar Slot 0" = "true"  # vanilla: Shop_Heart

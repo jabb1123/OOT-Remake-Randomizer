@@ -1,13 +1,13 @@
 # ShadowTemple
 
-[regions.Root.exits]
-"ShadowTemple" = "can_play(Nocturne_of_Shadow) and Dins_Fire and has_hookshot"
-
 [regions."ShadowTemple"]
 dungeon = true
 
+[regions."ShadowTemple".exits]
+"Graveyard" = "true"
+
 [regions."ShadowTemple".events]
-"Shadow_Temple_Clear" = "is_adult and Hover_Boots and has_hookshot and Bow and can_play(Zeldas_Lullaby) and Lens_of_Truth and has_explosives"
+"Shadow_Temple_Clear" = "is_adult and Dins_Fire and Hover_Boots and has_hookshot and Bow and can_play(Zeldas_Lullaby) and Lens_of_Truth and has_explosives"
 
 [regions."ShadowTemple".locations]
 "Dm_Awake_Shadow_Get (event item)" = "Shadow_Temple_Clear"

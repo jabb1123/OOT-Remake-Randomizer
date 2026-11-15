@@ -367,6 +367,8 @@ class World:
     # Per-seed requirements AND-ed onto a location's own rule (e.g. a wallet for a shop price).
     extra_requirements: dict[str, Node] = field(default_factory=dict)
     helpers: dict[str, Helper] = field(default_factory=dict)
+    # Top-level `[exits]`: targets reachable from any region once their requirement holds.
+    global_exits: dict[str, Node] = field(default_factory=dict)
 
     @property
     def referenced_items(self) -> set[str]:
@@ -374,6 +376,8 @@ class World:
         for region in self.regions.values():
             for req in (*region.exits.values(), *region.locations.values(), *region.events.values()):
                 found |= _items_in(req)
+        for req in self.global_exits.values():
+            found |= _items_in(req)
         for req in self.extra_requirements.values():
             found |= _items_in(req)
         return found
@@ -455,7 +459,7 @@ class World:
                             if placements.get(loc):
                                 items[placements[loc]] += 1
                             changed = True
-                    for target, req in region.exits.items():
+                    for target, req in (*region.exits.items(), *self.global_exits.items()):
                         if target not in seen and evaluate(req, items, events, age, options):
                             seen.add(target)
                             frontier.append(target)
@@ -491,6 +495,8 @@ def load_world_data(path: Path = DEFAULT_WORLD_PATH) -> tuple[dict, list[str]]:
     Merge rules for a directory of files:
       * `[settings]` may appear in only one file.
       * `[helpers]` may be split across files; the same helper name in two files is an error.
+      * Top-level `[exits]` (reachable from any region) may be split across files; the same
+        target in two files is an error.
       * Per region, the `exits` / `locations` / `events` / `skulltulas` tables are merged;
         the same key in two files is an error naming both files.
       * Scalar region flags (`dungeon`, `excluded`) may repeat but must agree.
@@ -501,7 +507,7 @@ def load_world_data(path: Path = DEFAULT_WORLD_PATH) -> tuple[dict, list[str]]:
     def show(file: Path) -> str:
         return file.relative_to(root).as_posix() if root else str(file)
 
-    merged: dict = {"regions": {}, "helpers": {}}
+    merged: dict = {"regions": {}, "helpers": {}, "exits": {}}
     warnings: list[str] = []
     settings_from: Path | None = None
     origin: dict[tuple, Path] = {}
@@ -516,6 +522,15 @@ def load_world_data(path: Path = DEFAULT_WORLD_PATH) -> tuple[dict, list[str]]:
                     raise LogicError(f"[settings] is defined in both {show(settings_from)} and {show(file)}")
                 settings_from = file
                 merged["settings"] = value
+            elif top == "exits":
+                if not isinstance(value, dict):
+                    raise LogicError(f"{show(file)}: top-level 'exits' must be a table")
+                for target, req in value.items():
+                    prev = origin.get(("exits", target))
+                    if prev is not None:
+                        raise LogicError(f"exits.{target!r} is defined in both {show(prev)} and {show(file)}")
+                    origin[("exits", target)] = file
+                    merged["exits"][target] = req
             elif top == "helpers":
                 if not isinstance(value, dict):
                     raise LogicError(f"{show(file)}: 'helpers' must be a table")
@@ -610,6 +625,11 @@ def load_world(path: Path = DEFAULT_WORLD_PATH) -> World:
         for target in region.exits:
             if target not in regions:
                 errors.append(f"{region.name}: exit to undefined region {target!r}")
+    global_exits: dict[str, Node] = {}
+    for target, req in data.get("exits", {}).items():
+        if target not in regions:
+            errors.append(f"exits: exit to undefined region {target!r}")
+        global_exits[target] = compile_req(req, f"exits.{target}")
 
     start_age = settings.get("start_age", "child")
     if start_age not in AGES:
@@ -643,9 +663,10 @@ def load_world(path: Path = DEFAULT_WORLD_PATH) -> World:
         location_region=location_region,
         token_locations=token_locations,
         helpers=helpers,
+        global_exits=global_exits,
     )
 
-    linked = {spawn for spawn in spawns.values()} | {t for r in regions.values() for t in r.exits}
+    linked = {spawn for spawn in spawns.values()} | {t for r in regions.values() for t in r.exits} | set(global_exits)
     for rname in regions:
         if rname not in linked:
             warnings.append(f"region {rname!r} has no exit leading to it")

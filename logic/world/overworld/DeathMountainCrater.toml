@@ -1,9 +1,10 @@
 # DeathMountainCrater
 
-[regions.Root.exits]
-"DeathMountainCrater" = "is_adult or Deku_Tree_Clear or has_bombs"
-
 [regions."DeathMountainCrater"]
+
+[regions."DeathMountainCrater".exits]
+"DeathMountainTrail" = "true"
+"FireTemple" = "is_adult and can_play(Bolero_of_Fire)"
 
 [regions."DeathMountainCrater".locations]
 "DeathMountainCrater Heart Piece 1" = "true"  # loose Obj_Heart_Piece, both ages

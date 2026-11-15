@@ -1,9 +1,12 @@
 # ZoraDomain
 
-[regions.Root.exits]
-"ZoraDomain" = "((is_adult or Deku_Tree_Clear or has_bombs) and (can_play(Zeldas_Lullaby) or can_dive)) or (can_dive and can_play(Zeldas_Lullaby))"
-
 [regions."ZoraDomain"]
+
+[regions."ZoraDomain".exits]
+"ZoraRiver" = "true"
+"LakeHylia" = "can_dive"
+"ZoraFountain" = "can_dive"
+"ZoraShop" = "is_child or (is_adult and Ice_Cavern_Clear)"
 
 [regions."ZoraDomain".locations]
 "ZoraDomain Static room 0 #0 (Obj_Heart_Piece)" = "is_child and Deku_Sticks"
@@ -14,8 +17,6 @@
 
 # Zora Shop (shopsanity). As adult the shopkeeper is frozen until King Zora is thawed with blue
 # fire, which this logic does not model, so only the child shop counts.
-[regions."ZoraDomain".exits]
-"ZoraShop" = "is_child or (is_adult and Ice_Cavern_Clear)"
 
 [regions."ZoraShop".locations]
 "Zora Shop Slot 0" = "true"  # vanilla: Red Potion

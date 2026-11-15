@@ -1,9 +1,12 @@
 # LostWood
 
-[regions.Root.exits]
-"LostWood" = "true"
-
 [regions."LostWood"]
+
+[regions."LostWood".exits]
+"KokiriForest" = "true"
+"GoronCity" = "has_explosives"
+"SacredForestMeadow" = "true"
+"ZoraRiver" = "Item_Scale_Silver"
 
 [regions."LostWood".locations]
 "LostWood Dynamic room 0 #0 (TBox_Rupee_Purple)" = "is_adult"

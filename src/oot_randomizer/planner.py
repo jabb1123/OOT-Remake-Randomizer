@@ -303,12 +303,7 @@ def _try_fill(
         return not (item in _MAJORS and loc in dungeon_of and dungeon_of[loc] in dungeons_with_major)
 
     def place(loc: str, item: str) -> None:
-        nonlocal chest_free, chest_needed
         placed[loc] = item
-        if kind_of[loc] == "chest":
-            chest_free -= 1
-        if needs_chest(item):
-            chest_needed -= 1
         if loc in shop_locs:
             if item in SHOP_FILLER_ITEMS:
                 filler_price.setdefault(item, shop_prices[loc])

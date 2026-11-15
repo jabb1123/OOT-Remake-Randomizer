@@ -1,10 +1,10 @@
 # BottomOfTheWell
 
-[regions.Root.exits]
-"BottomOfTheWell" = "is_child and Deku_Tree_Clear and can_play(Song_of_Storms)"
-
 [regions."BottomOfTheWell"]
 dungeon = true
+
+[regions."BottomOfTheWell".exits]
+"KakarikoVillage" = "is_child"
 
 [regions."BottomOfTheWell".locations]
 "BottomOfTheWell Dynamic room 1 #0 (Item_Dungeon_Compass)" = "Lens_of_Truth" 

@@ -1,9 +1,11 @@
 # GerudoFortress
 
-[regions.Root.exits]
-"GerudoFortress" = "is_adult and (Longshot or can_play(Eponas_Song))"
-
 [regions."GerudoFortress"]
+
+[regions."GerudoFortress".exits]
+"GerudoValley" = "is_adult"
+"GerudoTrainingGround" = "is_adult"
+"HountedWasteland" = "is_adult"
 
 [regions."GerudoFortress".locations]
 "GerudoFortress Static room 0 #0 (Obj_Heart_Piece)" = "is_adult and Longshot"

@@ -1,9 +1,10 @@
 # HountedWasteland
 
-[regions.Root.exits]
-"HountedWasteland" = "is_adult and (Longshot or can_play(Eponas_Song))"
-
 [regions."HountedWasteland"]
+
+[regions."HountedWasteland".exits]
+"GerudoFortress" = "is_adult and Longshot or Hover_Boots"
+"DesertColossus" = "Lens_of_Truth"
 
 [regions."HountedWasteland".locations]
 "HountedWasteland Static room 0 #0 (Item_ScrubBusinessSeed)" = "Item_DinFire"

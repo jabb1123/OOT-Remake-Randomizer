@@ -134,28 +134,28 @@ class TempleStoneLogicTest(unittest.TestCase):
         cls.placed = _vanilla_placements(cls.slots)
         cls.placed |= {loc: TOKEN_ITEM for loc in cls.world.token_locations}
 
-    def _reached(self, placed: dict[str, str]) -> set[str]:
+    def _events(self, placed: dict[str, str]) -> set[str]:
         res = self.world.explore(placed, {"bombchus_in_logic": True})
-        return set().union(*res.regions.values())
+        return set(res.events)
 
-    def test_temple_is_reachable_with_both_stones(self):
-        self.assertIn("TempleOfTime", self._reached(self.placed))
+    def test_time_travel_is_reachable_with_both_stones(self):
+        self.assertIn("Time_Travel", self._events(self.placed))
 
-    def test_temple_needs_kokiris_emerald(self):
+    def test_time_travel_needs_kokiris_emerald(self):
         placed = {k: v for k, v in self.placed.items() if k != event_location_name("Dm_Kokiri_0130.bfevfl.zs")}
-        self.assertNotIn("TempleOfTime", self._reached(placed))
+        self.assertNotIn("Time_Travel", self._events(placed))
 
-    def test_temple_needs_goron_ruby(self):
+    def test_time_travel_needs_goron_ruby(self):
         placed = {k: v for k, v in self.placed.items() if k != event_location_name("Dm_DeathMtTrail_0025.bfevfl.zs")}
-        self.assertNotIn("TempleOfTime", self._reached(placed))
+        self.assertNotIn("Time_Travel", self._events(placed))
 
-    def test_temple_needs_zora_sapphire(self):
+    def test_time_travel_needs_zora_sapphire(self):
         placed = {
             k: v
             for k, v in self.placed.items()
             if k != event_location_name("Dm_ZoraFountain_0030.bfevfl.zs")
         }
-        self.assertNotIn("TempleOfTime", self._reached(placed))
+        self.assertNotIn("Time_Travel", self._events(placed))
 
 
 if __name__ == "__main__":

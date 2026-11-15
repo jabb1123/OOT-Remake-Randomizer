@@ -1,9 +1,11 @@
 # LakeHylia
 
-[regions.Root.exits]
-"LakeHylia" = "is_adult or Deku_Tree_Clear"
-
 [regions."LakeHylia"]
+
+[regions."LakeHylia".exits]
+"HyruleField" = "true"
+"WaterTemple" = "is_adult and Iron_Boots and has_hookshot"
+
 # TODO: Track down chest in LH
 
 [regions."LakeHylia".locations]

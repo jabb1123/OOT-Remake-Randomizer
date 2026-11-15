@@ -1,10 +1,10 @@
 # InsideGanonCastle
 
-[regions.Root.exits]
-"InsideGanonCastle" = "is_adult and Item_Medal_Forest and Item_Medal_Fire and Item_Medal_Water and Item_Medal_Shadow and Item_Medal_Spirit"
-
 [regions."InsideGanonCastle"]
 dungeon = true
+
+[regions."InsideGanonCastle".exits]
+"OutsideGanonCastle" = "true"
 
 [regions."InsideGanonCastle".events]
 "Ganon_Defeated" = "is_adult and Bow and Megaton_Hammer and Longshot and Mirror_Shield and Golden_Gauntlets and Lens_of_Truth and Bombchus"

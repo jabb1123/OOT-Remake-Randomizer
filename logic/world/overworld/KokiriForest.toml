@@ -5,6 +5,12 @@
 
 [regions."KokiriForest"]
 
+[regions."KokiriForest".exits]
+"HyruleField" = "Deku_Tree_Clear"
+"LostWood" = "true"
+"KokiriShop" = "true"
+"InsideTheDekuTree" = "Kokiri_Sword and (Deku_Shield or TBox_Shield_Hylian)"
+
 [regions."KokiriForest".locations]
 "Dm_Kokiri_0155 (event item)" = "(is_child and Deku_Tree_Clear) or can_get_to_hyrule_field"
 "KokiriForest Dynamic room 0 #0 (Item_Sword_Kokiri)" = "true"
@@ -22,9 +28,6 @@
 
 # Kokiri Shop (shopsanity). Slot numbers are the shelf ShopItemIndex; only slots listed here
 # can hold randomized items, and a slot's price adds a wallet requirement per seed.
-[regions."KokiriForest".exits]
-"KokiriShop" = "true"
-
 [regions."KokiriShop".locations]
 "Kokiri Shop Slot 0" = "Deku_Tree_Clear"  # vanilla: Shop_Heart; shelf appears after the Deku Tree
 "Kokiri Shop Slot 1" = "Deku_Tree_Clear"  # vanilla: Shop_DekuSeedBundle_02; shelf appears after the Deku Tree

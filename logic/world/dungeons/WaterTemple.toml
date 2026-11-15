@@ -1,10 +1,10 @@
 # WaterTemple
 
-[regions.Root.exits]
-"WaterTemple" = "is_adult and Iron_Boots and has_hookshot"
-
 [regions."WaterTemple"]
 dungeon = true
+
+[regions."WaterTemple".exits]
+"LakeHylia" = "true"
 
 [regions."WaterTemple".events]
 "Water_Temple_Clear" = "is_adult and Longshot and (Hover_Boots or (Goron_Bracelet and has_explosives))"

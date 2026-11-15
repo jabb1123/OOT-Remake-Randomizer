@@ -1,9 +1,11 @@
 # ZoraFountain
 
-[regions.Root.exits]
-"ZoraFountain" = "(is_adult or Deku_Tree_Clear) and can_play(Zeldas_Lullaby)"
-
 [regions."ZoraFountain"]
+
+[regions."ZoraFountain".exits]
+"IceCavern" = "is_adult"
+"ZoraDomain" = "true"
+"InsideJabuJabuBelly" = "is_child"
 
 [regions."ZoraFountain".locations]
 "ZoraFountain Heart Piece 1" = "is_adult"  # loose Obj_Heart_Piece, adult copy only

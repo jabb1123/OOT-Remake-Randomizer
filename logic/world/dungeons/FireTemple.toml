@@ -1,10 +1,10 @@
 # FireTemple
 
-[regions.Root.exits]
-"FireTemple" = "is_adult"
-
 [regions."FireTemple"]
 dungeon = true
+
+[regions."FireTemple".exits]
+"DeathMountainCrater" = "true"
 
 [regions."FireTemple".events]
 "Fire_Temple_Clear" = "is_adult and Megaton_Hammer and (Hover_Boots or (Goron_Bracelet and has_explosives))"

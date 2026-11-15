@@ -265,7 +265,7 @@ NPC_LOCATIONS: dict[tuple[str, str, str | None], tuple[str, str, str]] = {
     ),
     ("Dm_LostWood_0040.bfevfl.zs", "Item_BulletBag_Medium", None): (
         "LostWood",
-        "is_child and (Slingshot or Boomerang)",
+        "is_child and Slingshot",
         "Lost Woods scrub target (1st bullet bag upgrade)",
     ),
     ("Npc_Goron_Biggoron_Adult.bfevfl.zs", "Item_Sword_Biggoron", None): (
@@ -374,7 +374,8 @@ def _q(text: str) -> str:
 def build_template(slots: list[ChestSlot]) -> str:
     chest_by_region: dict[str, list[ChestSlot]] = defaultdict(list)
     for slot in slots:
-        chest_by_region[slot.scene].append(slot)
+        if slot.name not in NOT_IN_GAME_SLOTS:
+            chest_by_region[slot.scene].append(slot)
     songs_by_region: dict[str, list[str]] = defaultdict(list)
     for flow, (region, _, _) in SONG_LOCATIONS.items():
         songs_by_region[region].append(flow)

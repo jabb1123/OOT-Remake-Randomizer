@@ -1,10 +1,10 @@
 # GerudoTrainingGround
 
-[regions.Root.exits]
-"GerudoTrainingGround" = "is_adult and (Longshot or can_play(Eponas_Song))"
-
 [regions."GerudoTrainingGround"]
 dungeon = true
+
+[regions."GerudoTrainingGround".exits]
+"GerudoFortress" = "is_adult"
 
 [regions."GerudoTrainingGround".locations]
 "GerudoTrainingGround Dynamic room 8 #0 (Item_Dungeon_SmallKey)" = "true"

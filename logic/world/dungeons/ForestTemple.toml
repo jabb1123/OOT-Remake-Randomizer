@@ -6,6 +6,9 @@
 [regions."ForestTemple"]
 dungeon = true
 
+[regions."ForestTemple".exits]
+"SacredForestMeadow" = "true"
+
 [regions."ForestTemple".events]
 "Forest_Temple_Clear" = "is_adult and Bow and Goron_Bracelet"
 

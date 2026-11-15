@@ -1,10 +1,10 @@
 # SpiritTemple
 
-[regions.Root.exits]
-"SpiritTemple" = "(is_child and can_play(Requiem_of_Spirit) and Boomerang) or (is_adult and (can_play(Requiem_of_Spirit) or (Longshot or can_play(Eponas_Song))) and (Longshot or Hover_Boots))"
-
 [regions."SpiritTemple"]
 dungeon = true
+
+[regions."SpiritTemple".exits]
+"DesertColossus" = "true"
 
 [regions."SpiritTemple".events]
 "Spirit_Temple_Clear" = "is_adult and (Silver_Gauntlets or Golden_Gauntlets) and Mirror_Shield and has_hookshot and Bow and can_play(Zeldas_Lullaby) and has_explosives"

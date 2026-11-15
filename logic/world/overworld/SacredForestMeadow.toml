@@ -1,9 +1,10 @@
 # SacredForestMeadow
 
-[regions.Root.exits]
-"SacredForestMeadow" = "true"
-
 [regions."SacredForestMeadow"]
+
+[regions."SacredForestMeadow".exits]
+"ForestTemple" = "is_adult and has_hookshot"
+"LostWood" = "true"
 
 [regions."SacredForestMeadow".locations]
 "Dm_MelodyGet_Saria" = "is_child and Deku_Tree_Clear"  # song: Saria's Song from Saria, Sacred Forest Meadow

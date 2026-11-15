@@ -5,6 +5,9 @@
 
 [regions."HyruleCastle"]
 
+[regions."HyruleCastle".exits]
+"Market" = "is_child"
+
 [regions."HyruleCastle".events]
 
 [regions."HyruleCastle".locations]

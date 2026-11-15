@@ -1,9 +1,10 @@
 # OutsideGanonCastle
 
-[regions.Root.exits]
-"OutsideGanonCastle" = "is_adult"
-
 [regions."OutsideGanonCastle"]
+
+[regions."OutsideGanonCastle".exits]
+"Market" = "is_adult"
+"InsideGanonCastle" = "is_adult and Item_Medal_Forest and Item_Medal_Fire and Item_Medal_Water and Item_Medal_Shadow and Item_Medal_Spirit"
 
 [regions."OutsideGanonCastle".locations]
 "Dm_FairyFountain_Courage: Item_FairyBless_DefenseDouble (npc item)" = "Golden_Gauntlets and (Item_Wallet_Medium or Item_Wallet_Large) and can_play(Zeldas_Lullaby)"  # Great Fairies only spawn once Zelda's Lullaby is owned
