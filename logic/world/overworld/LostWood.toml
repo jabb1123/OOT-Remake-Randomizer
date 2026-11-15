@@ -11,7 +11,7 @@
 "LostWood_ScrubForestStageElder_TrueMaskFirst: Item_NutBag_Medium (npc item)" = "is_child and can_get_to_hyrule_field and moving_time"
 "Enemy_Scrub_Business_Common: Item_StickBag_Large (npc item)" = "is_child and Deku_Sticks"
 "Enemy_Scrub_Business_Common: Item_NutBag_Large (npc item)" = "is_child and has_explosives"
-"Dm_LostWood_0040: Item_BulletBag_Medium (npc item)" = "is_child and Slingshot"
+"Dm_LostWood_0040: Item_BulletBag_Medium (npc item)" = "is_child and (Slingshot or Boomerang)"
 "Npc_SkullKid_Child_02: Obj_Heart_Piece (npc item)" = "is_child and has_ocarina"
 
 [regions."LostWood".skulltulas]

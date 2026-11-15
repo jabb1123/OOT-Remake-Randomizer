@@ -20,7 +20,7 @@
 "House of Skulltula Reward 30" = "Gold_Skulltula_Token:30"  # vanilla: Giant's Wallet
 "House of Skulltula Reward 40" = "Gold_Skulltula_Token:40"  # vanilla: Bombchus (10)
 "House of Skulltula Reward 50" = "Gold_Skulltula_Token:50"  # vanilla: Heart Piece
-"Npc_Hylia_001_Adult: Obj_Heart_Piece (npc item)" = "is_child or (is_adult and has_hookshot)"
+"Npc_Hylia_001_Adult: Obj_Heart_Piece (npc item)" = "is_child or (is_adult and has_hookshot)" # guy on roof
 
 [regions."KakarikoVillage".skulltulas]
 "Kak GS House Under Construction" = "is_child"  # original: is_child and at_night

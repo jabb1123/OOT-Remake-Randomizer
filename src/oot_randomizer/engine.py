@@ -13,7 +13,7 @@ from .patcher import PatchRecord, _legacy_item_id, make_patch
 UNSHUFFLED_ITEMS = frozenset({"Item_Dungeon_SmallKey", "Item_Dungeon_BossKey"})
 # Scanned chests that are not present in the game (verified in play). Left out of the pool so
 # no item is placed where nothing can be picked up.
-NOT_IN_GAME_SLOTS = frozenset({"KokiriForest Static room 0 #0 (TBox_Rupee_Green)"})
+NOT_IN_GAME_SLOTS = frozenset()
 _ERA_TAG = re.compile(r"_(?:Child|Adult(?:_Alternative)?)(?=_)")
 _SUMMARY_PATH = Path(__file__).resolve().parents[2] / "chest_locations_summary.json"
 
@@ -70,7 +70,7 @@ def load_chest_slots(summary: list[dict]) -> list[ChestSlot]:
 def shuffle_chest_items(seed: int | random.Random, slots: list[ChestSlot]) -> list[tuple[ChestSlot, str]]:
     """Permute the vanilla item pool across slots so every item appears exactly as often as vanilla."""
     rng = seed if isinstance(seed, random.Random) else random.Random(seed)
-    shuffled = [s for s in slots if s.vanilla_item not in UNSHUFFLED_ITEMS and s.name not in NOT_IN_GAME_SLOTS]
+    shuffled = [s for s in slots if s.vanilla_item not in UNSHUFFLED_ITEMS]
     items = [s.vanilla_item for s in shuffled]
     rng.shuffle(items)
     assignment = dict(zip((id(s) for s in shuffled), items))
