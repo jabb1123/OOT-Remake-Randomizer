@@ -265,7 +265,7 @@ NPC_LOCATIONS: dict[tuple[str, str, str | None], tuple[str, str, str]] = {
     ),
     ("Dm_LostWood_0040.bfevfl.zs", "Item_BulletBag_Medium", None): (
         "LostWood",
-        "is_child and Slingshot",
+        "is_child and (Slingshot or Boomerang)",
         "Lost Woods scrub target (1st bullet bag upgrade)",
     ),
     ("Npc_Goron_Biggoron_Adult.bfevfl.zs", "Item_Sword_Biggoron", None): (

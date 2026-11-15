@@ -7,17 +7,17 @@
 dungeon = true
 
 [regions."BottomOfTheWell".locations]
-"BottomOfTheWell Dynamic room 1 #0 (Item_Dungeon_Compass)" = "Lens_of_Truth"
-"BottomOfTheWell Dynamic room 1 #0 (Item_Dungeon_SmallKey)" = "true"
-"BottomOfTheWell Dynamic room 1 #0 (TBox_Rupee_Blue)" = "true"
-"BottomOfTheWell Dynamic room 1 #0 (TBox_Rupee_Red)" = "true"
-"BottomOfTheWell Dynamic room 1 #1 (TBox_Rupee_Blue)" = "true"
-"BottomOfTheWell Dynamic room 1 #1 (TBox_Rupee_Red)" = "true"
-"BottomOfTheWell Dynamic room 1 #2 (TBox_Rupee_Blue)" = "true"
-"BottomOfTheWell Dynamic room 11 #0 (Item_ScrubBusinessSeed)" = "true"
+"BottomOfTheWell Dynamic room 1 #0 (Item_Dungeon_Compass)" = "Lens_of_Truth" 
+"BottomOfTheWell Dynamic room 1 #0 (Item_Dungeon_SmallKey)" = "true" 
+"BottomOfTheWell Dynamic room 1 #0 (TBox_Rupee_Blue)" = "true" 
+"BottomOfTheWell Dynamic room 1 #0 (TBox_Rupee_Red)" = "true" 
+"BottomOfTheWell Dynamic room 1 #1 (TBox_Rupee_Blue)" = "true" 
+"BottomOfTheWell Dynamic room 1 #1 (TBox_Rupee_Red)" = "true" 
+"BottomOfTheWell Dynamic room 1 #2 (TBox_Rupee_Blue)" = "can_play(Zeldas_Lullaby)"
+"BottomOfTheWell Dynamic room 11 #0 (Item_ScrubBusinessSeed)" = "can_play(Zeldas_Lullaby)"
 "BottomOfTheWell Dynamic room 2 #0 (TBox_Rupee_Purple)" = "can_play(Zeldas_Lullaby) and Lens_of_Truth"
 "BottomOfTheWell Dynamic room 9 #0 (Item_Dungeon_Map)" = "has_explosives or Goron_Bracelet"
-"BottomOfTheWell Static room 6 #0 (TBox_Shield_Deku)" = "true"
+"BottomOfTheWell Static room 6 #0 (TBox_Shield_Deku)" = "can_play(Zeldas_Lullaby)"
 "BottomOfTheWell Static room 8 #0 (Item_GlassTruth)" = "can_play(Zeldas_Lullaby) and Kokiri_Sword"
 
 [regions."BottomOfTheWell".skulltulas]
