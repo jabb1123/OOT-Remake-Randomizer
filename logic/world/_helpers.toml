@@ -37,7 +37,8 @@ ranged_weapon = "(is_child and (Slingshot or Boomerang)) or (is_adult and (Bow o
 
 # --- Light -------------------------------------------------------------------------------
 # Lighting torches or switches: a Deku Stick held up to a flame, or Din's Fire.
-can_light = "Sticks or Dins_Fire"
+can_light_anywhere = "Dins_Fire or (is_adult and Bow and Fire_Arrows)"
+can_light = "Sticks or can_light_anywhere" # Requires a pre-exisitng light source for sticks
 
 # --- Swimming -------------------------------------------------------------------------
 can_dive = "Item_Scale_Silver or Item_Scale_Gold"
