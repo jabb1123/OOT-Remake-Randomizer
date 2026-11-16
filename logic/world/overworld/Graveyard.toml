@@ -12,8 +12,6 @@
 "Graveyard Dynamic room 0 #0 (TBox_Shield_Hylian)" = "true"
 "Graveyard Static room 0 #0 (Item_Hookshot)" = "is_adult"
 "Graveyard Static room 0 #0 (Obj_Heart_Piece)" = "true"
-"Graveyard Static room 0 #0 (TBox_Rupee_Blue)" = "is_adult"
-"Graveyard Static room 0 #0 (TBox_Rupee_Red)" = "is_adult"
 "Graveyard Static room 0 #1 (Obj_Heart_Piece)" = "is_adult"
 
 [regions."Graveyard".skulltulas]
