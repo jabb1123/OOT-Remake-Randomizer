@@ -746,7 +746,7 @@ REGULAR_SHOP_ITEMS: frozenset[str] = frozenset(
     }
 )
 REGULAR_SHOP_ITEM_PREFIXES: tuple[str, ...] = ("Item_Bottle",)
-ITEM_LIFT_Y = 0.3
+ITEM_LIFT_Y = 0.5
 
 
 def needs_lift(item: str) -> bool:

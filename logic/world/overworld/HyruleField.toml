@@ -11,6 +11,7 @@
 "GerudoValley" = "true"
 "KakarikoVillage" = "true"
 "Market" = "true"
+"KokiriForest" = "Deku_Tree_Clear"
 "ZoraRiver" = "has_bombs"
 
 [regions."HyruleField".locations]

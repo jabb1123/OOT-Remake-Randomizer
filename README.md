@@ -59,6 +59,10 @@ Every `*.toml` is loaded recursively in sorted path order and deep-merged. The s
 
 `--skip-intro` (`RandomizerConfig.skip_intro`, off by default) skips the whole opening Introduction cutscene at the start of a new game. In `OpeningEvent.bfevfl`, the `Opening_Introduction` setup event (`Event9`) is redirected to the skip-check's skip branch (`Event24`, the same path the game takes when the player presses skip). The staging, the Meet_DekuTree challenge, and the `Dm_Kokiri_0030` wake-up demo become unreachable. The loading transition (`Dm_Kokiri_0000`, entry point `Opening_LoadingKokiriForest`) is left alone because it gates the scene load. The patch is in `src/oot_randomizer/cutscene_skips.py`.
 
+## Hyrule Field clock on the Zelda route
+
+The owl route sets the clock in `Dm_HrlField_0000` and `Dm_HrlField_0010`, but the Zelda route never sets it. `start_clock_at_zelda_flow_end` inserts an `EventWorldManagerController.EventTrigger_SetTime` write (7:00) right before the final action of `Dm_MelodyGet_Zelda`, the flow that runs the Impa conversation. The patch is in `src/oot_randomizer/field_clock.py`.
+
 ## Starting Small Stick Bag and Small Nut Bag
 
 Every seed adds `Item_StickBag_Small` and `Item_NutBag_Small` to the pouch at the start of a new game. Each is a silent `PouchSystemActor.EventTriggerAddOrRemovePouchContent` inserted at the start of `Opening_Introduction`, in `src/oot_randomizer/starting_items.py`. The vanilla bags are given on the first Deku Stick and first Deku Nut pickups, and shops give them on purchase, but a stick or nut bundle in a loose heart slot gets no bag and left the player at 0/0. The starting grant covers that case. It is not applied to saves that already exist. The grant runs whether or not `--skip-intro` is set, because it comes before the entry point's first event.

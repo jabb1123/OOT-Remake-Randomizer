@@ -130,6 +130,13 @@ The bool is registered only when the Din's Fire fairy slot is randomized. The fa
 stays on the custom bool, so a Din's Fire elsewhere (for example in a chest) does not hide the
 fairy's offer.
 
+## Slingshot hand-over
+
+The vanilla Slingshot pickup gives the Small Bullet Bag with the weapon. A hand-over or GetInEvent
+grant gives only the weapon, so a randomized Slingshot would arrive without its bag. `add_slingshot_bag`
+inserts a silent `PouchSystemActor` add of `Item_BulletBag_Small` before each Slingshot grant. It runs
+after `fix_progressive_branches`, so every switch path into the grant goes through the add.
+
 ## Gates not converted (for Stage B)
 
 These checks read the game's own state and are left alone. They need a decision when the

@@ -4,7 +4,7 @@
 
 [regions."Graveyard".exits]
 "KakarikoVillage" = "true"
-"ShadowTemple" = "can_play(Nocturne_of_Shadow)"
+"ShadowTemple" = "can_play(Nocturne_of_Shadow) and has_hookshot and is_adult"
 
 [regions."Graveyard".locations]
 "Graveyard Heart Piece 1" = "is_adult"  # loose Obj_Heart_Piece, both ages

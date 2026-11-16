@@ -12,7 +12,10 @@ from oot_randomizer.npc_grants import (
     NPC_ITEM_DISPLAY_NAMES,
     NPC_SLOTS,
     PROGRESSIVE_BRANCHES,
+    SLINGSHOT_BAG,
+    SLINGSHOT_ITEM,
     _grant_params,
+    add_slingshot_bag,
     npc_location_name,
     disable_scrub_biggoron_sale,
     fix_progressive_branches,
@@ -425,6 +428,60 @@ class ShippedLogicTest(unittest.TestCase):
             region = self.world.regions[self.world.location_region[name]]
             with self.subTest(location=name):
                 self.assertIn(base, _items_in(region.locations[name]))
+
+
+class SlingshotBagTest(unittest.TestCase):
+    def setUp(self):
+        self.raw = _raw_or_skip(DM_LOST_WOOD)
+
+    def _patched(self) -> bytes:
+        return patch_npc_grant(self.raw, "Item_BulletBag_Medium", SLINGSHOT_ITEM)
+
+    @staticmethod
+    def _slingshot_grants(flow):
+        from evfl.event import SubFlowEvent
+
+        return [
+            e for e in flow.flowchart.events
+            if isinstance(e.data, SubFlowEvent) and e.data.params
+            and e.data.params.data.get("ActorName") == SLINGSHOT_ITEM
+        ]
+
+    @staticmethod
+    def _bag_adds_into(flow, target):
+        from evfl.event import ActionEvent
+
+        return [
+            e for e in flow.flowchart.events
+            if isinstance(e.data, ActionEvent) and e.data.nxt is not None and e.data.nxt.v is target
+            and e.data.params is not None and e.data.params.data.get("Actor") == SLINGSHOT_BAG
+        ]
+
+    def test_hand_over_of_slingshot_adds_bag_before_grant(self):
+        flow = _load(add_slingshot_bag(self._patched()))
+        grants = self._slingshot_grants(flow)
+        self.assertEqual(len(grants), 1)
+        adds = self._bag_adds_into(flow, grants[0])
+        self.assertEqual(len(adds), 1)
+        self.assertEqual(adds[0].data.actor.v.identifier.name, "PouchSystemActor")
+        self.assertEqual(adds[0].data.params.data["Num"], 1)
+        self.assertIs(adds[0].data.params.data["IsGetEvent"], False)
+
+    def test_bag_add_is_idempotent(self):
+        once = add_slingshot_bag(self._patched())
+        self.assertEqual(add_slingshot_bag(once), once)
+
+    def test_flow_without_slingshot_is_unchanged(self):
+        self.assertIs(add_slingshot_bag(self.raw), self.raw)
+
+    def test_bag_add_covers_every_progressive_switch_path(self):
+        data = fix_progressive_branches(self._patched(), "Dm_LostWood_0040.bfevfl.zs")
+        flow = _load(add_slingshot_bag(data))
+        grant = self._slingshot_grants(flow)[0]
+        (add,) = self._bag_adds_into(flow, grant)
+        switch = next(e for e in flow.flowchart.events if e.name == "Event83")
+        for case in switch.data.cases.values():
+            self.assertIs(case.v, add)
 
 
 if __name__ == "__main__":

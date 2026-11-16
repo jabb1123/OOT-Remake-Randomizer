@@ -18,13 +18,16 @@ from pathlib import Path, PurePosixPath
 from .chest_events import SWORD_EVENT_FLOW, SWORD_VANILLA_ITEM, skip_sword_demo
 from .cutscene_skips import INTRO_EVENT_FLOW, skip_intro_cutscene
 from .starting_items import patch_intro_flow
-from .kokiri_blocker import MIDO_BLOCKER_FLOWS, clear_mido_blocker
+from .field_clock import ZELDA_MELODY_FLOW, start_clock_at_zelda_flow_end
+from .kokiri_blocker import MIDO_BLOCKER_PATCHES
 from .event_items import EVENT_SLOTS, patch_event_item
 from .npc_grants import (
     DIN_FAIRY_FLOW,
     NPC_SLOTS,
     REROUTED_FLOWS,
     SCRUB_BIGGORON_FLOW,
+    SLINGSHOT_ITEM,
+    add_slingshot_bag,
     disable_scrub_biggoron_sale,
     fix_progressive_branches,
     patch_din_fairy_received,
@@ -258,12 +261,17 @@ class RomPatcher:
                 applied += 1
             except NupPatchError:
                 pass  # flow absent from this NUP (e.g. test fixtures); the retail NUP always has it
-            for blocker_flow in MIDO_BLOCKER_FLOWS:
+            for blocker_flow, blocker_transform in MIDO_BLOCKER_PATCHES:
                 try:
-                    patcher.replace_file(blocker_flow, clear_mido_blocker)
+                    patcher.replace_file(blocker_flow, blocker_transform)
                     applied += 1
                 except NupPatchError:
                     pass  # flow absent from this NUP (e.g. test fixtures); the retail NUP always has it
+            try:
+                patcher.replace_file(ZELDA_MELODY_FLOW, start_clock_at_zelda_flow_end)
+                applied += 1
+            except NupPatchError:
+                pass  # flow absent from this NUP (e.g. test fixtures); the retail NUP always has it
             song_changes: dict[str, str] = {}
             for flow_file, new_song in (song_assignments or {}).items():
                 old_song = SONG_SLOTS[flow_file]
@@ -318,6 +326,11 @@ class RomPatcher:
                 for flow_file in REROUTED_FLOWS:
                     patcher.replace_file(flow_file, lambda data, f=flow_file: fix_progressive_branches(data, f))
                     applied += 1
+                # The bag add goes last: it must sit in front of the grant after the switches are rewired.
+                for flow_file, changes in npc_changes.items():
+                    if SLINGSHOT_ITEM in changes.values():
+                        patcher.replace_file(flow_file, add_slingshot_bag)
+                        applied += 1
             if event_assignments:
                 for flow_file in STONE_GATE_FLOWS:
                     try:

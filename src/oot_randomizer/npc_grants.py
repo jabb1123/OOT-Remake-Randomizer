@@ -3,7 +3,8 @@
 Bag and quiver upgrades, bombchu bundles and scales are handed over by NPCs and minigames.
 A hand-over (`NpcCommon_HandOver_NpcToPlayer_NoDisplay`) names its item in `ReveiveItem`, and a
 GetInEvent sub-flow names it in `ActorName`. Like event_items.py, Stage A repoints only those
-parameters. Model, LOD and XLink references keep the vanilla actor.
+parameters. Model, LOD and XLink references keep the vanilla actor. A hand-over of the Slingshot also
+gives the Small Bullet Bag (add_slingshot_bag), which the vanilla pickup gives with the weapon.
 
 Pouch queries (`PouchSystemActor.EventQueryIsExistInPouch`) and bool gates still name the vanilla
 items, so the game's own progress checks are unchanged. docs\\npc_grants.md lists them for Stage B.
@@ -15,7 +16,7 @@ import io
 import random
 from dataclasses import dataclass
 
-from .game_flags import insert_bool_write_before
+from .game_flags import insert_bool_write_before, insert_pouch_add_before
 from .gamedata_list import DIN_FAIRY_RECEIVED_BOOL
 
 _HAND_OVER_SUBFLOW = "NpcCommon_HandOver_NpcToPlayer_NoDisplay"
@@ -201,6 +202,41 @@ def patch_npc_grants(data: bytes, changes: dict[tuple[str | None, str] | str, st
 def patch_npc_grant(data: bytes, old_item: str, new_item: str) -> bytes:
     """Repoint the grant of `old_item` to `new_item` in one NPC flow."""
     return patch_npc_grants(data, {(None, old_item): new_item})
+
+
+SLINGSHOT_ITEM = "Item_Range_SlingShot"
+SLINGSHOT_BAG = "Item_BulletBag_Small"
+
+
+def add_slingshot_bag(data: bytes) -> bytes:
+    """Give the Small Bullet Bag with a Slingshot that an NPC or minigame hands over.
+
+    The vanilla Slingshot pickup also gives the bag, but a hand-over or GetInEvent grant gives only
+    the weapon. Inserts a silent pouch add before each Slingshot grant. Run it after
+    patch_npc_grants and fix_progressive_branches, since those rewire the switches that lead to
+    the grant. Returns the input unchanged when the flow grants no Slingshot or already adds the bag.
+    """
+    from evfl import EventFlow
+    from evfl.event import SubFlowEvent
+
+    flow = EventFlow()
+    flow.read(data)
+    slingshot_params = [p for p, k, _ in _grant_params(flow) if p[k] == SLINGSHOT_ITEM]
+    grants = [
+        event
+        for event in flow.flowchart.events
+        if isinstance(event.data, SubFlowEvent)
+        and event.data.params is not None
+        and any(event.data.params.data is p for p in slingshot_params)
+    ]
+    prefix = f"AutoEvent_Add_{SLINGSHOT_BAG}_before_"
+    if not grants or any(event.name.startswith(prefix) for event in flow.flowchart.events):
+        return data
+    for grant in grants:
+        insert_pouch_add_before(flow.flowchart, grant, SLINGSHOT_BAG)
+    out = io.BytesIO()
+    flow.write(out)
+    return out.getvalue()
 
 
 @dataclass(frozen=True)
