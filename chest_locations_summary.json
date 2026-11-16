@@ -878,18 +878,6 @@
         "room_index": 0,
         "vanilla_drop": "Obj_Heart_Piece",
         "str_table_index": 324
-      },
-      {
-        "gyaml": "Obj_TBox_A_01_NoBake",
-        "room_index": 0,
-        "vanilla_drop": "TBox_Rupee_Red",
-        "str_table_index": 407
-      },
-      {
-        "gyaml": "Obj_TBox_A_01_NoBake",
-        "room_index": 0,
-        "vanilla_drop": "TBox_Rupee_Blue",
-        "str_table_index": 406
       }
     ]
   },
