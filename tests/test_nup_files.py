@@ -346,6 +346,17 @@ class AddFilesTests(unittest.TestCase):
         for key, data in before.items():
             self.assertEqual(after[key], data, key)
 
+    def test_replace_file_passes_through_uncompressed_entries(self):
+        nup = build_nup(self.tmp)
+        payload = b"YB\x07\x00" + b"plain byml setting " * 20
+        add_files(nup, 0, [("a/b/raw_setting.bgyml", payload)])
+        patcher = NupChestPatcher(nup, write_sarc({}))
+        self.assertEqual(patcher.replace_file("raw_setting.bgyml", lambda d: d + b"PATCHED"), 1)
+        self.assertVerifies(nup)
+        with NupReader(str(nup)) as r:
+            ref = resolve_path(r, r.packages[0], "romfs/a/b/raw_setting.bgyml")
+            self.assertEqual(r.read_file(ref.index), payload + b"PATCHED")
+
     def test_add_resource_sizes_on_added_restbl(self):
         nup = build_nup(self.tmp)
         table = bytearray(b"RESTBL" + struct.pack("<IIII", 1, 160, 0, 0))

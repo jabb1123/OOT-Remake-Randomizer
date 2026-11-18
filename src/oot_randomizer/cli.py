@@ -202,7 +202,7 @@ def _cmd_scan(args: argparse.Namespace) -> None:
         progress=_progress,
     )
     print()  # newline after progress line
-    print(report.summary())
+    # print(report.summary())
 
     if args.json_out:
         Path(args.json_out).write_text(report.to_json(), encoding="utf-8")

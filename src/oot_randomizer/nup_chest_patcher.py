@@ -107,6 +107,10 @@ def _detect_dict_id(data: bytes) -> int | None:
     return int.from_bytes(data[pos : pos + [0, 1, 2, 4][did_flag]], "little")
 
 
+def _is_zstd_frame(data: bytes) -> bool:
+    return len(data) >= 4 and struct.unpack_from("<I", data, 0)[0] == 0xFD2FB528
+
+
 def _decompress(data: bytes, dicts: dict[int, bytes]) -> bytes:
     req = _detect_dict_id(data)
     if req is None:
@@ -484,9 +488,11 @@ class NupChestPatcher:
         return new_extent_offset
 
     def replace_file(self, filename: str, transform) -> int:
-        """Apply `transform(decompressed_bytes) -> bytes` to every package copy of a .zs file.
+        """Apply `transform(decompressed_bytes) -> bytes` to every package copy of a romfs file.
 
-        Copies sharing one extent are rewritten together. Returns the number of extents written.
+        Zstd-framed entries are decompressed before the transform and recompressed after it;
+        uncompressed entries are passed through as-is. Copies sharing one extent are rewritten
+        together. Returns the number of extents written.
         """
         r = NupReader(str(self.nup_path))
         try:
@@ -507,18 +513,40 @@ class NupChestPatcher:
             raise NupPatchError(f"{filename!r} not found in NUP romfs")
 
         for indices, compressed, path in groups.values():
-            original = _decompress(compressed, self._dicts)
+            # Some entries (e.g. plain BYML setting files) are stored without zstd framing.
+            stored_raw = not _is_zstd_frame(compressed)
+            original = compressed if stored_raw else _decompress(compressed, self._dicts)
             patched = transform(original)
-            dict_id = _detect_dict_id(compressed)
-            if dict_id is None:
-                recompressed = zstd.ZstdCompressor(level=19).compress(patched)
+            if stored_raw:
+                recompressed = patched
             else:
-                recompressed = _recompress(patched, self._dicts, dict_id)
+                dict_id = _detect_dict_id(compressed)
+                if dict_id is None:
+                    recompressed = zstd.ZstdCompressor(level=19).compress(patched)
+                else:
+                    recompressed = _recompress(patched, self._dicts, dict_id)
             self._write_extent(indices, recompressed)
             key = path.removesuffix(".zs")
             prev_orig = self.size_changes.get(key, (len(original), 0))[0]
             self.size_changes[key] = (prev_orig, len(patched))
         return len(groups)
+
+    def read_file(self, filename: str) -> bytes:
+        """Return the decompressed bytes of a romfs file, read from the first package that has it."""
+        r = NupReader(str(self.nup_path))
+        try:
+            for pkg in r.packages:
+                ref = _find_nup_file(r, pkg.romfs_dir, filename)
+                if ref is not None:
+                    compressed = r.read_file(ref.index)
+                    break
+            else:
+                raise NupPatchError(f"{filename!r} not found in NUP romfs")
+        finally:
+            r.close()
+        if _is_zstd_frame(compressed):
+            return _decompress(compressed, self._dicts)
+        return compressed
 
     def update_resource_size_tables(self) -> int:
         """Grow RESTBL entries for every patched resource in every package. Returns entries updated."""

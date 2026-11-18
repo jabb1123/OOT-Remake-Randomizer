@@ -18,8 +18,8 @@ from pathlib import Path, PurePosixPath
 from .chest_events import SWORD_EVENT_FLOW, SWORD_VANILLA_ITEM, skip_sword_demo
 from .cutscene_skips import INTRO_EVENT_FLOW, skip_intro_cutscene
 from .starting_items import patch_intro_flow
-from .field_clock import ZELDA_MELODY_FLOW, start_clock_at_zelda_flow_end
 from .kokiri_blocker import MIDO_BLOCKER_PATCHES
+from .world_time import CASTLE_ENTRY_FLOW, add_goto_quest_progress_to_castle_entry
 from .event_items import EVENT_SLOTS, patch_event_item
 from .npc_grants import (
     DIN_FAIRY_FLOW,
@@ -268,7 +268,7 @@ class RomPatcher:
                 except NupPatchError:
                     pass  # flow absent from this NUP (e.g. test fixtures); the retail NUP always has it
             try:
-                patcher.replace_file(ZELDA_MELODY_FLOW, start_clock_at_zelda_flow_end)
+                patcher.replace_file(CASTLE_ENTRY_FLOW, add_goto_quest_progress_to_castle_entry)
                 applied += 1
             except NupPatchError:
                 pass  # flow absent from this NUP (e.g. test fixtures); the retail NUP always has it

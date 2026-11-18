@@ -137,22 +137,8 @@ def insert_pouch_add_before(flowchart, target, item: str) -> None:
     flowchart.events.append(new_event)
 
 
-def insert_action_before(flowchart, target, actor_name: str, action_name: str, params: dict) -> None:
-    """Run an existing actor action with `params` immediately before `target` on every path into it.
-
-    The flow must already contain `actor_name` with `action_name`; the helper does not create them.
-    """
-    actor = next((a for a in flowchart.actors if a.identifier.name == actor_name), None)
-    if actor is None:
-        raise ValueError(f"flow has no {actor_name} actor")
-    action = next((a for a in actor.actions if a.v == action_name), None)
-    if action is None:
-        raise ValueError(f"{actor_name} has no {action_name} action")
-    _insert_action_node(flowchart, target, actor, action, params)
-
-
-def insert_new_action_before(flowchart, target, actor_name: str, action_name: str, params: dict) -> None:
-    """Like `insert_action_before`, but declares the actor action in the flow when it is missing."""
+def _find_or_create_action(flowchart, actor_name: str, action_name: str):
+    """Return the (actor, action) pair, adding the actor and action to the flow when missing."""
     from evfl.actor import Actor
     from evfl.common import ActorIdentifier, StringHolder
 
@@ -165,10 +151,19 @@ def insert_new_action_before(flowchart, target, actor_name: str, action_name: st
     if action is None:
         action = StringHolder(action_name)
         actor.actions.append(action)
-    _insert_action_node(flowchart, target, actor, action, params)
+    return actor, action
 
 
-def _insert_action_node(flowchart, target, actor, action, params: dict) -> None:
+def insert_action_before(flowchart, target, actor_name: str, action_name: str, params: dict):
+    """Run an actor action with `params` immediately before `target` on every path into it.
+
+    The actor and action are added to the flow when it lacks them. Returns the new event.
+    """
+    actor, action = _find_or_create_action(flowchart, actor_name, action_name)
+    return _insert_action_node(flowchart, target, actor, action, params)
+
+
+def _insert_action_node(flowchart, target, actor, action, params: dict):
     from evfl.container import Container
     from evfl.event import ActionEvent, Event
     from evfl.util import make_index, make_rindex
@@ -185,6 +180,7 @@ def _insert_action_node(flowchart, target, actor, action, params: dict) -> None:
     new_event.data = node
     redirect_references(flowchart, target, new_event)
     flowchart.events.append(new_event)
+    return new_event
 
 
 CHALLENGE_ACTOR = "ChallengeSystemActor"
@@ -196,18 +192,7 @@ def insert_challenge_progress_before(flowchart, target, challenge: str, step: st
 
     Adds the ChallengeSystemActor and its progress action to the flow when it lacks them.
     """
-    from evfl.actor import Actor
-    from evfl.common import ActorIdentifier, StringHolder
-
-    actor = next((a for a in flowchart.actors if a.identifier.name == CHALLENGE_ACTOR), None)
-    if actor is None:
-        actor = Actor()
-        actor.identifier = ActorIdentifier(CHALLENGE_ACTOR)
-        flowchart.actors.append(actor)
-    action = next((a for a in actor.actions if a.v == CHALLENGE_PROGRESS_ACTION), None)
-    if action is None:
-        action = StringHolder(CHALLENGE_PROGRESS_ACTION)
-        actor.actions.append(action)
+    actor, action = _find_or_create_action(flowchart, CHALLENGE_ACTOR, CHALLENGE_PROGRESS_ACTION)
     _insert_action_node(flowchart, target, actor, action, {
         "ChallengeName": challenge,
         "StepName": step,

@@ -59,21 +59,10 @@ Every `*.toml` is loaded recursively in sorted path order and deep-merged. The s
 
 `--skip-intro` (`RandomizerConfig.skip_intro`, off by default) skips the whole opening Introduction cutscene at the start of a new game. In `OpeningEvent.bfevfl`, the `Opening_Introduction` setup event (`Event9`) is redirected to the skip-check's skip branch (`Event24`, the same path the game takes when the player presses skip). The staging, the Meet_DekuTree challenge, and the `Dm_Kokiri_0030` wake-up demo become unreachable. The loading transition (`Dm_Kokiri_0000`, entry point `Opening_LoadingKokiriForest`) is left alone because it gates the scene load. The patch is in `src/oot_randomizer/cutscene_skips.py`.
 
-## Hyrule Field clock on the Zelda route
+## Hyrule Field time on the Zelda route
 
-The owl route sets the clock in `Dm_HrlField_0000` and `Dm_HrlField_0010`, but the Zelda route never sets it. `start_clock_at_zelda_flow_end` inserts an `EventWorldManagerController.EventTrigger_SetTime` write (7:00) right before the final action of `Dm_MelodyGet_Zelda`, the flow that runs the Impa conversation. The patch is in `src/oot_randomizer/field_clock.py`.
+The clock also has to be started. Only the Kaepora flow on first entry to Hyrule Field (`Dm_HrlField_0000`) runs `Event_SetTimeForFlowchart` (a 22-second transition to the target time), so a route that skips it never starts time. The first Kaepora talk in `Goto_HyruleCastle` also sets up the quest log. `add_goto_quest_progress_to_castle_entry` copies those steps into the castle entry flow right after the entry's first action, before the entry's parallel block: set `HyruleField_ArriveEntrance` and `UI_IsFinishChallengeMenuOpenEvent`, add the `Pouch_Amiibo` pouch item, progress the `Goto_HyruleCastle` challenge to `Step02` (with the progress UI ignored, as in `Goto_HyruleCastle`), and show the challenge progress UI. Routes that start at the castle never run `Goto_HyruleCastle`, so without these steps the quest menu never activates. A test checks that each copied step exists verbatim in the retail `Goto_HyruleCastle` flow.
 
-## Starting Small Stick Bag and Small Nut Bag
+### Hyrule Field Kaepora segment isolation
 
-Every seed adds `Item_StickBag_Small` and `Item_NutBag_Small` to the pouch at the start of a new game. Each is a silent `PouchSystemActor.EventTriggerAddOrRemovePouchContent` inserted at the start of `Opening_Introduction`, in `src/oot_randomizer/starting_items.py`. The vanilla bags are given on the first Deku Stick and first Deku Nut pickups, and shops give them on purchase, but a stick or nut bundle in a loose heart slot gets no bag and left the player at 0/0. The starting grant covers that case. It is not applied to saves that already exist. The grant runs whether or not `--skip-intro` is set, because it comes before the entry point's first event.
-
-
-## Recommended next implementation phases
-
-- Build a byte-level ROM parser for Ocarina of Time memory layout
-- Add a serializer for generated patches
-- Separate logic engines by category (items, entrances, overworld)
-- Add test coverage for input validation and rules generation
-- Add a GUI layer later if desired
-
-This project is best treated as a serious engineering foundation for a future OOT randomizer implementation rather than a one-file script.
+`src/oot_randomizer/hyrule_field_segments.py` can unlink the Kaepora segments (`Dm_HrlField_0000`, `0005`, `0010`) from the first Kaepora talk in `Goto_HyruleCastle`, so one segment plays at a time. It is disabled in the patcher and kept as a debug tool for finding time triggers. To use it, add a call to `isolate_kaepora_segments` on `KAEPORA_FLOW` in `patcher.py` and set `KAEPORA_SEGMENTS_TO_PLAY`.
