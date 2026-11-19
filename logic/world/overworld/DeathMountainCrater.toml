@@ -1,19 +1,37 @@
 # DeathMountainCrater
 
-[regions."DeathMountainCrater"]
+###
+# Death Mountain Crater region logic for Ocarina of Time randomizer
+#
+# We sub-divide Death Mountain Crater into Peak and Inner regions for logic purposes
+# as child cannot leave inner Death Mountain Crater without a warp song
+###
 
-[regions."DeathMountainCrater".exits]
+[regions."DeathMountainCraterPeak"]
+
+[regions."DeathMountainCraterPeak".exits]
 "DeathMountainTrail" = "true"
-"FireTemple" = "is_adult and can_play(Bolero_of_Fire)"
+"DeathMountainCraterInner" = "is_adult and Megaton_Hammer"
 
-[regions."DeathMountainCrater".locations]
+[regions."DeathMountainCraterPeak".locations]
 "DeathMountainCrater Heart Piece 1" = "true"  # loose Obj_Heart_Piece, both ages
-"DeathMountainCrater Heart Piece 2" = "is_adult"  # loose Obj_Heart_Piece, both ages
-"Dm_MelodyGet_Fire" = "is_adult"  # song: Bolero of Fire from Sheik, Death Mountain Crater
 "DeathMountainCrater Dynamic room 0 #0 (Item_ScrubBusinessSeed)" = "true"
 "DeathMountainCrater Static room 0 #0 (TBox_Rupee_Purple)" = "is_adult and Megaton_Hammer"
+
+[regions."DeathMountainCraterPeak".skulltulas]
+"DMC GS Crate" = "is_child and has_explosives"  # original: is_child and can_child_attack and can_break_heated_crate
+
+[regions."DeathMountainCraterInner"]
+
+[regions."DeathMountainCraterInner".exits]
+"FireTemple" = "is_adult and can_play(Bolero_of_Fire)"
+"GoronCity" = "is_adult and Silver_Gauntlets"
+"DeathMountainCraterPeak" = "is_adult and Megaton_Hammer"
+
+[regions."DeathMountainCraterInner".locations]
+"DeathMountainCrater Heart Piece 2" = "is_adult"  # loose Obj_Heart_Piece, both ages
+"Dm_MelodyGet_Fire" = "is_adult"  # song: Bolero of Fire from Sheik, Death Mountain Crater
 "Dm_FairyFountain_Wisdom: Item_FairyBless_MPDouble (npc item)" = "Megaton_Hammer and is_adult and can_play(Zeldas_Lullaby)"  # Great Fairies only spawn once Zelda's Lullaby is owned
 
-[regions."DeathMountainCrater".skulltulas]
-"DMC GS Crate" = "is_child and has_explosives"  # original: is_child and can_child_attack and can_break_heated_crate
+[regions."DeathMountainCraterInner".skulltulas]
 "DMC GS Bean Patch" = "is_child and can_play(Bolero_of_Fire)"  # original: can_plant_bugs and can_child_attack

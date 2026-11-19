@@ -4,7 +4,7 @@
 [regions."DesertColossus"]
 
 [regions."DesertColossus".exits]
-"HountedWasteland" = "true"
+"HountedWasteland" = "is_adult"
 "SpiritTemple" = "true"
 
 [regions."DesertColossus".locations]

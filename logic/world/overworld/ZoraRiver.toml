@@ -16,7 +16,7 @@
 
 
 [regions."ZoraRiver".skulltulas]
-"ZR GS Tree" = "is_child"  # original: is_child and can_child_attack and can_bonk
-"ZR GS Ladder" = "is_child"  # original: is_child and at_night and can_child_attack
+"ZR GS Bean Patch" = "is_child"  # original: is_child and can_child_attack and can_bonk
+"ZR GS Waterfall" = "is_child"  # original: is_child and at_night and can_child_attack
 "ZR GS Near Raised Grottos" = "(is_adult and has_hookshot)"  # original: can_use(Hookshot) and at_night
 "ZR GS Above Bridge" = "(is_adult and has_hookshot)"  # original: can_use(Hookshot) and at_night

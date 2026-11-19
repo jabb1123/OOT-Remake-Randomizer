@@ -31,6 +31,6 @@
 "Kak GS House Under Construction" = "is_child"  # original: is_child and at_night
 "Kak GS Skulltula House" = "is_child"  # original: is_child and at_night
 "Kak GS Near Gate Guard" = "is_child"  # original: is_child and at_night
-"Kak GS Tree" = "is_child"  # original: is_child and at_night and can_bonk
-"Kak GS Watchtower" = "is_child and (Slingshot or has_bombchus)"  # original: is_child and at_night and (Slingshot or has_bombchus or (logic_kakariko_tower_gs and (Sticks or Kokiri_Swor...
+"Kak GS Tree" = "true"  # original: is_child and at_night and can_bonk
+"Kak GS Watchtower" = "is_child and (Slingshot or Boomerang or has_bombchus)"  # original: is_child and at_night and (Slingshot or has_bombchus or (logic_kakariko_tower_gs and (Sticks or Kokiri_Swor...
 "Kak GS Above Impas House" = "(is_adult and has_hookshot)"  # original: is_adult and at_night

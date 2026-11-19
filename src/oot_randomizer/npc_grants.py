@@ -19,7 +19,12 @@ from dataclasses import dataclass
 from .game_flags import insert_bool_write_before, insert_pouch_add_before
 from .gamedata_list import DIN_FAIRY_RECEIVED_BOOL
 
-_HAND_OVER_SUBFLOW = "NpcCommon_HandOver_NpcToPlayer_NoDisplay"
+_HAND_OVER_SUBFLOW = frozenset(
+    {
+        "NpcCommon_HandOver_NpcToPlayer_NoDisplay",
+        "NpcCommon_HandOver_NpcToPlayer_NoDisplay_BombBag",
+    }
+)
 _HAND_OVER_KEY = "ReveiveItem"
 _GET_IN_EVENT_SUBFLOWS = frozenset(
     {
@@ -57,13 +62,15 @@ class NpcSlot:
 _NPC_GRANTS: tuple[tuple[str, str], ...] = (
     ("MiniGame_HitTarget.bfevfl.zs", "Item_BulletBag_Large"),
     ("MiniGame_HitTarget.bfevfl.zs", "Item_Quiver_Medium"),
-    ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombBag_Medium"),
+    ("Npc_Goron_006_Child.bfevfl.zs", "Item_BombBag_Medium"),
+    ("MiniGame_BombchuBowling.bfevfl.zs", "Obj_Heart_Piece"),
     ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombBag_Large"),
     ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombchuBundle_Medium"),
     ("MiniGame_Fishing.bfevfl.zs", "Item_Scale_Gold"),
     ("MiniGame_Fishing.bfevfl.zs", "Obj_Heart_Piece"),
     ("MiniGame_Diving.bfevfl.zs", "Item_Scale_Silver"),
     ("Minigame_HorsebackArchery.bfevfl.zs", "Item_Quiver_Large"),
+    ("Minigame_HorsebackArchery.bfevfl.zs", "Obj_Heart_Piece"),
     ("LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl.zs", "Item_StickBag_Medium"),
     ("LostWood_ScrubForestStageElder_TrueMaskFirst.bfevfl.zs", "Item_NutBag_Medium"),
     ("Enemy_Scrub_Business_Common.bfevfl.zs", "Item_StickBag_Large"),
@@ -151,7 +158,10 @@ def _grant_params(flow) -> list[tuple[dict, str, str]]:
         body = event.data
         if not isinstance(body, SubFlowEvent) or not body.params:
             continue
-        if body.entry_point_name == _HAND_OVER_SUBFLOW and _HAND_OVER_KEY in body.params.data:
+        if (
+            body.entry_point_name in _HAND_OVER_SUBFLOW
+            and _HAND_OVER_KEY in body.params.data
+        ):
             found.append((body.params.data, _HAND_OVER_KEY, body.entry_point_name))
         elif body.entry_point_name in _GET_IN_EVENT_SUBFLOWS and _GET_IN_EVENT_KEY in body.params.data:
             found.append((body.params.data, _GET_IN_EVENT_KEY, body.entry_point_name))
@@ -255,6 +265,9 @@ PROGRESSIVE_BRANCHES: dict[str, tuple[ProgressiveBranch, ...]] = {
     "MiniGame_BombchuBowling.bfevfl.zs": (
         ProgressiveBranch("Event76", "Event306", "Item_BombBag_Large"),
     ),
+    "Npc_Goron_006_Child.bfevfl.zs": (
+        ProgressiveBranch("Event14", "Event58", "Item_BombBag_Medium"),
+    ),
     "MiniGame_HitTarget.bfevfl.zs": (
         # ProgressiveBranch("original check for the progressive item (win the game)",
         #                   "event that gives the vanilla item (item is given)",
@@ -302,11 +315,36 @@ REROUTED_FLOWS: tuple[str, ...] = tuple(
 )
 
 
+def _successors(event) -> list:
+    """Events that `event` can continue to: every switch case, or the single `nxt`."""
+    data = event.data
+    if hasattr(data, "cases"):
+        targets = [case.v for case in data.cases.values()]
+    else:
+        nxt = getattr(data, "nxt", None)
+        targets = [nxt.v] if nxt is not None else []
+    return [target for target in targets if target is not None]
+
+
+def _reaches(start, target) -> bool:
+    seen: set[int] = set()
+    stack = [start]
+    while stack:
+        event = stack.pop()
+        if event is target:
+            return True
+        if id(event) not in seen:
+            seen.add(id(event))
+            stack.extend(_successors(event))
+    return False
+
+
 def fix_progressive_branches(data: bytes, flow_file: str) -> bytes:
     """Point every case of the flow's progressive bag switches at the kept grant.
 
-    Returns the input unchanged when already patched. Raises ValueError if the switch or the
-    kept grant event is missing or is not the expected kind.
+    The kept grant only has to be reachable from the switch, so intermediate checks (e.g. the
+    Goron's Small bag talks) are skipped. Returns the input unchanged when already patched.
+    Raises ValueError if the switch or the kept grant event is missing or is not the expected kind.
     """
     from evfl import EventFlow
     from evfl.event import SubFlowEvent, SwitchEvent
@@ -324,14 +362,14 @@ def fix_progressive_branches(data: bytes, flow_file: str) -> bytes:
             or not switch.data.cases
         ):
             raise ValueError(f"{flow_file}: {branch.switch} is not a switch")
-        grant_subflows = _GET_IN_EVENT_SUBFLOWS | {_HAND_OVER_SUBFLOW}
+        grant_subflows = _GET_IN_EVENT_SUBFLOWS | _HAND_OVER_SUBFLOW
         if (
             keep is None
             or not isinstance(keep.data, SubFlowEvent)
             or keep.data.entry_point_name not in grant_subflows
         ):
             raise ValueError(f"{flow_file}: {branch.keep} is not an item grant")
-        if not any(case.v is keep for case in switch.data.cases.values()):
+        if not _reaches(switch, keep):
             raise ValueError(
                 f"{flow_file}: {branch.switch} does not lead to {branch.keep}"
             )
@@ -372,6 +410,9 @@ DIN_FAIRY_FLOW = "Dm_FairyFountain_Din.bfevfl.zs"
 _DIN_RECEIVED_SWITCH = "Event78"  # SwitchEvent: owned Din's Fire -> skip the 25-rupee offer
 _DIN_OLD_FLAG = "IsGet.Item_DinFire"
 _DIN_GRANT = "Event212"  # SubFlowEvent GetInEvent_GreatFairyDin, which gives the randomized item
+_DIN_FIRST_TIME = (
+    "Event334"  # SubFlowEvent FirstTime, the only path that offers the 25-rupee deal
+)
 
 
 def patch_din_fairy_received(data: bytes) -> bytes:
@@ -408,6 +449,14 @@ def patch_din_fairy_received(data: bytes) -> bytes:
     if params.get("GameDataName") != _DIN_OLD_FLAG:
         raise ValueError(f"Din flow {_DIN_RECEIVED_SWITCH} is not {_DIN_OLD_FLAG}")
 
+    from evfl.util import make_index
+
+    first_time = by_name.get(_DIN_FIRST_TIME)
+    if first_time is None or not isinstance(first_time.data, SubFlowEvent):
+        raise ValueError(f"Din flow has no {_DIN_FIRST_TIME} subflow")
+    # Met before but not yet received: the vanilla switch sent this to RecoverSequence, which never
+    # offers the item. Send it through the first-meeting offer instead.
+    switch.data.cases[0] = make_index(first_time)
     params["GameDataName"] = DIN_FAIRY_RECEIVED_BOOL
     insert_bool_write_before(flow.flowchart, grant, DIN_FAIRY_RECEIVED_BOOL, True)
     # Din's Fire counts as owned once the fairy hands over its item. Setting the vanilla flag too makes

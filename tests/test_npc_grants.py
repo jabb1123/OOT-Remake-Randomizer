@@ -121,7 +121,12 @@ class DinFairyReceivedTest(unittest.TestCase):
         before = self._events(self.raw)
         after = self._events(patch_din_fairy_received(self.raw))
         self.assertEqual(after["Event78"].data.cases[1].v.name, "Event86")
-        self.assertEqual(before["Event78"].data.cases[0].v.name, after["Event78"].data.cases[0].v.name)
+        self.assertEqual(before["Event78"].data.cases[1].v.name, after["Event78"].data.cases[1].v.name)
+
+    def test_met_but_not_received_goes_through_first_time_offer(self):
+        events = self._events(patch_din_fairy_received(self.raw))
+        self.assertEqual(events["Event78"].data.cases[0].v.name, "Event334")
+        self.assertEqual(events["Event334"].data.entry_point_name, "FirstTime")
 
     def test_idempotent_and_round_trips(self):
         once = patch_din_fairy_received(self.raw)
@@ -138,10 +143,10 @@ class DinFairyReceivedTest(unittest.TestCase):
 
 
 class SlotTableTest(unittest.TestCase):
-    def test_twenty_five_locations_one_per_flow_item_label(self):
-        self.assertEqual(len(NPC_SLOTS), 29)
+    def test_one_slot_per_flow_item_label(self):
+        self.assertEqual(len(NPC_SLOTS), 31)
         keys = [(slot.flow, slot.item, slot.label) for slot in NPC_SLOTS.values()]
-        self.assertEqual(len(set(keys)), 29)
+        self.assertEqual(len(set(keys)), 31)
 
     def test_frog_choir_hearts_are_two_slots_with_different_groups(self):
         frog = [s for s in NPC_SLOTS.values() if s.flow == FROG + ".zs" and s.item == "Obj_Heart_Piece"]
@@ -310,6 +315,17 @@ class PatchTest(unittest.TestCase):
         self.assertEqual(a, b)
         events = {event.name: event for event in _load(a).flowchart.events}
         self.assertEqual(events["Event30"].data.params.data["ActorName"], "Item_Hookshot")
+
+    def test_goron_bomb_bag_switch_skips_to_the_medium_grant(self):
+        flow_file = "Npc_Goron_006_Child.bfevfl.zs"
+        raw = _raw_or_skip("Npc_Goron_006_Child.bfevfl")
+        changes = {"Item_BombBag_Medium": "Item_Hookshot"}
+        a = fix_progressive_branches(patch_npc_grants(raw, changes), flow_file)
+        b = patch_npc_grants(fix_progressive_branches(raw, flow_file), changes)
+        self.assertEqual(a, b)
+        events = {event.name: event for event in _load(a).flowchart.events}
+        self.assertEqual({case.v.name for case in events["Event14"].data.cases.values()}, {"Event58"})
+        self.assertEqual(events["Event58"].data.params.data["ReveiveItem"], "Item_Hookshot")
 
     def test_progressive_fix_rejects_unexpected_shape(self):
         with self.assertRaises(ValueError):

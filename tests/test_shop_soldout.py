@@ -2,7 +2,12 @@ import unittest
 from pathlib import Path
 
 from oot_randomizer.gamedata_list import SHOP_SOLDOUT_NAMES
-from oot_randomizer.shop_soldout import KOKIRI_SESSION_BOOL, patch_kokiri_soldout
+from oot_randomizer.npc_grants import SLINGSHOT_BAG, SLINGSHOT_ITEM
+from oot_randomizer.shop_soldout import (
+    KOKIRI_SESSION_BOOL,
+    add_shop_slingshot_bag,
+    patch_kokiri_soldout,
+)
 
 RAW_FLOW = Path(
     r"C:\Users\jabb1123\.copilot\session-state\aa09e5ec-62eb-4ee7-bbd4-90178d07a405\files\raw\DisplayShop.bfevfl"
@@ -76,6 +81,44 @@ class KokiriSoldOutFlowTest(unittest.TestCase):
     def test_vanilla_flow_is_still_reachable(self):
         self.assertEqual(self.events["Event318"].actor.v.identifier.name, "Npc_EventStarter")
         self.assertEqual(self.events["Event268"].nxt.v.name, "Event219")
+
+
+@unittest.skipUnless(RAW_FLOW.exists(), "DisplayShop.bfevfl not available")
+class ShopSlingshotBagFlowTest(unittest.TestCase):
+    CHECK = "AutoEvent_ShopSlingshotBag_Check_"
+    ADD = "AutoEvent_ShopSlingshotBag_Add_"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.raw = RAW_FLOW.read_bytes()
+        cls.patched = add_shop_slingshot_bag(cls.raw)
+        cls.flow = _load(cls.patched)
+        cls.events = _events(cls.flow)
+
+    def test_each_purchase_is_gated_on_the_selected_slingshot(self):
+        for target in ("Event268", "Event171"):
+            check = self.events[self.CHECK + target]
+            self.assertEqual(check.params.data, {
+                "GameDataName": "Shop_SelectItemName", "Index": -1, "Value": SLINGSHOT_ITEM,
+            })
+            self.assertEqual(check.cases[0].v.name, target)
+            self.assertEqual(check.cases[1].v.name, self.ADD + target)
+
+    def test_bag_add_runs_before_the_purchase(self):
+        for target in ("Event268", "Event171"):
+            add = self.events[self.ADD + target]
+            self.assertEqual(add.params.data["Actor"], SLINGSHOT_BAG)
+            self.assertEqual(add.params.data["Num"], 1)
+            self.assertEqual(add.nxt.v.name, target)
+
+    def test_applying_twice_is_a_no_op(self):
+        self.assertEqual(add_shop_slingshot_bag(self.patched), self.patched)
+
+    def test_kokiri_sold_out_gate_is_rerouted_to_the_bag_gate(self):
+        combined = add_shop_slingshot_bag(patch_kokiri_soldout(self.raw))
+        events = _events(_load(combined))
+        self.assertEqual(events["ShopSoldOut_MarkSession"].cases[0].v.name, self.CHECK + "Event268")
+        self.assertEqual(events["ShopSoldOut_SelectSession"].cases[0].v.name, "Event318")
 
 
 if __name__ == "__main__":

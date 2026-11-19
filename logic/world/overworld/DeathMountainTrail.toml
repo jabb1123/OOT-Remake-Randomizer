@@ -5,7 +5,7 @@
 [regions."DeathMountainTrail".exits]
 "GoronCity" = "true"
 "KakarikoVillage" = "true"
-"DeathMountainCrater" = "has_explosives"
+"DeathMountainCraterPeak" = "has_explosives"
 "DodongoCavern" = "has_strength"
 
 [regions."DeathMountainTrail".locations]

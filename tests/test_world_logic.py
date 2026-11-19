@@ -277,6 +277,20 @@ class ShippedWorldTests(unittest.TestCase):
         self.assertEqual(set(vanilla) - res.locations, set())
         self.assertEqual(res.items[TOKEN_ITEM], TOTAL_TOKENS)
 
+    def test_child_bolero_warp_needs_a_second_warp_song(self):
+        crater = self.world.global_exits["DeathMountainCraterInner"]
+
+        def can_enter(age, *songs):
+            items = Counter({resolve_item("Fairy_Ocarina"): 1} | {resolve_item(s): 1 for s in songs})
+            return evaluate(crater, items, set(), age, {})
+
+        bolero, requiem = "Bolero_of_Fire", "Requiem_of_Spirit"
+        self.assertFalse(can_enter("child", bolero, requiem))
+        self.assertFalse(can_enter("child", bolero))
+        self.assertTrue(can_enter("child", bolero, "Nocturne_of_Shadow"))
+        self.assertTrue(can_enter("child", bolero, "Prelude_of_Light"))
+        self.assertTrue(can_enter("adult", bolero))
+
     def test_planned_seeds_are_beatable(self):
         options = PlanOptions()
         for seed in range(10):

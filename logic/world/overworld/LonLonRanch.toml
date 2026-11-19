@@ -11,6 +11,5 @@
 
 [regions."LonLonRanch".skulltulas]
 "LLR GS Tree" = "is_child"  # original: is_child and can_bonk
-"LLR GS Rain Shed" = "is_child"  # original: is_child and at_night
 "LLR GS House Window" = "is_child and Boomerang"  # original: can_use(Boomerang) and at_night
-"LLR GS Back Wall" = "is_child and Boomerang"  # original: can_use(Boomerang) and at_night
+"LLR GS Back Wall" = "(is_adult and has_hookshot) or (is_child and Boomerang)"  # original: can_use(Boomerang) and at_night

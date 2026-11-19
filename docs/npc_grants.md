@@ -20,7 +20,7 @@ Only these parameters change. Model, LOD and XLink references keep the vanilla a
 | --- | --- | --- | --- |
 | MiniGame_HitTarget (Shooting Gallery, child) | Bullet Bag Large (2nd upgrade) | Market | child + Slingshot (flow forced to this slot, see below) |
 | MiniGame_HitTarget (Shooting Gallery, adult) | Quiver Medium | KakarikoVillage | adult + Bow |
-| MiniGame_BombchuBowling | Bomb Bag Medium / Large | Market | Bomb Bag (Large also needs Bomb Bag Medium) |
+| MiniGame_BombchuBowling | Bomb Bag Large | Market | Bomb Bag and Bomb Bag Medium (Medium comes from the Goron child slot) |
 | MiniGame_BombchuBowling | Bombchu Bundle Medium | Market | true |
 | MiniGame_Fishing | Golden Scale / Heart Piece | LakeHylia | true |
 | MiniGame_Diving | Silver Scale | ZoraRiver | true |
@@ -68,8 +68,10 @@ bool and pouch switches, case 0 is "true":
 With randomized items, the branch taken would depend on where the real Medium bag was found,
 so one of each game's two slots would never pay out. `fix_progressive_branches` points both
 cases of each switch at the kept grant (`PROGRESSIVE_BRANCHES` in `npc_grants.py`), so Lost
-Woods is always the 1st upgrade slot and the Market gallery always the 2nd. The other two
-slots are not locations, and their grant events become unreachable. The patch runs whenever
+Woods is always the 1st upgrade slot and the Market gallery always the 2nd. The kept grant only
+has to be reachable from the switch, so the Goron child's switch (Event14) skips its Small bag
+checks and talk (Event12/13/21/54) and goes straight to the Medium grant (Event58). The other
+two slots are not locations, and their grant events become unreachable. The patch runs whenever
 NPC items are shuffled. `Dm_LostWood_0040` Event38 (which bag model to show) is cosmetic and is
 left alone.
 
@@ -129,6 +131,12 @@ grant, the fairy asked again on every visit.
 The bool is registered only when the Din's Fire fairy slot is randomized. The fairy's own check
 stays on the custom bool, so a Din's Fire elsewhere (for example in a chest) does not hide the
 fairy's offer.
+
+The 25-rupee offer lives only on the first-meeting path (`FirstTime`, reached through Event32's
+MeetFirst switch). Once the fairy has been met, Event78's not-received case used to go to
+RecoverSequence, which never offers the item, so the randomized item could be unreachable. The
+patch repoints that case at the `FirstTime` subflow (Event334) so the offer is shown again until the
+item is handed over.
 
 ## Slingshot hand-over
 

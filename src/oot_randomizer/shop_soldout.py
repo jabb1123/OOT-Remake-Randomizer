@@ -11,13 +11,18 @@ adds two gates that only apply while the Kokiri Shop session is open
   is put in the pouch.
 
 Only the Kokiri child shop NPC is covered. The adult flow is not extracted yet.
+
+`add_shop_slingshot_bag` is applied to the same flow: a Slingshot bought from any shop also gets
+the Small Bullet Bag, which the vanilla Slingshot pickup gives but a purchase does not.
 """
 
 from __future__ import annotations
 
 import io
 
+from .game_flags import game_data_actor, pouch_add_action, redirect_references
 from .gamedata_list import SHOP_SOLDOUT_NAMES
+from .npc_grants import SLINGSHOT_BAG, SLINGSHOT_ITEM
 
 DISPLAY_SHOP_FLOW = "DisplayShop.bfevfl.zs"
 KOKIRI_SESSION_BOOL = "KokiriForest_Shop_Talking"
@@ -178,6 +183,85 @@ def patch_kokiri_soldout(data: bytes) -> bytes:
         raise ValueError(f"{_BUY_ENTRY} no longer starts at {_BUY_VANILLA}")
     _add_select_gate(flow)
     _add_buy_mark(flow)
+    out = io.BytesIO()
+    flow.write(out)
+    return out.getvalue()
+
+
+SHOP_PUT_IN_POUCH_ACTION = "EventTriggerShopItemPutInPouch"
+SELECTED_ITEM_GAME_DATA = "Shop_SelectItemName"
+_STRING_QUERY = "EventQueryIsGameDataString64"
+_BAG_EVENT_PREFIX = "AutoEvent_ShopSlingshotBag_"
+
+
+def add_shop_slingshot_bag(data: bytes) -> bytes:
+    """Add the Small Bullet Bag before each shop purchase that can hand over a Slingshot.
+
+    A purchase only puts the item's own pouch content in the pouch. Before every
+    EventTriggerShopItemPutInPouch, a GameDataActor check on `Shop_SelectItemName` sends a
+    Slingshot purchase through a silent bag add first. Applying it twice is a no-op.
+    """
+    from evfl import EventFlow
+    from evfl.container import Container
+    from evfl.event import ActionEvent, Event, SwitchEvent
+    from evfl.util import make_index, make_rindex
+
+    flow = EventFlow()
+    flow.read(data)
+    chart = flow.flowchart
+    if any(event.name.startswith(_BAG_EVENT_PREFIX) for event in chart.events):
+        return data
+    purchases = [
+        event for event in chart.events
+        if isinstance(event.data, ActionEvent)
+        and str(event.data.actor_action.v) == SHOP_PUT_IN_POUCH_ACTION
+    ]
+    if not purchases:
+        raise ValueError(f"DisplayShop has no {SHOP_PUT_IN_POUCH_ACTION} action")
+
+    game_data = game_data_actor(chart)
+    query = next((q for q in game_data.queries if q.v == _STRING_QUERY), None)
+    if query is None:
+        raise ValueError(f"DisplayShop GameDataActor has no {_STRING_QUERY} query")
+    pouch_actor, add_action = pouch_add_action(chart)
+
+    for target in purchases:
+        bag_params = Container()
+        bag_params.data.update({
+            "Num": 1,
+            "IsEquipDIrect": False,
+            "IsSetMessageTargetActorName": False,
+            "Actor": SLINGSHOT_BAG,
+            "IsGetEvent": False,
+        })
+        bag_node = ActionEvent()
+        bag_node.actor = make_rindex(pouch_actor)
+        bag_node.actor_action = make_rindex(add_action)
+        bag_node.params = bag_params
+        bag_node.nxt = make_index(target)
+        bag = Event()
+        bag.name = f"{_BAG_EVENT_PREFIX}Add_{target.name}"
+        bag.data = bag_node
+
+        check_params = Container()
+        check_params.data.update({
+            "GameDataName": SELECTED_ITEM_GAME_DATA,
+            "Index": -1,
+            "Value": SLINGSHOT_ITEM,
+        })
+        check_node = SwitchEvent()
+        check_node.actor = make_rindex(game_data)
+        check_node.actor_query = make_rindex(query)
+        check_node.params = check_params
+        check_node.cases = {0: make_rindex(target), 1: make_rindex(bag)}
+        check = Event()
+        check.name = f"{_BAG_EVENT_PREFIX}Check_{target.name}"
+        check.data = check_node
+
+        # Reroute before the new nodes are added, so their own edges to `target` stay put.
+        redirect_references(chart, target, check)
+        chart.events.extend([check, bag])
+
     out = io.BytesIO()
     flow.write(out)
     return out.getvalue()

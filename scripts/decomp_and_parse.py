@@ -197,7 +197,7 @@ def _flowchart_dot(flow_name: str, fc) -> str:
                 edges.append(f'  {_dot_quote(ev.name)} -> {_dot_quote(flow_id)} [label="transition", style=dashed, color=blue];')
             nodes.append(f"  {_dot_quote(ev.name)} [label={_dot_quote(label)}, shape=box, style=filled, fillcolor={fill}];")
         elif isinstance(dd, SwitchEvent):
-            label = f"{ev.name}\nSWITCH {dd.actor.v.identifier.name}\n{dd.actor_query.v}"
+            label = f"{ev.name}\nSWITCH {dd.actor.v.identifier.name}\n{dd.actor_query.v}\n{_short_params(dd.params)}"
             nodes.append(f"  {_dot_quote(ev.name)} [label={_dot_quote(label)}, shape=diamond];")
         elif isinstance(dd, (SubFlowEvent, SubFlowSwitchEvent)):
             flow_id = external_flow(dd.res_flowchart_name, f"{dd.res_flowchart_name}\n@{dd.entry_point_name}")
@@ -284,7 +284,8 @@ else:
                 lines.append(f"{ev.name} ACT {dd.actor.v.identifier.name} {dd.actor_action.v} {params}")
             elif isinstance(dd, SwitchEvent):
                 cases = {k: v.v.name for k, v in dd.cases.items()}
-                lines.append(f"{ev.name} SW {dd.actor.v.identifier.name} {dd.actor_query.v} {cases}")
+                params = dd.params.data if dd.params else ""
+                lines.append(f"{ev.name} SW {dd.actor.v.identifier.name} {dd.actor_query.v} {cases} {params}")
             elif isinstance(dd, SubFlowEvent):
                 params = dd.params.data if dd.params else ""
                 lines.append(f"{ev.name} SUB {dd.res_flowchart_name} {dd.entry_point_name} {params}")

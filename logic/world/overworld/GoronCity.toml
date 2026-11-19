@@ -5,8 +5,8 @@
 [regions."GoronCity".exits]
 "DeathMountainTrail" = "true"
 "GoronShop" = "has_explosives or has_strength or (is_adult and Bow) or (can_play(Zeldas_Lullaby) and Sticks) or Dins_Fire"
-"LostWood" = "has_explosives"
-"DeathMountainCrater" = "is_adult"
+"LostWood" = "has_explosives or (can_play(Zeldas_Lullaby) and Sticks)"
+"DeathMountainCraterInner" = "is_adult and Silver_Gauntlets"
 
 [regions."GoronCity".locations]
 "GoronCity Dynamic room 0 #0 (TBox_Rupee_Blue)" = "has_explosives"
@@ -16,10 +16,11 @@
 "GoronCity Static room 0 #0 (TBox_Rupee_Green)" = "is_adult and has_hookshot"
 "GoronCity Static room 0 #0 (TBox_Rupee_Purple)" = "is_adult and has_hookshot"
 "Dm_Goron_0030: Item_Gauntlet_Goron (npc item)" = "is_child and can_play(Zeldas_Lullaby) and can_play(Sarias_Song)"
+"Npc_Goron_006_Child: Item_BombBag_Medium (npc item)" = "is_child and Bomb_Bag"
 
 [regions."GoronCity".skulltulas]
-"GC GS Boulder Maze" = "is_child and has_explosives"  # original: is_child and has_explosives
-"GC GS Center Platform" = "is_adult"  # original: is_adult
+"GC GS Boulder Maze" = "has_explosives"  # original: is_child and has_explosives
+"GC GS Center Platform" = "is_adult and has_hookshot"  # original: is_adult
 
 # Goron Shop (shopsanity). Opening it: child with explosives or strength, adult by stopping
 # the rolling Goron (explosives, strength or bow); OoT Randomizer's 'GC Shop' rule without Din's Fire.

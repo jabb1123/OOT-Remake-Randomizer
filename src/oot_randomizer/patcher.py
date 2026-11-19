@@ -195,7 +195,7 @@ class RomPatcher:
 
         from .gamedata_list import GAME_DATA_LIST, patch_gamedata_list
         from .nup_chest_patcher import NupChestPatcher, NupPatchError
-        from .shop_soldout import DISPLAY_SHOP_FLOW, patch_kokiri_soldout
+        from .shop_soldout import DISPLAY_SHOP_FLOW, add_shop_slingshot_bag, patch_kokiri_soldout
         # Group patches by the real scene files and exact chest identity.
         # byte_offset is not required here: the NUP scan resolves the real BYML offsets
         # for each target room/chest when a valid NUP + ZsDic are present.
@@ -347,7 +347,15 @@ class RomPatcher:
                     lambda data: patch_gamedata_list(data, shop=bool(shop_actors), npc_grant=din_randomized),
                 )
             if shop_actors:
-                patcher.replace_file(DISPLAY_SHOP_FLOW, patch_kokiri_soldout)
+                # One transform for DisplayShop: replace_file re-reads the NUP, so the two edits
+                # must share a single call. The bag gate runs last so it reroutes the sold-out gate.
+                sells_slingshot = any(item == SLINGSHOT_ITEM for _, item, _ in shop_assignments or [])
+
+                def display_shop(data: bytes, bag: bool = sells_slingshot) -> bytes:
+                    data = patch_kokiri_soldout(data)
+                    return add_shop_slingshot_bag(data) if bag else data
+
+                patcher.replace_file(DISPLAY_SHOP_FLOW, display_shop)
                 applied += 1
             patcher.update_resource_size_tables()
         except Exception:

@@ -204,11 +204,6 @@ NPC_LOCATIONS: dict[tuple[str, str, str | None], tuple[str, str, str]] = {
         "is_adult and Bow",
         "Shooting Gallery, Kakariko",
     ),
-    ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombBag_Medium", None): (
-        "Market",
-        "Bomb_Bag",
-        "Bombchu Bowling",
-    ),
     ("MiniGame_BombchuBowling.bfevfl.zs", "Item_BombBag_Large", None): (
         "Market",
         "Bomb_Bag and Bomb_Bag_Medium",
@@ -218,6 +213,16 @@ NPC_LOCATIONS: dict[tuple[str, str, str | None], tuple[str, str, str]] = {
         "Market",
         "true",
         "Bombchu Bowling",
+    ),
+    ("MiniGame_BombchuBowling.bfevfl.zs", "Obj_Heart_Piece", None): (
+        "Market",
+        "Bomb_Bag and is_child and Alarm_Cucco and Dodongos_Cavern_Clear",
+        "Bombchu Bowling, heart piece",
+    ),
+    ("Npc_Goron_006_Child.bfevfl.zs", "Item_BombBag_Medium", None): (
+        "GoronCity",
+        "is_child and Bomb_Bag",
+        "Goron City child",
     ),
     ("MiniGame_Fishing.bfevfl.zs", "Item_Scale_Gold", None): (
         "LakeHylia",
@@ -238,6 +243,11 @@ NPC_LOCATIONS: dict[tuple[str, str, str | None], tuple[str, str, str]] = {
         "GerudoFortress",
         "is_adult and Bow",
         "Horseback Archery",
+    ),
+    ("Minigame_HorsebackArchery.bfevfl.zs", "Obj_Heart_Piece", None): (
+        "GerudoFortress",
+        "is_adult and Bow",
+        "Horseback Archery, heart piece after the Large quiver",
     ),
     (
         "LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl.zs",
@@ -334,7 +344,7 @@ NPC_LOCATIONS: dict[tuple[str, str, str | None], tuple[str, str, str]] = {
         "Great Fairy for 50 rupees",
     ),
     ("Dm_FairyFountain_Wisdom.bfevfl.zs", "Item_FairyBless_MPDouble", None): (
-        "DeathMountainCrater",
+        "DeathMountainCraterInner",
         "Megaton_Hammer and is_adult and (Zeldas_Lullaby and (Fairy_Ocarina or Ocarina_of_Time))",
         "Great Fairy for 200 rupees",
     ),
