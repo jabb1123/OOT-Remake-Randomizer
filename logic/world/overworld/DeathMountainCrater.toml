@@ -14,7 +14,7 @@
 "DeathMountainCraterInner" = "is_adult and Megaton_Hammer"
 
 [regions."DeathMountainCraterPeak".locations]
-"DeathMountainCrater Heart Piece 1" = "true"  # loose Obj_Heart_Piece, both ages
+"DeathMountainCrater Heart Piece 2" = "true"  # loose Obj_Heart_Piece, both ages
 "DeathMountainCrater Dynamic room 0 #0 (Item_ScrubBusinessSeed)" = "true"
 "DeathMountainCrater Static room 0 #0 (TBox_Rupee_Purple)" = "is_adult and Megaton_Hammer"
 
@@ -29,7 +29,7 @@
 "DeathMountainCraterPeak" = "is_adult and Megaton_Hammer"
 
 [regions."DeathMountainCraterInner".locations]
-"DeathMountainCrater Heart Piece 2" = "is_adult"  # loose Obj_Heart_Piece, both ages
+"DeathMountainCrater Heart Piece 1" = "is_adult"  # loose Obj_Heart_Piece, both ages
 "Dm_MelodyGet_Fire" = "is_adult"  # song: Bolero of Fire from Sheik, Death Mountain Crater
 "Dm_FairyFountain_Wisdom: Item_FairyBless_MPDouble (npc item)" = "Megaton_Hammer and is_adult and can_play(Zeldas_Lullaby)"  # Great Fairies only spawn once Zelda's Lullaby is owned
 
