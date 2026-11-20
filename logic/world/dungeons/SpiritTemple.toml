@@ -17,7 +17,7 @@ dungeon = "SpiritTemple"
 [regions."SpiritTempleChildDoor".exits]
 "SpiritTemple" = "true"
 "SpiritTempleChildClimb" = "Small_Key_SpiritTemple:1"
-"SpiritTempleChildBridge" = "true"
+"SpiritTempleChildBridge" = "has_explosives"
 
 [regions."SpiritTempleChildDoor".locations]
 
@@ -30,10 +30,10 @@ dungeon = "SpiritTemple"
 
 [regions."SpiritTempleChildBridge".locations]
 "SpiritTemple Static room 4 #0 (Item_Dungeon_SmallKey)" = "can_light and Boomerang"
-"SpiritTemple Dynamic room 2 #0 (TBox_Shield_Deku)" = "true"
+"SpiritTemple Dynamic room 2 #0 (TBox_Shield_Deku)" = "Boomerang"
 
 [regions."SpiritTempleChildBridge".skulltulas]
-"Spirit Temple GS Metal Fence" = "is_child"  # original: Boomerang or (logic_spirit_fence_gs and Kokiri_Sword) or (((Silver_Rupee_Spirit_Temple_Child_Early_Torches,...
+"Spirit Temple GS Metal Fence" = "is_child and can_shoot"  # original: Boomerang or (logic_spirit_fence_gs and Kokiri_Sword) or (((Silver_Rupee_Spirit_Temple_Child_Early_Torches,...
 
 ###
 [regions."SpiritTempleChildClimb"]
@@ -81,10 +81,10 @@ dungeon = "SpiritTemple"
 
 [regions."SpiritTempleLaserMaze".exits]
 "SpiritTempleChildStairCase" = "true"
-"SpiritTempleIronKnuckleRoom" = "has_explosives"
+"SpiritTempleIronKnuckleRoom" = "true"
 
 [regions."SpiritTempleLaserMaze".locations]
-"SpiritTemple Static room 26 #0 (Item_Dungeon_SmallKey)" = "has_explosives"  # placed by requirement; confirm in-game
+"SpiritTemple Static room 26 #0 (Item_Dungeon_SmallKey)" = "true"  # placed by requirement; confirm in-game
 
 ###
 [regions."SpiritTempleIronKnuckleRoom"]
