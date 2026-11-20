@@ -37,7 +37,14 @@ from .item_ids import resolve_actor_name
 from .location_mapper import build_scene_file_index, load_summary_file
 from .locations import OOTLocation
 from .skulltula_rewards import SKULL_FLOW, SKULL_REWARDS, patch_skull_rewards
-from .stone_gates import STONE_GATE_FLOWS, patch_stone_gates
+from .stone_gates import (
+    POUCH_ADD_FLOWS,
+    POUCH_ADD_SUBFLOW,
+    STONE_GATE_FLOWS,
+    STONE_SLOT_FLOWS,
+    add_stone_count_check,
+    patch_stone_gates,
+)
 from .songs import OCARINA_LEARN_FLOW, SONG_SLOTS, patch_bfevfl_song, patch_bfevfl_songs
 
 
@@ -341,6 +348,18 @@ class RomPatcher:
                         applied += 1
                     except NupPatchError:
                         pass
+                # A stone can be granted from any stone slot, so each grant rechecks the Door of Time.
+                for flow_file in STONE_SLOT_FLOWS:
+                    patcher.replace_file(flow_file, add_stone_count_check)
+                    applied += 1
+                # Chests, hearts, and NPC grants pass through the shared pouch add, so a stone from any
+                # of them rechecks the Door of Time too.
+                for flow_file in POUCH_ADD_FLOWS:
+                    patcher.replace_file(
+                        flow_file,
+                        lambda data: add_stone_count_check(data, POUCH_ADD_SUBFLOW),
+                    )
+                    applied += 1
             if shop_actors or din_randomized:
                 patcher.replace_file(
                     GAME_DATA_LIST,

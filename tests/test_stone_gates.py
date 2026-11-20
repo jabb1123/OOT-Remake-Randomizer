@@ -1,18 +1,27 @@
 import io
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from evfl import EventFlow
-from evfl.event import SwitchEvent
+from evfl.event import SubFlowEvent, SwitchEvent
 
+from oot_randomizer import stone_gates
 from oot_randomizer.engine import load_default_slots
-from oot_randomizer.event_items import EVENT_SLOTS, event_location_name
+from oot_randomizer.event_items import EVENT_SLOTS, event_location_name, patch_event_item
 from oot_randomizer.npc_grants import NPC_SLOTS
 from oot_randomizer.planner import known_locations
 from oot_randomizer.shop_slots import VANILLA_SHOP_LOGIC_ITEMS
 from oot_randomizer.skulltula_rewards import SKULL_REWARDS, TOKEN_ITEM, skull_location_name
 from oot_randomizer.songs import SONG_SLOTS, song_location_name
-from oot_randomizer.stone_gates import STONE_BOOL_ITEMS, STONE_GATE_FLOWS, patch_stone_gates
+from oot_randomizer.stone_gates import (
+    POUCH_ADD_SUBFLOW,
+    STONE_BOOL_ITEMS,
+    STONE_GATE_FLOWS,
+    STONE_SLOT_FLOWS,
+    add_stone_count_check,
+    patch_stone_gates,
+)
 from oot_randomizer.world_logic import load_world
 
 RAW_DIR = Path(
@@ -74,6 +83,16 @@ class StoneGateTableTest(unittest.TestCase):
 
 @unittest.skipUnless(RAW_DOOR.exists() and RAW_GORON.exists(), "raw stone-gate flows not available")
 class RawStoneGateFlowTest(unittest.TestCase):
+    def setUp(self):
+        patcher = mock.patch.object(stone_gates, "POUCH_STONE_GATES", True)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_switch_off_leaves_the_vanilla_bool_gates(self):
+        with mock.patch.object(stone_gates, "POUCH_STONE_GATES", False):
+            raw = _raw(RAW_DOOR)
+            self.assertIs(patch_stone_gates(raw, "DoorOfTime.bfevfl.zs"), raw)
+
     def test_round_trip_is_byte_equal(self):
         for path in (RAW_DOOR, RAW_GORON):
             raw = _raw(path)
@@ -156,6 +175,80 @@ class TempleStoneLogicTest(unittest.TestCase):
             if k != event_location_name("Dm_ZoraFountain_0030.bfevfl.zs")
         }
         self.assertNotIn("Time_Travel", self._events(placed))
+
+
+class StoneCountCheckTest(unittest.TestCase):
+    CHECK = "DoorOfTime_CheckStoneNum"
+
+    def _check_events(self, flow: EventFlow):
+        return [
+            e for e in flow.flowchart.events
+            if isinstance(e.data, SubFlowEvent) and e.data.entry_point_name == self.CHECK
+        ]
+
+    def test_every_stone_slot_calls_the_check_after_its_grant(self):
+        for flow_name in STONE_SLOT_FLOWS:
+            path = RAW_DIR / flow_name.removesuffix(".zs")
+            if not path.exists():
+                self.skipTest(f"{path.name} not available")
+            raw = _raw(path)
+            grant = next(
+                e for e in _load(raw).flowchart.events
+                if isinstance(e.data, SubFlowEvent) and e.data.entry_point_name == "GetPouchContentByActorName"
+            )
+            original_next = grant.data.nxt.v.name
+            patched = _load(add_stone_count_check(raw))
+            checks = self._check_events(patched)
+            self.assertEqual(len(checks), 1, flow_name)
+            check = checks[0]
+            self.assertEqual(check.data.res_flowchart_name, "DoorOfTime", flow_name)
+            after_grant = next(
+                e for e in patched.flowchart.events
+                if e.name == grant.name
+            )
+            self.assertIs(after_grant.data.nxt.v, check, flow_name)
+            self.assertEqual(check.data.nxt.v.name, original_next, flow_name)
+
+    def test_check_is_idempotent(self):
+        for flow_name in STONE_SLOT_FLOWS:
+            path = RAW_DIR / flow_name.removesuffix(".zs")
+            if not path.exists():
+                self.skipTest(f"{path.name} not available")
+            once = add_stone_count_check(_raw(path))
+            self.assertIs(add_stone_count_check(once), once, flow_name)
+
+    def test_check_survives_a_repointed_stone_grant(self):
+        path = RAW_DIR / "Dm_DeathMtTrail_0025.bfevfl"
+        if not path.exists():
+            self.skipTest("Dm_DeathMtTrail_0025 not available")
+        moved = patch_event_item(_raw(path), "Item_Stone_Fire", "Item_Stone_Water")
+        patched = add_stone_count_check(moved)
+        self.assertEqual(len(self._check_events(_load(patched))), 1)
+        grants = [
+            e.data.params.data["ActorName"]
+            for e in _load(patched).flowchart.events
+            if isinstance(e.data, SubFlowEvent) and e.data.entry_point_name == "GetPouchContentByActorName"
+        ]
+        self.assertEqual(grants, ["Item_Stone_Water"])
+
+    def test_pouch_add_calls_the_check_after_the_item_is_added(self):
+        path = RAW_DIR / "Dm_SY_Get.bfevfl"
+        if not path.exists():
+            self.skipTest("Dm_SY_Get not available")
+        raw = _raw(path)
+        add = next(
+            e for e in _load(raw).flowchart.events
+            if isinstance(e.data, SubFlowEvent) and e.data.entry_point_name == POUCH_ADD_SUBFLOW
+        )
+        original_next = add.data.nxt.v.name
+        patched = _load(add_stone_count_check(raw, POUCH_ADD_SUBFLOW))
+        checks = self._check_events(patched)
+        self.assertEqual(len(checks), 1)
+        after_add = next(e for e in patched.flowchart.events if e.name == add.name)
+        self.assertIs(after_add.data.nxt.v, checks[0])
+        self.assertEqual(checks[0].data.nxt.v.name, original_next)
+        once = add_stone_count_check(raw, POUCH_ADD_SUBFLOW)
+        self.assertIs(add_stone_count_check(once, POUCH_ADD_SUBFLOW), once)
 
 
 if __name__ == "__main__":

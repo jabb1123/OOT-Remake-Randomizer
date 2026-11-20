@@ -50,12 +50,14 @@ The Zora's Sapphire grant is `Item_Stone_Water` in `Dm_ZoraFountain_0030` (Event
 
 The Temple of Time door and Darunia's Fire-stone branch read `Get_StoneOfFire_IsCompleted_Exp`, a bool set only by the vanilla Goron's Ruby flow. A shuffled Ruby would leave the door locked, so these gates now check pouch possession.
 
-`src\oot_randomizer\stone_gates.py` (`patch_stone_gates`) rewrites the matched query events in these flows, using the Epona pattern `PouchSystemActor.EventQueryIsExistInPouch {'Actor': 'Obj_Ocarina_Time', 'Num': 1}` with `Item_Stone_Fire`:
+`src\oot_randomizer\stone_gates.py` (`patch_stone_gates`) rewrites the matched query events in these flows when `POUCH_STONE_GATES` is `True`. It is currently `False` for diagnosis, so the vanilla `Get_StoneOf*_IsCompleted_Exp` gates are left in place. The pickup hook is unaffected. The conversion is described below, using the Epona pattern `PouchSystemActor.EventQueryIsExistInPouch {'Actor': 'Obj_Ocarina_Time', 'Num': 1}` with `Item_Stone_Fire`:
 
 - `DoorOfTime` (Event38)
 - `Dm_Goron_0028` (Event44)
 
 The patch is idempotent, leaves the file unchanged when the query is absent, and is byte-equal when nothing matches. It runs in `RomPatcher.apply` when at least one event item moved, and it is applied via `replace_file`, so it composes with other patches to the same flow.
+
+Stone pickup trigger: the Door of Time stone count is only rechecked when Zora's Fountain is left (vanilla `Dm_SY_BancChange_EscapeDungeon` Event78). A shuffled stone can be granted from any of the three stone slots, so `add_stone_count_check` inserts a `SUB DoorOfTime DoorOfTime_CheckStoneNum` right after the `GetPouchContentByActorName` grant in `Dm_Kokiri_0130`, `Dm_DeathMtTrail_0025`, and `Dm_ZoraFountain_0030`. The original successor is kept, the insertion is idempotent, and it runs in `RomPatcher.apply` whenever event items are shuffled. The same insertion goes after the `PouchAddItem` sub-flow in the shared `Dm_SY_Get` get-item flow, so chest, heart piece, and NPC grants that pass through it also recheck the Door of Time. That hook runs after every item, not only stones. The check's own stone gates decide whether progress happens.
 
 The Water bool (`Get_StoneOfWater_IsCompleted_Exp`) is converted in `DoorOfTime.bfevfl.zs` (Event39 and Event56) to a pouch query for `Item_Stone_Water`, the same as Fire. Other Water-bool users are left unchanged: `Dm_SY_BancChange_EscapeDungeon`, `Dm_SY_Ocarina_SariaSong`, `SubEvent_GetEponaSong`, and several `Npc_Zora_*` dialogs. Also left unchanged: `SageOf*_IsCompleted_Exp`; `DoorOfTime_IsAfter_*`; and the Forest and Fire has-stone gates in `Dm_SY_BancChange_EscapeDungeon`, `Dm_SY_BancChangeArrive`, and Kokiri dialog. Those remain bool-based and may still misbehave after a stone moves.
 

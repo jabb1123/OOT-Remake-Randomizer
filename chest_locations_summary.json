@@ -170,12 +170,6 @@
         "room_index": 0,
         "vanilla_drop": "Item_Shield_Mirror",
         "str_table_index": 173
-      },
-      {
-        "gyaml": "Obj_TBox_A_01_NoBake",
-        "room_index": 0,
-        "vanilla_drop": "TBox_Rupee_Purple",
-        "str_table_index": 279
       }
     ]
   },
