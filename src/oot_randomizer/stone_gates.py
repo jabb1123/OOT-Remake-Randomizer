@@ -13,7 +13,7 @@ import io
 from evfl import EventFlow
 from evfl.actor import Actor
 from evfl.common import ActorIdentifier, StringHolder
-from evfl.event import SwitchEvent
+from evfl.event import ActionEvent, SwitchEvent
 
 STONE_BOOL_ITEMS: dict[str, str] = {
     "Get_StoneOfForest_IsCompleted_Exp": "Item_Stone_Forest",
@@ -81,6 +81,7 @@ POUCH_ADD_FLOWS: tuple[str, ...] = ("Dm_SY_Get.bfevfl.zs",)
 POUCH_ADD_SUBFLOW = "PouchAddItem"
 _STONE_CHECK_FLOW = "DoorOfTime"
 _STONE_CHECK_ENTRY = "DoorOfTime_CheckStoneNum"
+_STONE_CHECK_FLOW_FILE = "DoorOfTime.bfevfl.zs"
 
 
 def add_stone_count_check(data: bytes, grant_subflow: str = _STONE_GRANT_SUBFLOW) -> bytes:
@@ -193,23 +194,56 @@ def add_stone_count_check_at_route_end(data: bytes, grant_subflow: str = POUCH_A
     return out.getvalue()
 
 
+# Diagnostic bools for the Door of Time stone check. The first is written on entry, and the others
+# are written before each progress branch, so a test ROM shows whether the check ran and which path
+# it took. False leaves the flow untouched.
+STONE_CHECK_DIAGNOSTICS = True
+_DIAG_ENTRY_BOOL = "Rando_Diag_StoneCheck_Ran"
+# (event name in DoorOfTime, bool written before it)
+_DIAG_BRANCH_BOOLS: tuple[tuple[str, str], ...] = (
+    ("Event37", "Rando_Diag_StoneCheck_Step03"),
+    ("Event147", "Rando_Diag_StoneCheck_Step2_1"),
+    ("Event148", "Rando_Diag_StoneCheck_Step2_2"),
+    ("Event6", "Rando_Diag_StoneCheck_Both"),
+)
+
+
+def _add_stone_check_diagnostics(flow: EventFlow) -> bool:
+    from .game_flags import insert_bool_write_before
+
+    entry = next(ep for ep in flow.flowchart.entry_points if ep.name == _STONE_CHECK_ENTRY)
+    first = entry.main_event.v.data
+    if isinstance(first, ActionEvent) and first.params is not None:
+        if first.params.data.get("GameDataName") == _DIAG_ENTRY_BOOL:
+            return False
+    events = {e.name: e for e in flow.flowchart.events}
+    insert_bool_write_before(flow.flowchart, entry.main_event.v, _DIAG_ENTRY_BOOL, True)
+    for event_name, flag in _DIAG_BRANCH_BOOLS:
+        insert_bool_write_before(flow.flowchart, events[event_name], flag, True)
+    return True
+
+
 def patch_stone_gates(data: bytes, flow_name: str) -> bytes:
-    if not POUCH_STONE_GATES:
-        return data
     bools = STONE_GATE_FLOWS.get(flow_name)
     if not bools:
         return data
     flow = EventFlow()
     flow.read(data)
-    switches = _stone_switches(flow, bools)
-    if not switches:
+    changed = False
+    if POUCH_STONE_GATES:
+        switches = _stone_switches(flow, bools)
+        if switches:
+            pouch = _pouch_actor(flow)
+            for body in switches:
+                stone_bool = body.params.data["GameDataName"]
+                body.actor.v = pouch
+                body.actor_query.v = _query(pouch, _POUCH_QUERY)
+                body.params.data = {"Actor": STONE_BOOL_ITEMS[stone_bool], "Num": 1}
+            changed = True
+    if STONE_CHECK_DIAGNOSTICS and flow_name == _STONE_CHECK_FLOW_FILE:
+        changed = _add_stone_check_diagnostics(flow) or changed
+    if not changed:
         return data
-    pouch = _pouch_actor(flow)
-    for body in switches:
-        stone_bool = body.params.data["GameDataName"]
-        body.actor.v = pouch
-        body.actor_query.v = _query(pouch, _POUCH_QUERY)
-        body.params.data = {"Actor": STONE_BOOL_ITEMS[stone_bool], "Num": 1}
     out = io.BytesIO()
     flow.write(out)
     return out.getvalue()

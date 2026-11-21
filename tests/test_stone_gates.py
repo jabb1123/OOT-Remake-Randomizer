@@ -92,7 +92,9 @@ class RawStoneGateFlowTest(unittest.TestCase):
     def test_switch_off_leaves_the_vanilla_bool_gates(self):
         with mock.patch.object(stone_gates, "POUCH_STONE_GATES", False):
             raw = _raw(RAW_DOOR)
-            self.assertIs(patch_stone_gates(raw, "DoorOfTime.bfevfl.zs"), raw)
+            patched = _switches(_load(patch_stone_gates(raw, "DoorOfTime.bfevfl.zs")))
+            self.assertIn(FIRE_BOOL, [p.get("GameDataName") for _, _, p in patched])
+            self.assertNotIn("Item_Stone_Fire", [p.get("Actor") for _, _, p in patched])
 
     def test_round_trip_is_byte_equal(self):
         for path in (RAW_DOOR, RAW_GORON):
@@ -259,6 +261,46 @@ class StoneCountCheckTest(unittest.TestCase):
         once = add_stone_count_check_at_route_end(raw, POUCH_ADD_SUBFLOW)
         self.assertIs(add_stone_count_check_at_route_end(once, POUCH_ADD_SUBFLOW), once)
 
+
+class StoneCheckDiagnosticsTest(unittest.TestCase):
+    def _diag_writes(self, flow: EventFlow) -> dict[str, ActionEvent]:
+        writes = {}
+        for event in flow.flowchart.events:
+            body = event.data
+            if isinstance(body, ActionEvent) and body.params is not None:
+                flag = body.params.data.get("GameDataName")
+                if isinstance(flag, str) and flag.startswith("Rando_Diag_StoneCheck_"):
+                    writes[flag] = body
+        return writes
+
+    def test_diagnostic_bools_precede_the_entry_and_each_branch(self):
+        if not RAW_DOOR.exists():
+            self.skipTest("raw Door of Time dump not present")
+        expected = {stone_gates._DIAG_ENTRY_BOOL} | {flag for _, flag in stone_gates._DIAG_BRANCH_BOOLS}
+        for pouch_gates in (True, False):
+            with self.subTest(pouch_gates=pouch_gates), mock.patch.object(
+                stone_gates, "POUCH_STONE_GATES", pouch_gates
+            ):
+                patched = _load(patch_stone_gates(_raw(RAW_DOOR), "DoorOfTime.bfevfl.zs"))
+                writes = self._diag_writes(patched)
+                self.assertEqual(set(writes), expected)
+                for flag, body in writes.items():
+                    self.assertIs(body.params.data["Value"], True)
+                entry = next(ep for ep in patched.flowchart.entry_points
+                             if ep.name == stone_gates._STONE_CHECK_ENTRY)
+                self.assertEqual(entry.main_event.v.data.params.data["GameDataName"],
+                                 stone_gates._DIAG_ENTRY_BOOL)
+                for event_name, flag in stone_gates._DIAG_BRANCH_BOOLS:
+                    self.assertEqual(writes[flag].nxt.v.name, event_name)
+
+    def test_diagnostics_off_leaves_the_flow_untouched(self):
+        if not RAW_DOOR.exists():
+            self.skipTest("raw Door of Time dump not present")
+        raw = _raw(RAW_DOOR)
+        with mock.patch.object(stone_gates, "STONE_CHECK_DIAGNOSTICS", False), mock.patch.object(
+            stone_gates, "POUCH_STONE_GATES", False
+        ):
+            self.assertIs(patch_stone_gates(raw, "DoorOfTime.bfevfl.zs"), raw)
 
 
 if __name__ == "__main__":
