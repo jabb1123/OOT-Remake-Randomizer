@@ -498,7 +498,8 @@ class World:
             self.errors.append(f"location {loc!r} (in {self.location_region[loc]}) does not exist")
         missing = known_locations - set(self.location_region)
         if missing:
-            self.warnings.append(f"{len(missing)} locations not listed in any region (treated as always reachable)")
+            names = ", ".join(sorted(missing))
+            self.warnings.append(f"{len(missing)} locations not listed in any region (treated as always reachable): {names}")
 
 
 def logic_files(path: Path) -> list[Path]:

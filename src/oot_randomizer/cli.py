@@ -108,7 +108,7 @@ def _cmd_randomize(args: argparse.Namespace) -> None:
 
 
 def _cmd_logic(args: argparse.Namespace) -> int:
-    from .engine import load_default_slots
+    from .engine import NOT_IN_GAME_SLOTS, load_default_slots
     from .event_items import EVENT_SLOTS, event_location_name
     from .heart_pickups import FIRE_ARROW_ITEM, FIRE_ARROW_LOCATIONS, HEART_LOCATIONS
     from .logic_template import build_template
@@ -156,7 +156,7 @@ def _cmd_logic(args: argparse.Namespace) -> int:
         print(f"warning: {item} is required somewhere but no location holds it")
 
     # The unmodified game must satisfy the rules, otherwise they are too strict.
-    vanilla = {s.name: s.vanilla_item for s in slots}
+    vanilla = {s.name: s.vanilla_item for s in slots if s.name not in NOT_IN_GAME_SLOTS}
     vanilla |= {song_location_name(f): song for f, song in SONG_SLOTS.items()}
     vanilla |= {skull_location_name(n): item for n, item in SKULL_REWARDS.items()}
     vanilla |= {event_location_name(f): item for f, item in EVENT_SLOTS.items()}
