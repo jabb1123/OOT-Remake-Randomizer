@@ -45,6 +45,9 @@ from oot_randomizer.shop_slots import (
 )
 from oot_randomizer.shops import ShopError, find_shelf_actors, set_shelf_item, tag_names
 from oot_randomizer.shop_soldout import patch_kokiri_soldout
+from oot_randomizer.stone_gates import (
+    POUCH_ADD_FLOWS, STONE_CHECK_FLOW_FILE, STONE_GATE_FLOWS, STONE_SLOT_FLOWS,
+)
 from oot_randomizer.skulltula_rewards import SKULL_LOCATIONS, SKULL_REWARDS, TOKEN_ITEM, skull_location_name
 from oot_randomizer.songs import SONG_SLOTS, song_location_name
 from oot_randomizer.world_logic import LogicError, load_world
@@ -54,6 +57,7 @@ import test_nup_files as tnf  # noqa: E402  (module imports: their TestCases are
 import test_shop_soldout as tso  # noqa: E402
 import test_shops as ts  # noqa: E402
 import test_skulltula as tsk  # noqa: E402
+import test_stone_gates as tsg  # noqa: E402
 
 SHOP_DATA = Path(r"C:\Users\jabb1123\.copilot\session-state\aa09e5ec-62eb-4ee7-bbd4-90178d07a405\files\shop_data.json")
 WALLETS = ("Item_Wallet_Medium", "Item_Wallet_Large")
@@ -631,6 +635,11 @@ def build_shop_nup(tmp: Path) -> tuple[Path, bytes]:
         if tso.RAW_FLOW.exists():
             t["romfs/Event/EventFlow/DisplayShop.bfevfl.zs"] = cctx.compress(tso.RAW_FLOW.read_bytes())
             sizes["Event/EventFlow/DisplayShop.bfevfl"] = 262144
+        for flow_name in set(STONE_GATE_FLOWS) | set(STONE_SLOT_FLOWS) | set(POUCH_ADD_FLOWS):
+            path = tsg.RAW_DIR / flow_name.removesuffix(".zs")
+            if path.exists():
+                t[f"romfs/Event/EventFlow/{flow_name}"] = cctx.compress(path.read_bytes())
+                sizes[f"Event/EventFlow/{flow_name.removesuffix('.zs')}"] = 262144
         t[f"romfs/System/Resource/ResourceSizeTable.{product}.rsizetable.zs"] = \
             zstandard.ZstdCompressor().compress(ts._restbl(sizes))
         t[f"romfs/GameData/{GAME_DATA_LIST}"] = cctx.compress(game_data_list())
@@ -734,6 +743,34 @@ class ShopPatchPathTests(unittest.TestCase):
         self.assertEqual(res.mode, "binary")
         self.assertEqual(sorted(res.shop_actors), ["Shop_Rando_Item_Hookshot", "Shop_Rando_Item_Range_Bow"])
         self.assert_final_state(nup, skulls is not None)
+
+    def test_shop_and_stone_event_patches_are_persisted_together(self):
+        needed = set(STONE_GATE_FLOWS) | set(STONE_SLOT_FLOWS) | set(POUCH_ADD_FLOWS)
+        if not tso.RAW_FLOW.exists() or any(
+            not (tsg.RAW_DIR / name.removesuffix(".zs")).exists() for name in needed
+        ):
+            self.skipTest("raw shop and stone flows not available")
+        nup = self.copy("shop_stone")
+        flow_name = STONE_SLOT_FLOWS[0]
+        result = RomPatcher().apply(
+            nup, [CHEST_PATCH], shop_assignments=SHOP_PLAN,
+            event_assignments={flow_name: EVENT_SLOTS[flow_name]},
+        )
+        self.assertEqual(result.mode, "binary")
+        for pkg in (0, 1):
+            shop = self.read(nup, pkg, "Event/EventFlow/DisplayShop.bfevfl.zs")
+            door = self.read(nup, pkg, "Event/EventFlow/" + STONE_CHECK_FLOW_FILE)
+            flow = tso._load(shop)
+            events = tso._events(flow)
+            source_entry = next(
+                ep.main_event.v.name for ep in tso._load(door).flowchart.entry_points
+                if ep.name == "DoorOfTime_CheckStoneNum"
+            )
+            for grant, marker in (("Event268", "Event281"), ("Event171", "Event103")):
+                self.assertEqual(events[marker].nxt.v.name, f"StoneCheck_{grant}_{source_entry}")
+            self.assertIn("ShopSoldOut_MarkSession", events)
+        ok, problems = tnf.verify(str(nup), deep=True)
+        self.assertTrue(ok, problems)
 
     def test_shops_after_replace_file_patches_is_also_valid(self):
         nup = self.copy("shops_last")

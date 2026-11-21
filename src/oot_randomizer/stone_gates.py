@@ -86,6 +86,10 @@ _STONE_CHECK_ENTRY = "DoorOfTime_CheckStoneNum"
 STONE_CHECK_FLOW_FILE = "DoorOfTime.bfevfl.zs"
 # Prefix on the check's events once copied into a calling flow.
 _INLINE_PREFIX = "StoneCheck_"
+# Skips the copied check once the Door of Time quest is at Step03 or further, so a stone pickup
+# after that point does not progress the quest again.
+_STEP_GATE_BOOL = "DoorOfTime_IsAfter_Step03_Exp"
+_STEP_GATE_NAME = "IsAfterStep03"
 
 
 def _read_flow(data: bytes) -> EventFlow:
@@ -138,11 +142,43 @@ def _flow_actor(flow: EventFlow, src: Actor) -> Actor:
     return actor
 
 
-def _copy_check_into(flow: EventFlow, check: EventFlow, exit_to: Event | None) -> Event:
-    """Copy DoorOfTime_CheckStoneNum from `check` into `flow` and return the copied entry event.
+def _step_gate(flow: EventFlow, check: EventFlow, run: Event, exit_to: Event | None, prefix: str) -> Event:
+    """Return a switch that runs `run` only while the Door of Time quest is before Step03.
+
+    The true case (already at Step03 or further) skips to `exit_to`. A missing true case ends the
+    branch, which matches a route that ends at None.
+    """
+    src_actor = next(a for a in check.flowchart.actors if a.identifier.name == _GAME_DATA_ACTOR)
+    actor = _flow_actor(flow, src_actor)
+    template = next(
+        e.data for e in check.flowchart.events
+        if isinstance(e.data, SwitchEvent) and e.data.actor.v is not None
+        and e.data.actor.v.identifier.name == _GAME_DATA_ACTOR
+        and e.data.actor_query.v is not None and e.data.actor_query.v.v == _GAME_DATA_BOOL_QUERY
+    )
+    gate = SwitchEvent()
+    gate.actor = make_rindex(actor)
+    gate.actor_query = make_rindex(_holder(actor.queries, _GAME_DATA_BOOL_QUERY))
+    gate.params = deepcopy(template.params)
+    gate.params.data["GameDataName"] = _STEP_GATE_BOOL
+    gate.cases = {1: make_rindex(run)}
+    if exit_to is not None:
+        gate.cases[0] = make_rindex(exit_to)
+    event = Event()
+    event.name = f"{prefix}{_STEP_GATE_NAME}"
+    event.data = gate
+    flow.flowchart.events.append(event)
+    return event
+
+
+def _copy_check_into(
+    flow: EventFlow, check: EventFlow, exit_to: Event | None, prefix: str = _INLINE_PREFIX
+) -> Event:
+    """Copy DoorOfTime_CheckStoneNum from `check` into `flow` and return the entry of the copy.
 
     The check runs inside the calling flow, so it no longer depends on a cross-file sub-flow. Its
-    exits continue to `exit_to`, or end the branch when `exit_to` is None.
+    exits continue to `exit_to`, or end the branch when `exit_to` is None. The returned entry is a
+    step gate in front of the copied check.
     """
     entry = next(ep for ep in check.flowchart.entry_points if ep.name == _STONE_CHECK_ENTRY)
     old_events: list[Event] = []
@@ -165,7 +201,7 @@ def _copy_check_into(flow: EventFlow, check: EventFlow, exit_to: Event | None) -
     copies: dict[int, Event] = {}
     for old in old_events:
         new = Event()
-        new.name = f"{_INLINE_PREFIX}{old.name}"
+        new.name = f"{prefix}{old.name}"
         copies[id(old)] = new
 
     def target(event: Event | None) -> Event | None:
@@ -188,7 +224,7 @@ def _copy_check_into(flow: EventFlow, check: EventFlow, exit_to: Event | None) -
             node.cases = {case: make_rindex(copies[id(c.v)]) for case, c in body.cases.items()}
         copies[id(old)].data = node
         flow.flowchart.events.append(copies[id(old)])
-    return copies[id(entry.main_event.v)]
+    return _step_gate(flow, check, copies[id(entry.main_event.v)], exit_to, prefix)
 
 
 def add_stone_count_check(data: bytes, check_data: bytes, grant_subflow: str = _STONE_GRANT_SUBFLOW) -> bytes:
@@ -255,6 +291,45 @@ def add_stone_count_check_at_route_end(
             raise ValueError(f"unexpected {type(body).__name__} after {grant_subflow}")
     if exits == 0:
         raise ValueError(f"no route exit after {grant_subflow}")
+    return _write_flow(flow)
+
+
+_SHOP_PURCHASE_EXITS = (
+    ("Event268", "Event281", "EventTriggerGetItemAtShop", "Event295"),
+    ("Event171", "Event103", "EventTriggerGetBottleItemAtShop", "Event338"),
+)
+
+
+def add_shop_stone_count_check(data: bytes, check_data: bytes) -> bytes:
+    """Recount after each shop purchase's item processing and before its autosave."""
+    flow = _read_flow(data)
+    prefixes = [f"{_INLINE_PREFIX}{grant}_" for grant, _, _, _ in _SHOP_PURCHASE_EXITS]
+    present = [any(e.name.startswith(prefix) for e in flow.flowchart.events) for prefix in prefixes]
+    if all(present):
+        return data
+    if any(present):
+        raise ValueError("DisplayShop has an incomplete stone-count patch")
+
+    events = {event.name: event for event in flow.flowchart.events}
+    check = _read_flow(check_data)
+    for (grant, marker_name, action, autosave_name), prefix in zip(_SHOP_PURCHASE_EXITS, prefixes):
+        marker = events.get(marker_name)
+        purchase = events.get(grant)
+        autosave = events.get(autosave_name)
+        if (
+            marker is None or not isinstance(marker.data, ActionEvent)
+            or marker.data.actor_action.v is None or marker.data.actor_action.v.v != action
+            or marker.data.nxt.v is not autosave or autosave is None
+            or not isinstance(autosave.data, ActionEvent)
+            or autosave.data.actor_action.v is None
+            or autosave.data.actor_action.v.v != "EventTriggerRequestAutoSave"
+            or purchase is None or not isinstance(purchase.data, ActionEvent)
+            or purchase.data.actor_action.v is None
+            or purchase.data.actor_action.v.v != "EventTriggerShopItemPutInPouch"
+        ):
+            raise ValueError(f"DisplayShop purchase route {grant} has changed")
+        entry = _copy_check_into(flow, check, autosave, prefix)
+        marker.data.nxt = make_index(entry)
     return _write_flow(flow)
 
 

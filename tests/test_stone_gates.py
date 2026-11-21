@@ -12,6 +12,7 @@ from oot_randomizer.event_items import EVENT_SLOTS, event_location_name, patch_e
 from oot_randomizer.npc_grants import NPC_SLOTS
 from oot_randomizer.planner import known_locations
 from oot_randomizer.shop_slots import VANILLA_SHOP_LOGIC_ITEMS
+from oot_randomizer.shop_soldout import add_shop_slingshot_bag, patch_kokiri_soldout
 from oot_randomizer.skulltula_rewards import SKULL_REWARDS, TOKEN_ITEM, skull_location_name
 from oot_randomizer.songs import SONG_SLOTS, song_location_name
 from oot_randomizer.stone_gates import (
@@ -183,6 +184,7 @@ class TempleStoneLogicTest(unittest.TestCase):
 class StoneCountCheckTest(unittest.TestCase):
     CHECK = "DoorOfTime_CheckStoneNum"
     PREFIX = "StoneCheck_"
+    GATE = "IsAfterStep03"
 
     def _check_raw(self) -> bytes:
         path = RAW_DIR / "DoorOfTime.bfevfl"
@@ -208,13 +210,17 @@ class StoneCountCheckTest(unittest.TestCase):
         """Names of the events outside the copied check that its exits continue to. None means the branch ends."""
         exits: set[str | None] = set()
         for e in self._inline_events(flow):
-            if not isinstance(e.data, ActionEvent):
+            if isinstance(e.data, ActionEvent):
+                targets = [e.data.nxt.v]
+            elif isinstance(e.data, SwitchEvent):
+                targets = [c.v for c in e.data.cases.values()]
+            else:
                 continue
-            target = e.data.nxt.v
-            if target is None:
-                exits.add(None)
-            elif not target.name.startswith(self.PREFIX):
-                exits.add(target.name)
+            for target in targets:
+                if target is None:
+                    exits.add(None)
+                elif not target.name.startswith(self.PREFIX):
+                    exits.add(target.name)
         return exits
 
     def _grant(self, flow: EventFlow, subflow: str):
@@ -225,7 +231,7 @@ class StoneCountCheckTest(unittest.TestCase):
 
     def test_every_stone_slot_runs_the_check_after_its_grant(self):
         check_raw = self._check_raw()
-        entry_name = self.PREFIX + self._source_entry_name(check_raw)
+        gate_name = self.PREFIX + self.GATE
         for flow_name in STONE_SLOT_FLOWS:
             path = RAW_DIR / flow_name.removesuffix(".zs")
             if not path.exists():
@@ -236,15 +242,28 @@ class StoneCountCheckTest(unittest.TestCase):
             patched = _load(add_stone_count_check(raw, check_raw))
             self.assertFalse(self._calls_door_of_time(patched), flow_name)
             after_grant = next(e for e in patched.flowchart.events if e.name == grant_name)
-            self.assertEqual(after_grant.data.nxt.v.name, entry_name, flow_name)
+            self.assertEqual(after_grant.data.nxt.v.name, gate_name, flow_name)
             self.assertEqual(self._inline_exits(patched), {original_next}, flow_name)
+
+    def test_step_gate_skips_the_check_from_step03_onward(self):
+        path = RAW_DIR / "Dm_SY_Get.bfevfl"
+        if not path.exists():
+            self.skipTest("Dm_SY_Get not available")
+        check_raw = self._check_raw()
+        source_entry = self._source_entry_name(check_raw)
+        patched = _load(add_stone_count_check_at_route_end(_raw(path), check_raw))
+        gate = next(e for e in patched.flowchart.events if e.name == self.PREFIX + self.GATE)
+        self.assertIsInstance(gate.data, SwitchEvent)
+        self.assertEqual(gate.data.params.data["GameDataName"], "DoorOfTime_IsAfter_Step03_Exp")
+        self.assertEqual(gate.data.cases[1].v.name, self.PREFIX + source_entry)
+        self.assertNotIn(0, gate.data.cases)
 
     def test_inlined_check_copies_each_source_event_it_reaches(self):
         check_raw = self._check_raw()
         source = {e.name: e for e in _load(check_raw).flowchart.events}
         raw = _raw(RAW_DIR / "Dm_SY_Get.bfevfl")
         patched = _load(add_stone_count_check_at_route_end(raw, check_raw))
-        copies = self._inline_events(patched)
+        copies = [e for e in self._inline_events(patched) if e.name != self.PREFIX + self.GATE]
         self.assertTrue(copies)
         for copy in copies:
             original = source[copy.name[len(self.PREFIX):]]
@@ -276,7 +295,7 @@ class StoneCountCheckTest(unittest.TestCase):
         check_raw = self._check_raw()
         moved = patch_event_item(_raw(path), "Item_Stone_Fire", "Item_Stone_Water")
         patched = _load(add_stone_count_check(moved, check_raw))
-        entry_name = self.PREFIX + self._source_entry_name(check_raw)
+        entry_name = self.PREFIX + self.GATE
         self.assertEqual(sum(e.name == entry_name for e in patched.flowchart.events), 1)
         self.assertFalse(self._calls_door_of_time(patched))
         grants = [
@@ -294,7 +313,7 @@ class StoneCountCheckTest(unittest.TestCase):
         raw = _raw(path)
         add = self._grant(_load(raw), POUCH_ADD_SUBFLOW)
         add_name, original_next = add.name, add.data.nxt.v.name
-        entry_name = self.PREFIX + self._source_entry_name(check_raw)
+        entry_name = self.PREFIX + self.GATE
         patched = _load(add_stone_count_check_at_route_end(raw, check_raw))
         self.assertFalse(self._calls_door_of_time(patched))
         self.assertEqual(sum(e.name == entry_name for e in patched.flowchart.events), 1)
@@ -312,6 +331,64 @@ class StoneCountCheckTest(unittest.TestCase):
         self.assertEqual(exits, {"Event183", "Event177"})
         once = add_stone_count_check_at_route_end(raw, check_raw)
         self.assertIs(add_stone_count_check_at_route_end(once, check_raw), once)
+
+    def test_shop_purchases_recount_before_autosave_and_preserve_other_patches(self):
+        path = RAW_DIR / "DisplayShop.bfevfl"
+        if not path.exists():
+            self.skipTest("DisplayShop not available")
+        check_raw = patch_stone_gates(self._check_raw(), "DoorOfTime.bfevfl.zs")
+        shop = add_shop_slingshot_bag(patch_kokiri_soldout(_raw(path)))
+        patched = stone_gates.add_shop_stone_count_check(shop, check_raw)
+        flow = _load(patched)
+        events = {event.name: event for event in flow.flowchart.events}
+        source_entry = self._source_entry_name(check_raw)
+        for grant, fork, join, sold, marker, autosave in (
+            ("Event268", "Event219", "Event220", "Event217", "Event281", "Event295"),
+            ("Event171", "Event232", "Event233", "Event231", "Event103", "Event338"),
+        ):
+            entry_name = f"StoneCheck_{grant}_{self.GATE}"
+            self.assertEqual(events[entry_name].data.cases[1].v.name, f"StoneCheck_{grant}_{source_entry}")
+            self.assertEqual(events[grant].data.nxt.v.name, fork)
+            self.assertEqual(events[fork].data.join.v.name, join)
+            self.assertEqual(events[join].data.nxt.v.name, sold)
+            self.assertEqual(events[sold].data.nxt.v.name, marker)
+            self.assertEqual(events[marker].data.nxt.v.name, entry_name)
+            copies = [event for event in flow.flowchart.events if event.name.startswith(f"StoneCheck_{grant}_")]
+            self.assertTrue(copies)
+            copied_switches = [
+                (event.data.actor.v.identifier.name, event.data.actor_query.v.v, event.data.params.data)
+                for event in copies if isinstance(event.data, SwitchEvent)
+            ]
+            for item in ("Item_Stone_Fire", "Item_Stone_Water"):
+                self.assertIn(("PouchSystemActor", "EventQueryIsExistInPouch",
+                               {"Actor": item, "Num": 1}), copied_switches)
+            self.assertTrue(any(
+                isinstance(event.data, ActionEvent)
+                and event.data.actor_action.v.v == "EventTriggerShowChallengeProgressUI"
+                for event in copies
+            ))
+            exits = {
+                event.data.nxt.v.name
+                for event in copies
+                if isinstance(event.data, ActionEvent)
+                and event.data.nxt.v is not None
+                and not event.data.nxt.v.name.startswith(f"StoneCheck_{grant}_")
+            }
+            self.assertEqual(exits, {autosave})
+            self.assertEqual(events[autosave].data.actor_action.v.v, "EventTriggerRequestAutoSave")
+            self.assertIn(f"AutoEvent_ShopSlingshotBag_Check_{grant}", events)
+        self.assertIn("ShopSoldOut_MarkSession", events)
+        self.assertIs(stone_gates.add_shop_stone_count_check(patched, check_raw), patched)
+
+    def test_shop_check_rejects_changed_purchase_route(self):
+        path = RAW_DIR / "DisplayShop.bfevfl"
+        if not path.exists():
+            self.skipTest("DisplayShop not available")
+        flow = _load(_raw(path))
+        marker = next(event for event in flow.flowchart.events if event.name == "Event281")
+        marker.data.nxt.v = None
+        with self.assertRaisesRegex(ValueError, "purchase route Event268 has changed"):
+            stone_gates.add_shop_stone_count_check(_serialize(flow), self._check_raw())
 
 
 class StoneCheckDiagnosticsTest(unittest.TestCase):

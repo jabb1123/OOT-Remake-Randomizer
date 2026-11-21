@@ -21,6 +21,7 @@ Status: experimental. Logic and placement are in place, but sold-out tracking an
 - The Deku Shield shelf uses a hand-written bool, `KokiriForest_Shop_SelectActor_Shield_Deku` (Bool index 8888 in `GameDataList`). The flow sets it in `Event558`, child only.
 - Game-data names are hashed with MurmurHash3 32-bit, seed 0.
 - Purchase path (`DisplayShop.bfevfl`): the selection gate is `SelectItem_CheckAvailable`, and the commit is `ShopItem_Buy_SecondMove` (`EventTriggerShopItemPutInPouch`, then `EventTriggerAddShopItemSoldNum`).
+- With randomized stone events and shop items enabled, both shop purchase paths recount the stones after item processing and before autosave. The recount uses the same patched Door of Time check as other randomized pickups.
 
 ## Per-slot sold-out (Kokiri Shop, in progress)
 

@@ -43,6 +43,7 @@ from .stone_gates import (
     STONE_CHECK_FLOW_FILE,
     STONE_GATE_FLOWS,
     STONE_SLOT_FLOWS,
+    add_shop_stone_count_check,
     add_stone_count_check,
     add_stone_count_check_at_route_end,
     patch_stone_gates,
@@ -371,13 +372,17 @@ class RomPatcher:
                     lambda data: patch_gamedata_list(data, shop=bool(shop_actors), npc_grant=din_randomized),
                 )
             if shop_actors:
-                # One transform for DisplayShop: replace_file re-reads the NUP, so the two edits
-                # must share a single call. The bag gate runs last so it reroutes the sold-out gate.
+                # Combine all DisplayShop edits in one transform. The bag gate reroutes the
+                # sold-out gate; the stone recount runs after the purchase and before autosave.
                 sells_slingshot = any(item == SLINGSHOT_ITEM for _, item, _ in shop_assignments or [])
 
                 def display_shop(data: bytes, bag: bool = sells_slingshot) -> bytes:
                     data = patch_kokiri_soldout(data)
-                    return add_shop_slingshot_bag(data) if bag else data
+                    if bag:
+                        data = add_shop_slingshot_bag(data)
+                    if event_assignments:
+                        data = add_shop_stone_count_check(data, door_check)
+                    return data
 
                 patcher.replace_file(DISPLAY_SHOP_FLOW, display_shop)
                 applied += 1
