@@ -46,7 +46,7 @@ from oot_randomizer.shop_slots import (
 from oot_randomizer.shops import ShopError, find_shelf_actors, set_shelf_item, tag_names
 from oot_randomizer.shop_soldout import patch_kokiri_soldout
 from oot_randomizer.stone_gates import (
-    POUCH_ADD_FLOWS, STONE_CHECK_FLOW_FILE, STONE_GATE_FLOWS, STONE_SLOT_FLOWS,
+    POUCH_ADD_FLOWS, STONE_GATE_FLOWS, STONE_SLOT_FLOWS,
 )
 from oot_randomizer.skulltula_rewards import SKULL_LOCATIONS, SKULL_REWARDS, TOKEN_ITEM, skull_location_name
 from oot_randomizer.songs import SONG_SLOTS, song_location_name
@@ -759,15 +759,11 @@ class ShopPatchPathTests(unittest.TestCase):
         self.assertEqual(result.mode, "binary")
         for pkg in (0, 1):
             shop = self.read(nup, pkg, "Event/EventFlow/DisplayShop.bfevfl.zs")
-            door = self.read(nup, pkg, "Event/EventFlow/" + STONE_CHECK_FLOW_FILE)
             flow = tso._load(shop)
             events = tso._events(flow)
-            source_entry = next(
-                ep.main_event.v.name for ep in tso._load(door).flowchart.entry_points
-                if ep.name == "DoorOfTime_CheckStoneNum"
-            )
             for grant, marker in (("Event268", "Event281"), ("Event171", "Event103")):
-                self.assertEqual(events[marker].nxt.v.name, f"StoneCheck_{grant}_{source_entry}")
+                # The copied check starts with the Step03 gate, so the marker's next event is that gate.
+                self.assertEqual(events[marker].nxt.v.name, f"StoneCheck_{grant}_IsAfterStep03")
             self.assertIn("ShopSoldOut_MarkSession", events)
         ok, problems = tnf.verify(str(nup), deep=True)
         self.assertTrue(ok, problems)

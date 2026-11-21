@@ -53,5 +53,8 @@ child_spawn = "Root"
 adult_spawn = "Root"
 # Event that unlocks playing as the other age (Door of Time / Master Sword).
 time_travel = "Time_Travel"
+# Event that lets the player return to child after having been adult (Sheik). Until it is set,
+# child-age reachability stops growing once adult is reached.
+time_travel_back = "Time_Travel_Back"
 goal = "Ganon_Defeated"
 start_items = []

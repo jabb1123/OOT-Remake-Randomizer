@@ -67,8 +67,11 @@ magic(4) TOC\x01 + package_count(4) + dir_count(8) + file_count(8)
   0x24DEC000 Encrypted RomFS (AES-CTR — game asset files, NOT accessible without key)
 ```
 
-**NSO sections** (`.text`, `.rodata`, `.data`) use **ZBIC** compression — a proprietary
-format, not LZ4/ZSTD/zlib. Do not attempt to decompress NSO sections with standard libs.
+**NSO sections** (`.text`, `.rodata`, `.data`) use **ZBIC** compression (NSO flags bit 7).
+Each segment starts with `ZBIC`, u16 `0x5880` at +4, decompressed size (LE u32) at +6, and
+payload from +10. The payload is a chain of zstd-style 3-byte block headers. Standard zstd and
+LZ4 block decoding fails on the first block, and the dictionaries in `ZsDic.pack` don't help.
+The executable has not been decoded, so the item-category enum integers are still unknown.
 
 **RomFS game files** are ZSTD-compressed with per-type dictionaries. Files named `*.zs`
 use dictionary compression; the dict_id is in the ZSTD frame header.

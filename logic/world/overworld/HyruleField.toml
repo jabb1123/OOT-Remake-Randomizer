@@ -17,9 +17,9 @@
 [regions."HyruleField".locations]
 "Dm_MelodyGet_Time (event item)" = "is_child and Zeldas_Lullaby and Kokiris_Emerald and Goron_Ruby and Zora_Sapphire and Deku_Tree_Clear and Dodongos_Cavern_Clear and Jabu_Jabu_Clear"
 "Dm_MelodyGet_Time" = "is_child and Zeldas_Lullaby and Kokiris_Emerald and Goron_Ruby and Zora_Sapphire"  # song: Song of Time from Zelda at the moat, after all three stones
-"HyruleField Dynamic room 0 #0 (Item_ScrubBusinessSeed)" = "is_adult"
+"HyruleField Dynamic room 0 #0 (Item_ScrubBusinessSeed)" = "is_adult and has_hookshot"
 "HyruleField Dynamic room 0 #0 (Obj_Heart_Piece)" = "is_adult"
-"HyruleField Dynamic room 0 #0 (TBox_Rupee_Red)" = "is_adult and has_hookshot"
+"HyruleField Dynamic room 0 #0 (TBox_Rupee_Red)" = "is_adult "
 "HyruleField Dynamic room 0 #1 (TBox_Rupee_Red)" = "is_adult"
 "HyruleField Dynamic room 0 #2 (TBox_Rupee_Red)" = "is_adult"
 "HyruleField Static room 0 #0 (Obj_Heart_Piece)" = "is_child and has_adult"

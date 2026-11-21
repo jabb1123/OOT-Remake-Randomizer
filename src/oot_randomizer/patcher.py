@@ -21,6 +21,9 @@ from .starting_items import patch_intro_flow
 from .kokiri_blocker import MIDO_BLOCKER_PATCHES
 from .world_time import CASTLE_ENTRY_FLOW, add_goto_quest_progress_to_castle_entry
 from .event_items import EVENT_SLOTS, patch_event_item
+from .dampe_race import DAMPE_RACE_FLOW, patch_dampe_race_approach
+from .storm_song_npc import STORM_NPC_FLOW, patch_storm_song_npc
+from .sheik_medal_gate import ALLSAGE_FLOW, patch_sheik_medal_gate
 from .npc_grants import (
     DIN_FAIRY_FLOW,
     NPC_SLOTS,
@@ -341,6 +344,24 @@ class RomPatcher:
                     if SLINGSHOT_ITEM in changes.values():
                         patcher.replace_file(flow_file, add_slingshot_bag)
                         applied += 1
+            # The Dampe race reward follows the race, so an owned hookshot must not skip its talk.
+            try:
+                patcher.replace_file(DAMPE_RACE_FLOW, patch_dampe_race_approach)
+                applied += 1
+            except NupPatchError:
+                pass
+            # The storm song slot is awarded once by this NPC, so the pouch must not skip that award.
+            try:
+                patcher.replace_file(STORM_NPC_FLOW, patch_storm_song_npc)
+                applied += 1
+            except NupPatchError:
+                pass
+            # Sheik's return-to-child gate also opens on any dungeon medal, not only the Fire or Forest flag.
+            try:
+                patcher.replace_file(ALLSAGE_FLOW, patch_sheik_medal_gate)
+                applied += 1
+            except NupPatchError:
+                pass
             if event_assignments:
                 for flow_file in STONE_GATE_FLOWS:
                     try:

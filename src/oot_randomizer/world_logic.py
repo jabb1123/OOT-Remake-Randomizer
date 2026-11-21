@@ -384,6 +384,9 @@ class World:
     # Key chests (`... (Item_Dungeon_SmallKey)` / `... (Item_Dungeon_BossKey)`) mapped to their dungeon's
     # counter. Counted even when the planner has not placed them, since keys are not shuffled yet.
     key_locations: dict[str, str] = field(default_factory=dict)
+    # Event that lets the player return to the start age after having been to the other one.
+    # Until it is set, the start age stops growing once the other age has been reached.
+    time_travel_back: str | None = None
 
     @property
     def referenced_items(self) -> set[str]:
@@ -455,38 +458,49 @@ class World:
         regions: dict[str, set[str]] = {age: set() for age in AGES}
         other_age = "adult" if self.start_age == "child" else "child"
 
+        def sweep(age: str) -> bool:
+            changed = False
+            seen = regions[age]
+            if not seen:
+                seen.add(self.spawns[age])
+            frontier = list(seen)
+            while frontier:
+                region = self.regions[frontier.pop()]
+                for name, req in region.events.items():
+                    if name not in events and evaluate(req, items, events, age, options):
+                        events.add(name)
+                        changed = True
+                for loc, req in region.locations.items():
+                    extra = self.extra_requirements.get(loc)
+                    if loc not in reached and evaluate(req, items, events, age, options) and (
+                        extra is None or evaluate(extra, items, events, age, options)
+                    ):
+                        reached.add(loc)
+                        item = self._item_at(loc, placements)
+                        if item:
+                            items[item] += 1
+                        changed = True
+                for target, req in (*region.exits.items(), *self.global_exits.items()):
+                    if target not in seen and evaluate(req, items, events, age, options):
+                        seen.add(target)
+                        frontier.append(target)
+                        changed = True
+            return changed
+
+        def start_age_frozen() -> bool:
+            # After the other age has been entered, the start age cannot grow until time_travel_back.
+            return (self.time_travel_back is not None and bool(regions[other_age])
+                    and self.time_travel_back not in events)
+
         changed = True
         while changed:
             changed = False
-            ages = [self.start_age]
-            if self.time_travel and self.time_travel in events:
-                ages.append(other_age)
-            for age in ages:
-                seen = regions[age]
-                if not seen:
-                    seen.add(self.spawns[age])
-                frontier = list(seen)
-                while frontier:
-                    region = self.regions[frontier.pop()]
-                    for name, req in region.events.items():
-                        if name not in events and evaluate(req, items, events, age, options):
-                            events.add(name)
-                            changed = True
-                    for loc, req in region.locations.items():
-                        extra = self.extra_requirements.get(loc)
-                        if loc not in reached and evaluate(req, items, events, age, options) and (
-                            extra is None or evaluate(extra, items, events, age, options)
-                        ):
-                            reached.add(loc)
-                            item = self._item_at(loc, placements)
-                            if item:
-                                items[item] += 1
-                            changed = True
-                    for target, req in (*region.exits.items(), *self.global_exits.items()):
-                        if target not in seen and evaluate(req, items, events, age, options):
-                            seen.add(target)
-                            frontier.append(target)
-                            changed = True
+            # The start age is swept to a fixpoint before the other age, so everything reachable
+            # before time travel is counted before any item from the other age is.
+            if not start_age_frozen() and sweep(self.start_age):
+                changed = True
+            elif self.time_travel and self.time_travel in events and sweep(other_age):
+                changed = True
         return SearchResult(items, events, reached, regions)
 
     def goal_met(self, result: SearchResult, options: dict | None = None) -> bool:
@@ -671,6 +685,9 @@ def load_world(path: Path = DEFAULT_WORLD_PATH) -> World:
     time_travel = settings.get("time_travel")
     if time_travel and time_travel not in event_names:
         errors.append(f"settings.time_travel: undefined event {time_travel!r}")
+    time_travel_back = settings.get("time_travel_back")
+    if time_travel_back and time_travel_back not in event_names:
+        errors.append(f"settings.time_travel_back: undefined event {time_travel_back!r}")
 
     start_items: Counter = Counter()
     for name in settings.get("start_items", []):
@@ -700,6 +717,7 @@ def load_world(path: Path = DEFAULT_WORLD_PATH) -> World:
         helpers=helpers,
         global_exits=global_exits,
         key_locations=key_locations,
+        time_travel_back=time_travel_back,
     )
 
     dungeon_names = {r.dungeon_name for r in regions.values() if r.dungeon}

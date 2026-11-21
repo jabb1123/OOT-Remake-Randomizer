@@ -187,6 +187,43 @@ Done = "is_adult"
         self.assertIn("F2", res.locations)
 
 
+class TimeTravelBackTests(unittest.TestCase):
+    WORLD = """
+[settings]
+time_travel = "Time_Travel"
+time_travel_back = "Time_Travel_Back"
+goal = "true"
+[regions.Root.exits]
+Field = "true"
+[regions.Root.locations]
+C0 = "is_child"
+A1 = "is_adult"
+A2 = "is_adult"
+[regions.Root.events]
+Time_Travel = "is_child"
+Time_Travel_Back = "is_adult and Bow"
+[regions.Field.locations]
+C2 = "is_child and Hookshot"
+"""
+
+    def test_child_locations_stay_closed_until_time_travel_back(self):
+        world = _world(self.WORLD)
+        self.assertEqual(world.errors, [])
+        res = world.explore({"C0": "TBox_Rupee_Red", "A1": "Item_Hookshot", "A2": "TBox_Rupee_Red", "C2": "TBox_Rupee_Red"})
+        self.assertIn("A1", res.locations)
+        self.assertNotIn("C2", res.locations)
+
+    def test_child_locations_open_after_time_travel_back(self):
+        world = _world(self.WORLD)
+        res = world.explore({"C0": "TBox_Rupee_Red", "A1": "Item_Hookshot", "A2": "Item_Range_Bow", "C2": "TBox_Rupee_Red"})
+        self.assertIn("C2", res.locations)
+
+    def test_without_time_travel_back_child_grows_freely(self):
+        world = _world(self.WORLD.replace('time_travel_back = "Time_Travel_Back"\n', ""))
+        res = world.explore({"C0": "TBox_Rupee_Red", "A1": "Item_Hookshot", "A2": "TBox_Rupee_Red", "C2": "TBox_Rupee_Red"})
+        self.assertIn("C2", res.locations)
+
+
 @unittest.skipUnless(load_default_slots(), "chest_locations_summary.json not available")
 class TemplatePlanningTests(unittest.TestCase):
     @classmethod

@@ -77,7 +77,7 @@ EVENTS: dict[str, dict[str, str]] = {
     },
     "InsideJabuJabuBelly": {"Jabu_Jabu_Clear": "is_child and Boomerang"},
     "TempleOfTime": {
-        "Time_Travel": "is_child and can_play(Song_of_Time) and Deku_Tree_Clear and Dodongos_Cavern_Clear and Jabu_Jabu_Clear and Kokiris_Emerald and Goron_Ruby and Zora_Sapphire",
+        "Time_Travel": "is_child and (Fairy_Ocarina or Ocarina_of_Time) and Song_of_Time and Deku_Tree_Clear and Dodongos_Cavern_Clear and Jabu_Jabu_Clear and Kokiris_Emerald and Goron_Ruby and Zora_Sapphire",
     },
     "ForestTemple": {"Forest_Temple_Clear": "Bow"},
     "FireTemple": {"Fire_Temple_Clear": "Megaton_Hammer"},

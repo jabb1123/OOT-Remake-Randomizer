@@ -191,6 +191,50 @@ logic rows were removed with the slot. Two things are still unverified in game: 
 first-visit flow replays on a later talk (the Medium grant would then repeat, because the
 randomized Medium item never enters the pouch), and whether the Large bag can be given there at all.
 
+## Dampe's Graveyard race (approach talk)
+
+`MiniGame_DampeRace.bfevfl.zs` (`dampe_race.py`) normally takes a different talk path when the
+player already owns the Hookshot or Longshot. That path skips the first-race reward, so the
+randomized Hookshot slot could never be collected. `patch_dampe_race_approach` repoints the
+approach-talk pouch switches (`Event262`, `Event260`, `Event18`, `Event0`, `Event61`) at their
+not-owned branch. Every player then takes the first-race talk path.
+
+The reward order comes from the race itself: `MiniGame_DampeRace_ClearCount` 0 gives the
+Hookshot slot (the randomized static room item), 1 gives the heart piece, and 2 or more give
+rupees. The post-race pouch switches (`Event442`, `Event443`, `Event444`) are left vanilla.
+Forcing them could skip the ClearCount increment or change the retry dialogue.
+
+Unverified in game: the approach talk on a player with the Hookshot already, and the heart piece
+on the second race.
+
+## Windmill Song of Storms (Npc_Hylia_009_Adult)
+
+`Npc_Hylia_009_Adult.bfevfl.zs` (`storm_song_npc.py`) awards the storm song slot through
+`Dm_MelodyGet_Storm`. Its talk gate (`Event9`) and ocarina gates (`Event17`, `Event69`) read the pouch
+(`IsGet.Item_Melody_StormSong`). If the song came from another location, the pouch already has it,
+so the award never runs. The patch points those three gates at
+`KakarikoVillage_Npc_Hylia_009_OcarinaStormSong_PlayedFront` instead. The award flow sets that flag
+at its end (`After_GetStormSong` → `Event80`), so the award runs once. Case mapping is unchanged.
+
+`Event31` (the balloon text) still reads the pouch. Only its wording is affected.
+
+## Sheik return to child (AllSage)
+
+`AllSage.bfevfl.zs` (`sheik_medal_gate.py`) gates Sheik's return to child on the
+`AllSage_AwakeSage_Fire_Or_Forest` flag through the `MeetSheik_And_Gone` entry (`Event178`). The
+vanilla flag is set only by the Fire and Forest medal flows. If either medal was randomized elsewhere,
+the flag is never set and Sheik blocks a return to child that the logic allows.
+
+The patch keeps that flag check (case 0 still goes to `Event181`). On false it runs a chain of five
+pouch queries (`PouchSystemActor.EventQueryIsExistInPouch`) for `Item_Medal_Forest`, `Fire`, `Water`,
+`Shadow`, and `Spirit`, in that order. Any held medal goes to `Event181`, which sets
+`AllSage_MeetSheik_And_Gone`. The Light medal is not checked, because the first trip to adulthood
+always gives it. The check mirrors the logic `Time_Travel_Back` (`is_adult and (has_two_medals or
+Forest_Temple_Clear or Fire_Temple_Clear)`). The new check events are named `MedalCheck_<Medal>`.
+
+Unverified in game: the chain's timing on the sage melody flows, and that the held medal is in the
+pouch when `Event178` runs.
+
 ## Options
 
 - Planner pool group `npc`, `PlanOptions.shuffle_npc_items` (default `True`).
