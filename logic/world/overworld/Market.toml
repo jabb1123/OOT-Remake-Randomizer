@@ -19,7 +19,7 @@
 "MiniGame_BombchuBowling: Obj_Heart_Piece (npc item)" = "Bomb_Bag and moving_time and Dodongos_Cavern_Clear"
 # Shooting gallery as child: the 2nd bullet bag upgrade. The flow always pays this slot out
 # (npc_grants.PROGRESSIVE_BRANCHES), so the Medium bag is not needed first.
-"MiniGame_HitTarget: Item_BulletBag_Large (npc item)" = "is_child and Slingshot"
+"MiniGame_HitTarget: Item_BulletBag_Large (npc item)" = "is_child"
 "SubEvent_FindRichard: Obj_Heart_Piece (npc item)" = "is_child and moving_time"
 
 [regions."Bazaar".locations]
