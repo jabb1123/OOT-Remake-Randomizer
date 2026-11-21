@@ -30,6 +30,9 @@ def build_parser() -> argparse.ArgumentParser:
     rand.add_argument("--no-skull-shuffle", action="store_true",
                       help="Keep the vanilla House of Skulltula rewards")
     rand.add_argument("--output", default=None, help="Output ROM copy path; original is never modified")
+    rand.add_argument("--mod-dir", default=None,
+                      help="Write a loose-file RomFS mod folder into this directory instead of a ROM copy "
+                           "(e.g. Lichii's load\\0400486024DEC000 folder)")
     rand.add_argument("--logic-file", default=None,
                       help="World logic: a TOML file or a directory of them (default: logic/world/)")
     rand.add_argument("--no-logic", action="store_true", help="Skip the completability check")
@@ -75,7 +78,7 @@ def _cmd_randomize(args: argparse.Namespace) -> None:
         shuffle_npc_items=not args.no_npc_items,
         shuffle_skull_rewards=not args.no_skull_shuffle,
         output_path=args.output,
-        use_logic=not args.no_logic,
+        mod_dir=args.mod_dir,
         logic_file=args.logic_file,
         all_locations_reachable=not args.goal_only,
         bombchus_in_logic=not args.no_bombchus_in_logic,

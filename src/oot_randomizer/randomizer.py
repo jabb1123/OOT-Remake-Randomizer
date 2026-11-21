@@ -3,7 +3,8 @@ from __future__ import annotations
 import json
 import random
 import shutil
-from dataclasses import dataclass, asdict
+import tempfile
+from dataclasses import dataclass, asdict, replace as dataclass_replace
 from pathlib import Path
 
 from .config import RandomizerConfig
@@ -12,6 +13,7 @@ from .event_items import EVENT_SLOTS, event_location_name
 from .heart_pickups import FIRE_ARROW_ITEM, FIRE_ARROW_LOCATIONS, HEART_SLOTS, heart_actor_name
 from .npc_grants import NPC_SLOTS
 from .logic import LogicEngine
+from .nup_mod_export import export_mod
 from .nup_parser import parse_nup_header, NupHeader
 from .oot_data import DUNGEON_ITEMS, GOAL_PRESETS, LOGIC_PRESETS, MAJOR_ITEMS
 from .patcher import RomPatcher, _legacy_item_id
@@ -140,8 +142,36 @@ class OOTRandomizer:
         spoiler_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
         return spoiler_path
 
+    def _export_mod(self, source_path: Path) -> RandomizationResult:
+        """Randomize a scratch copy, then keep only the changed RomFS files as a mod folder."""
+        mod_root = Path(self.config.mod_dir)
+        mod_root.mkdir(parents=True, exist_ok=True)
+        # The scratch copy sits next to the source ROM so it lands on a disk with room for it.
+        with tempfile.TemporaryDirectory(prefix=".rando_tmp_", dir=source_path.parent) as scratch:
+            scratch_nup = Path(scratch) / f"{source_path.stem}_randomized{source_path.suffix or '.nup'}"
+            inner = dataclass_replace(self.config, mod_dir=None, output_path=str(scratch_nup))
+            result = OOTRandomizer(inner).randomize(str(source_path))
+            mod_dir = mod_root / f"{source_path.stem}_seed{result.seed}"
+            export_mod(source_path, scratch_nup, mod_dir)
+            sidecars = [
+                Path(result.manifest_path),
+                Path(result.patch_manifest_path),
+                scratch_nup.with_suffix(".spoiler.txt"),
+            ]
+            for sidecar in sidecars:
+                shutil.copy2(sidecar, mod_dir / sidecar.name)
+        return dataclass_replace(
+            result,
+            output_path=str(mod_dir),
+            manifest_path=str(mod_dir / Path(result.manifest_path).name),
+            patch_manifest_path=str(mod_dir / Path(result.patch_manifest_path).name),
+            status="mod-exported",
+        )
+
     def randomize(self, rom_path: str) -> RandomizationResult:
         info = validate_nup_rom(rom_path)
+        if self.config.mod_dir:
+            return self._export_mod(Path(info.path))
 
         if self.config.seed == 0:
             seed = random.SystemRandom().randrange(1, 2**31 - 1)

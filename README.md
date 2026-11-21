@@ -41,6 +41,14 @@ pip install -e .
 oot-randomizer --rom "/path/to/The Legend of Zelda Ocarina of Time   U2.0.0.nup" --seed 12345
 ```
 
+## Loose-file mod export
+
+`--mod-dir DIR` skips writing a full patched ROM. It randomizes a scratch copy, then writes only the changed or new RomFS files to `DIR/<stem>_seed<N>/romfs/`, with the manifest, patch manifest, and spoiler log beside them. To load it in Eden/Lichii, copy that folder into the game's mod folder, `load\0400486024DEC000\`. The loose files override the base game files at the same paths. Paths in the mod are relative to the package RomFS root.
+
+```bash
+oot-randomizer --rom "/path/to/The Legend of Zelda Ocarina of Time   U2.0.0.nup" --seed 12345 --mod-dir "/path/to/mods"
+```
+
 ## World logic
 
 Placement logic lives in `logic/world/`, one TOML file per area:

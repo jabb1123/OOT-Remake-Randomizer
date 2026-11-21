@@ -40,6 +40,7 @@ from .skulltula_rewards import SKULL_FLOW, SKULL_REWARDS, patch_skull_rewards
 from .stone_gates import (
     POUCH_ADD_FLOWS,
     POUCH_ADD_SUBFLOW,
+    STONE_CHECK_FLOW_FILE,
     STONE_GATE_FLOWS,
     STONE_SLOT_FLOWS,
     add_stone_count_check,
@@ -349,16 +350,19 @@ class RomPatcher:
                         applied += 1
                     except NupPatchError:
                         pass
+                # The check is copied into each flow that calls it, so it runs inside that flow. It is read
+                # after the gates are patched so the copies include the gate changes.
+                door_check = patcher.read_file(STONE_CHECK_FLOW_FILE)
                 # A stone can be granted from any stone slot, so each grant rechecks the Door of Time.
                 for flow_file in STONE_SLOT_FLOWS:
-                    patcher.replace_file(flow_file, add_stone_count_check)
+                    patcher.replace_file(flow_file, lambda data: add_stone_count_check(data, door_check))
                     applied += 1
                 # Chests, hearts, and NPC grants pass through the shared pouch add, so a stone from any
                 # of them rechecks the Door of Time too.
                 for flow_file in POUCH_ADD_FLOWS:
                     patcher.replace_file(
                         flow_file,
-                        lambda data: add_stone_count_check_at_route_end(data, POUCH_ADD_SUBFLOW),
+                        lambda data: add_stone_count_check_at_route_end(data, door_check, POUCH_ADD_SUBFLOW),
                     )
                     applied += 1
             if shop_actors or din_randomized:

@@ -8,12 +8,14 @@ Epona check asks for the ocarina.
 
 from __future__ import annotations
 
+from copy import deepcopy
 import io
 
 from evfl import EventFlow
 from evfl.actor import Actor
 from evfl.common import ActorIdentifier, StringHolder
-from evfl.event import ActionEvent, SwitchEvent
+from evfl.event import ActionEvent, Event, SubFlowEvent, SwitchEvent
+from evfl.util import RequiredIndex, make_index, make_rindex
 
 STONE_BOOL_ITEMS: dict[str, str] = {
     "Get_StoneOfForest_IsCompleted_Exp": "Item_Stone_Forest",
@@ -81,90 +83,155 @@ POUCH_ADD_FLOWS: tuple[str, ...] = ("Dm_SY_Get.bfevfl.zs",)
 POUCH_ADD_SUBFLOW = "PouchAddItem"
 _STONE_CHECK_FLOW = "DoorOfTime"
 _STONE_CHECK_ENTRY = "DoorOfTime_CheckStoneNum"
-_STONE_CHECK_FLOW_FILE = "DoorOfTime.bfevfl.zs"
+STONE_CHECK_FLOW_FILE = "DoorOfTime.bfevfl.zs"
+# Prefix on the check's events once copied into a calling flow.
+_INLINE_PREFIX = "StoneCheck_"
 
 
-def add_stone_count_check(data: bytes, grant_subflow: str = _STONE_GRANT_SUBFLOW) -> bytes:
-    """Run DoorOfTime_CheckStoneNum right after a pouch grant sub-flow.
-
-    The Door of Time only recounts stones when Zora's Fountain is left, so this call runs after
-    each grant instead. It is inserted after the `grant_subflow` sub-flow, so the item is already
-    in the pouch. The check's own stone gates decide whether any progress happens. Returns the
-    input unchanged when the call is already present. Raises ValueError unless the flow has
-    exactly one grant.
-    """
-    from evfl.event import Event, SubFlowEvent
-    from evfl.util import make_index
-
+def _read_flow(data: bytes) -> EventFlow:
     flow = EventFlow()
     flow.read(data)
-    events = flow.flowchart.events
-    if any(
-        isinstance(e.data, SubFlowEvent) and e.data.entry_point_name == _STONE_CHECK_ENTRY
-        for e in events
-    ):
-        return data
-    grants = [
-        e for e in events
-        if isinstance(e.data, SubFlowEvent) and e.data.entry_point_name == grant_subflow
-    ]
-    if len(grants) != 1 or grants[0].data.nxt.v is None:
-        raise ValueError(f"flow has {len(grants)} {grant_subflow} grants, expected 1")
-    grant = grants[0]
+    return flow
 
-    node = SubFlowEvent()
-    node.res_flowchart_name = _STONE_CHECK_FLOW
-    node.entry_point_name = _STONE_CHECK_ENTRY
-    node.nxt = make_index(grant.data.nxt.v)
-    new_event = Event()
-    new_event.name = f"AutoEvent_{_STONE_CHECK_ENTRY}_after_{grant.name}"
-    new_event.data = node
-    grant.data.nxt = make_index(new_event)
-    events.append(new_event)
+
+def _write_flow(flow: EventFlow) -> bytes:
     out = io.BytesIO()
     flow.write(out)
     return out.getvalue()
 
 
-def add_stone_count_check_at_route_end(data: bytes, grant_subflow: str = POUCH_ADD_SUBFLOW) -> bytes:
-    """Run DoorOfTime_CheckStoneNum after the grant's get-item route has finished.
+def _has_inline_check(flow: EventFlow) -> bool:
+    return any(e.name.startswith(_INLINE_PREFIX) for e in flow.flowchart.events)
 
-    Calling the check straight after the grant cuts into the get-item presentation that follows it.
-    This instead walks the events after the grant and points each exit of that route at the check,
-    so the check runs last. Returns the input unchanged when the call is already present. Raises
-    ValueError unless the flow has exactly one grant and the route after it is simple.
 
-    A switch whose only case is 0 is a bool query, so its missing case 1 is the false exit and
-    also ends the route.
-    """
-    from evfl.event import ActionEvent, Event, SubFlowEvent, SwitchEvent
-    from evfl.util import RequiredIndex, make_index
-
-    flow = EventFlow()
-    flow.read(data)
-    events = flow.flowchart.events
-    if any(
-        isinstance(e.data, SubFlowEvent) and e.data.entry_point_name == _STONE_CHECK_ENTRY
-        for e in events
-    ):
-        return data
+def _single_grant(flow: EventFlow, grant_subflow: str) -> Event:
     grants = [
-        e for e in events
+        e for e in flow.flowchart.events
         if isinstance(e.data, SubFlowEvent) and e.data.entry_point_name == grant_subflow
     ]
     if len(grants) != 1 or grants[0].data.nxt.v is None:
         raise ValueError(f"flow has {len(grants)} {grant_subflow} grants, expected 1")
+    return grants[0]
 
-    node = SubFlowEvent()
-    node.res_flowchart_name = _STONE_CHECK_FLOW
-    node.entry_point_name = _STONE_CHECK_ENTRY
-    check = Event()
-    check.name = f"AutoEvent_{_STONE_CHECK_ENTRY}_at_end_of_{grants[0].name}"
-    check.data = node
+
+def _holder(holders: list[StringHolder], name: str) -> StringHolder:
+    for holder in holders:
+        if holder.v == name:
+            return holder
+    holder = StringHolder(name)
+    holders.append(holder)
+    return holder
+
+
+def _flow_actor(flow: EventFlow, src: Actor) -> Actor:
+    """Return the flow's actor for `src`, adding a copy of it when the flow does not have one."""
+    for actor in flow.flowchart.actors:
+        if actor.identifier.name == src.identifier.name:
+            return actor
+    actor = Actor()
+    actor.identifier = ActorIdentifier(src.identifier.name, src.identifier.sub_name)
+    actor.params = deepcopy(src.params)
+    actor.concurrent_clips = src.concurrent_clips
+    actor.actions = [StringHolder(h.v) for h in src.actions]
+    actor.queries = [StringHolder(h.v) for h in src.queries]
+    flow.flowchart.actors.append(actor)
+    return actor
+
+
+def _copy_check_into(flow: EventFlow, check: EventFlow, exit_to: Event | None) -> Event:
+    """Copy DoorOfTime_CheckStoneNum from `check` into `flow` and return the copied entry event.
+
+    The check runs inside the calling flow, so it no longer depends on a cross-file sub-flow. Its
+    exits continue to `exit_to`, or end the branch when `exit_to` is None.
+    """
+    entry = next(ep for ep in check.flowchart.entry_points if ep.name == _STONE_CHECK_ENTRY)
+    old_events: list[Event] = []
+    seen: set[int] = set()
+    stack = [entry.main_event.v]
+    while stack:
+        event = stack.pop()
+        if event is None or id(event) in seen:
+            continue
+        seen.add(id(event))
+        old_events.append(event)
+        body = event.data
+        if isinstance(body, ActionEvent):
+            stack.append(body.nxt.v)
+        elif isinstance(body, SwitchEvent):
+            stack.extend(case.v for case in body.cases.values())
+        else:
+            raise ValueError(f"unexpected {type(body).__name__} in {_STONE_CHECK_ENTRY}")
+
+    copies: dict[int, Event] = {}
+    for old in old_events:
+        new = Event()
+        new.name = f"{_INLINE_PREFIX}{old.name}"
+        copies[id(old)] = new
+
+    def target(event: Event | None) -> Event | None:
+        return exit_to if event is None else copies[id(event)]
+
+    for old in old_events:
+        body = old.data
+        actor = _flow_actor(flow, body.actor.v)
+        if isinstance(body, ActionEvent):
+            node = ActionEvent()
+            node.actor = make_rindex(actor)
+            node.actor_action = make_rindex(_holder(actor.actions, body.actor_action.v.v))
+            node.params = deepcopy(body.params)
+            node.nxt = make_index(target(body.nxt.v))
+        else:
+            node = SwitchEvent()
+            node.actor = make_rindex(actor)
+            node.actor_query = make_rindex(_holder(actor.queries, body.actor_query.v.v))
+            node.params = deepcopy(body.params)
+            node.cases = {case: make_rindex(copies[id(c.v)]) for case, c in body.cases.items()}
+        copies[id(old)].data = node
+        flow.flowchart.events.append(copies[id(old)])
+    return copies[id(entry.main_event.v)]
+
+
+def add_stone_count_check(data: bytes, check_data: bytes, grant_subflow: str = _STONE_GRANT_SUBFLOW) -> bytes:
+    """Run DoorOfTime_CheckStoneNum right after a pouch grant.
+
+    The Door of Time only recounts stones when Zora's Fountain is left, so this call runs after
+    each grant instead. The check is copied in after the grant, so the item is already in the
+    pouch. The check's own stone gates decide whether any progress happens. `check_data` is the
+    DoorOfTime flow to copy from. Returns the input unchanged when the check is already present.
+    Raises ValueError unless the flow has exactly one grant.
+    """
+    flow = _read_flow(data)
+    if _has_inline_check(flow):
+        return data
+    grant = _single_grant(flow, grant_subflow)
+    entry = _copy_check_into(flow, _read_flow(check_data), grant.data.nxt.v)
+    grant.data.nxt = make_index(entry)
+    return _write_flow(flow)
+
+
+def add_stone_count_check_at_route_end(
+    data: bytes, check_data: bytes, grant_subflow: str = POUCH_ADD_SUBFLOW
+) -> bytes:
+    """Run DoorOfTime_CheckStoneNum after the grant's get-item route has finished.
+
+    Calling the check straight after the grant cuts into the get-item presentation that follows it.
+    This instead walks the events after the grant and points each exit of that route at the copied
+    check, so the check runs last. `check_data` is the DoorOfTime flow to copy from. Returns the
+    input unchanged when the check is already present. Raises ValueError unless the flow has
+    exactly one grant and the route after it is simple.
+
+    A switch whose only case is 0 is a bool query, so its missing case 1 is the false exit and
+    also ends the route.
+    """
+    flow = _read_flow(data)
+    if _has_inline_check(flow):
+        return data
+    grant = _single_grant(flow, grant_subflow)
+    check = _copy_check_into(flow, _read_flow(check_data), None)
 
     exits = 0
     seen: set[int] = set()
-    stack = [grants[0].data.nxt.v]
+    stack = [grant.data.nxt.v]
     while stack:
         event = stack.pop()
         if id(event) in seen:
@@ -188,16 +255,13 @@ def add_stone_count_check_at_route_end(data: bytes, grant_subflow: str = POUCH_A
             raise ValueError(f"unexpected {type(body).__name__} after {grant_subflow}")
     if exits == 0:
         raise ValueError(f"no route exit after {grant_subflow}")
-    events.append(check)
-    out = io.BytesIO()
-    flow.write(out)
-    return out.getvalue()
+    return _write_flow(flow)
 
 
 # Diagnostic bools for the Door of Time stone check. The first is written on entry, and the others
-# are written before each progress branch, so a test ROM shows whether the check ran and which path
-# it took. False leaves the flow untouched.
-STONE_CHECK_DIAGNOSTICS = True
+# are written before each progress branch. These names are not registered in GameDataList, so a
+# write may stall the item-get flow. False leaves the flow untouched.
+STONE_CHECK_DIAGNOSTICS = False
 _DIAG_ENTRY_BOOL = "Rando_Diag_StoneCheck_Ran"
 # (event name in DoorOfTime, bool written before it)
 _DIAG_BRANCH_BOOLS: tuple[tuple[str, str], ...] = (
@@ -223,6 +287,32 @@ def _add_stone_check_diagnostics(flow: EventFlow) -> bool:
     return True
 
 
+# Vanilla shows the Door of Time progress window (Event171) after a step advances. The check only
+# advances on Step03 (Event37 -> Event77) and on Step2_1/Step2_2 (both -> Event5), so the window goes
+# before those exits. The "both stones" path (Event6) doesn't advance and gets no window.
+_PROGRESS_UI_ACTION = "EventTriggerShowChallengeProgressUI"
+_PROGRESS_UI_TARGETS = ("Event77", "Event5")
+
+
+def _add_stone_progress_ui(flow: EventFlow) -> bool:
+    from .game_flags import insert_action_before
+
+    events = {e.name: e for e in flow.flowchart.events}
+    added = False
+    for target in _PROGRESS_UI_TARGETS:
+        if f"AutoEvent_{_PROGRESS_UI_ACTION}_before_{target}" in events:
+            continue
+        insert_action_before(
+            flow.flowchart,
+            events[target],
+            "ChallengeSystemActor",
+            _PROGRESS_UI_ACTION,
+            {"ChallengeName": _STONE_CHECK_FLOW, "IsFirstStep": False},
+        )
+        added = True
+    return added
+
+
 def patch_stone_gates(data: bytes, flow_name: str) -> bytes:
     bools = STONE_GATE_FLOWS.get(flow_name)
     if not bools:
@@ -240,8 +330,10 @@ def patch_stone_gates(data: bytes, flow_name: str) -> bytes:
                 body.actor_query.v = _query(pouch, _POUCH_QUERY)
                 body.params.data = {"Actor": STONE_BOOL_ITEMS[stone_bool], "Num": 1}
             changed = True
-    if STONE_CHECK_DIAGNOSTICS and flow_name == _STONE_CHECK_FLOW_FILE:
+    if STONE_CHECK_DIAGNOSTICS and flow_name == STONE_CHECK_FLOW_FILE:
         changed = _add_stone_check_diagnostics(flow) or changed
+    if flow_name == STONE_CHECK_FLOW_FILE:
+        changed = _add_stone_progress_ui(flow) or changed
     if not changed:
         return data
     out = io.BytesIO()

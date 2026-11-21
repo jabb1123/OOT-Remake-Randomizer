@@ -25,6 +25,8 @@ class RandomizerConfig:
     shuffle_heart_pieces: bool = True
     skip_intro: bool = False
     output_path: str | None = None
+    # When set, write a loose-file RomFS mod folder into this directory instead of a ROM copy.
+    mod_dir: str | None = None
     item_pool_limit: int = 12
     dungeon_pool_limit: int = 6
 
