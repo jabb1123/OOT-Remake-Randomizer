@@ -125,6 +125,74 @@ def add_stone_count_check(data: bytes, grant_subflow: str = _STONE_GRANT_SUBFLOW
     return out.getvalue()
 
 
+def add_stone_count_check_at_route_end(data: bytes, grant_subflow: str = POUCH_ADD_SUBFLOW) -> bytes:
+    """Run DoorOfTime_CheckStoneNum after the grant's get-item route has finished.
+
+    Calling the check straight after the grant cuts into the get-item presentation that follows it.
+    This instead walks the events after the grant and points each exit of that route at the check,
+    so the check runs last. Returns the input unchanged when the call is already present. Raises
+    ValueError unless the flow has exactly one grant and the route after it is simple.
+
+    A switch whose only case is 0 is a bool query, so its missing case 1 is the false exit and
+    also ends the route.
+    """
+    from evfl.event import ActionEvent, Event, SubFlowEvent, SwitchEvent
+    from evfl.util import RequiredIndex, make_index
+
+    flow = EventFlow()
+    flow.read(data)
+    events = flow.flowchart.events
+    if any(
+        isinstance(e.data, SubFlowEvent) and e.data.entry_point_name == _STONE_CHECK_ENTRY
+        for e in events
+    ):
+        return data
+    grants = [
+        e for e in events
+        if isinstance(e.data, SubFlowEvent) and e.data.entry_point_name == grant_subflow
+    ]
+    if len(grants) != 1 or grants[0].data.nxt.v is None:
+        raise ValueError(f"flow has {len(grants)} {grant_subflow} grants, expected 1")
+
+    node = SubFlowEvent()
+    node.res_flowchart_name = _STONE_CHECK_FLOW
+    node.entry_point_name = _STONE_CHECK_ENTRY
+    check = Event()
+    check.name = f"AutoEvent_{_STONE_CHECK_ENTRY}_at_end_of_{grants[0].name}"
+    check.data = node
+
+    exits = 0
+    seen: set[int] = set()
+    stack = [grants[0].data.nxt.v]
+    while stack:
+        event = stack.pop()
+        if id(event) in seen:
+            continue
+        seen.add(id(event))
+        body = event.data
+        if isinstance(body, (ActionEvent, SubFlowEvent)):
+            if body.nxt.v is None:
+                body.nxt = make_index(check)
+                exits += 1
+            else:
+                stack.append(body.nxt.v)
+        elif isinstance(body, SwitchEvent):
+            stack.extend(target.v for target in body.cases.values())
+            if set(body.cases) == {0}:
+                false_exit = RequiredIndex()
+                false_exit.v = check
+                body.cases[1] = false_exit
+                exits += 1
+        else:
+            raise ValueError(f"unexpected {type(body).__name__} after {grant_subflow}")
+    if exits == 0:
+        raise ValueError(f"no route exit after {grant_subflow}")
+    events.append(check)
+    out = io.BytesIO()
+    flow.write(out)
+    return out.getvalue()
+
+
 def patch_stone_gates(data: bytes, flow_name: str) -> bytes:
     if not POUCH_STONE_GATES:
         return data

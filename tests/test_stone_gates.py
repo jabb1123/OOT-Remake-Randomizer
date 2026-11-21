@@ -4,7 +4,7 @@ from pathlib import Path
 from unittest import mock
 
 from evfl import EventFlow
-from evfl.event import SubFlowEvent, SwitchEvent
+from evfl.event import ActionEvent, SubFlowEvent, SwitchEvent
 
 from oot_randomizer import stone_gates
 from oot_randomizer.engine import load_default_slots
@@ -20,6 +20,7 @@ from oot_randomizer.stone_gates import (
     STONE_GATE_FLOWS,
     STONE_SLOT_FLOWS,
     add_stone_count_check,
+    add_stone_count_check_at_route_end,
     patch_stone_gates,
 )
 from oot_randomizer.world_logic import load_world
@@ -231,7 +232,7 @@ class StoneCountCheckTest(unittest.TestCase):
         ]
         self.assertEqual(grants, ["Item_Stone_Water"])
 
-    def test_pouch_add_calls_the_check_after_the_item_is_added(self):
+    def test_pouch_add_check_runs_at_the_end_of_the_get_route(self):
         path = RAW_DIR / "Dm_SY_Get.bfevfl"
         if not path.exists():
             self.skipTest("Dm_SY_Get not available")
@@ -241,14 +242,23 @@ class StoneCountCheckTest(unittest.TestCase):
             if isinstance(e.data, SubFlowEvent) and e.data.entry_point_name == POUCH_ADD_SUBFLOW
         )
         original_next = add.data.nxt.v.name
-        patched = _load(add_stone_count_check(raw, POUCH_ADD_SUBFLOW))
+        patched = _load(add_stone_count_check_at_route_end(raw, POUCH_ADD_SUBFLOW))
         checks = self._check_events(patched)
         self.assertEqual(len(checks), 1)
         after_add = next(e for e in patched.flowchart.events if e.name == add.name)
-        self.assertIs(after_add.data.nxt.v, checks[0])
-        self.assertEqual(checks[0].data.nxt.v.name, original_next)
-        once = add_stone_count_check(raw, POUCH_ADD_SUBFLOW)
-        self.assertIs(add_stone_count_check(once, POUCH_ADD_SUBFLOW), once)
+        self.assertEqual(after_add.data.nxt.v.name, original_next)
+        self.assertIsNone(checks[0].data.nxt.v)
+        exits = {
+            e.name for e in patched.flowchart.events
+            if isinstance(e.data, (ActionEvent, SubFlowEvent)) and e.data.nxt.v is checks[0]
+        } | {
+            e.name for e in patched.flowchart.events
+            if isinstance(e.data, SwitchEvent) and any(c.v is checks[0] for c in e.data.cases.values())
+        }
+        self.assertEqual(exits, {"Event183", "Event177"})
+        once = add_stone_count_check_at_route_end(raw, POUCH_ADD_SUBFLOW)
+        self.assertIs(add_stone_count_check_at_route_end(once, POUCH_ADD_SUBFLOW), once)
+
 
 
 if __name__ == "__main__":

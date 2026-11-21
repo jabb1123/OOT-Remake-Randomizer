@@ -43,6 +43,7 @@ from .stone_gates import (
     STONE_GATE_FLOWS,
     STONE_SLOT_FLOWS,
     add_stone_count_check,
+    add_stone_count_check_at_route_end,
     patch_stone_gates,
 )
 from .songs import OCARINA_LEARN_FLOW, SONG_SLOTS, patch_bfevfl_song, patch_bfevfl_songs
@@ -357,7 +358,7 @@ class RomPatcher:
                 for flow_file in POUCH_ADD_FLOWS:
                     patcher.replace_file(
                         flow_file,
-                        lambda data: add_stone_count_check(data, POUCH_ADD_SUBFLOW),
+                        lambda data: add_stone_count_check_at_route_end(data, POUCH_ADD_SUBFLOW),
                     )
                     applied += 1
             if shop_actors or din_randomized:
