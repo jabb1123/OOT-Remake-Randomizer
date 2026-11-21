@@ -78,5 +78,6 @@ Progression items prefer their own group's locations and fall back to chests. Ch
 - **Slot identity depends on scan order.** The `#k` in a slot name counts duplicate room and drop pairs in scan order. Regenerating the summary with a different order can renumber slots, and existing logic entries would then point at the wrong chest.
 - **Child and Adult copies must change together.** A slot has several targets for this reason.
 - **The patch changes file size.** New drop strings go into the BYML string table, so the RESTBL sizes and TOC must be updated, not just the bytes at one offset.
-- **Dynamic nodes can be shared.** `dynamic_offset` may be shared between actors, so do not edit it per chest.
+- **Dynamic nodes can be shared.** `dynamic_offset` may be shared between actors, so do not edit it per chest. A swapped chest gets its own copy of the Dynamic hash (`_dynamic_hash_for_swap`).
+- **Owned-item substitutes.** Some shield chests (`Obj_TBox_A_06`, e.g. Graveyard's Hylian Shield) carry `Drop__CheckActor` and `Drop__DropActor_Substitute` in their Dynamic node. If the player already owns the check item, the game gives the substitute (a rupee) instead of the drop. The swapped copy drops both keys, so the randomized item is always given.
 - **Unknown drops are skipped.** Chests with no room index or no drop name are ignored by `load_chest_slots`.

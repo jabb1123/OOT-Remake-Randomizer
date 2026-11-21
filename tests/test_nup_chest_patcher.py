@@ -7,6 +7,7 @@ from pathlib import Path
 from oot_randomizer.nup_chest_patcher import (
     NupChestPatcher,
     _detect_dict_id,
+    _dynamic_hash_for_swap,
     _walk_byml_chests,
 )
 
@@ -83,6 +84,44 @@ class WalkBymlChestsTests(unittest.TestCase):
         a = _walk_byml_chests(data)
         b = _walk_byml_chests(data)
         self.assertEqual([c.vanilla_drop for c in a], [c.vanilla_drop for c in b])
+
+
+class DynamicHashForSwapTests(unittest.TestCase):
+    """The swapped chest copy must drop the game's owned-substitute keys and give the new drop."""
+
+    KEYS = ["Drop__CheckActor", "Drop__DropActor", "Drop__DropActor_Substitute", "DefaultDungeonRoomIndex"]
+
+    @staticmethod
+    def _entry(key: int, typ: int, value: int) -> bytes:
+        return key.to_bytes(3, "little") + bytes([typ]) + struct.pack("<I", value)
+
+    def _hash_blob(self) -> bytes:
+        entries = (
+            self._entry(0, 0xA0, 5)    # Drop__CheckActor -> str 5
+            + self._entry(1, 0xA0, 7)  # Drop__DropActor -> str 7
+            + self._entry(2, 0xA0, 8)  # Drop__DropActor_Substitute -> str 8
+            + self._entry(3, 0xD1, 3)  # DefaultDungeonRoomIndex = 3
+        )
+        return b"\x00" * 16 + bytes([0xC1]) + (4).to_bytes(3, "little") + entries
+
+    def test_removes_owned_substitute_keys_and_keeps_others(self):
+        blob = self._hash_blob()
+        out = _dynamic_hash_for_swap(blob, 16, self.KEYS, 99)
+        self.assertEqual(out[0], 0xC1)
+        self.assertEqual(int.from_bytes(out[1:4], "little"), 2)
+        kept = [self.KEYS[int.from_bytes(out[4 + i * 8:7 + i * 8], "little")] for i in range(2)]
+        self.assertEqual(kept, ["Drop__DropActor", "DefaultDungeonRoomIndex"])
+
+    def test_sets_new_drop_index_and_keeps_room(self):
+        out = _dynamic_hash_for_swap(self._hash_blob(), 16, self.KEYS, 99)
+        self.assertEqual(struct.unpack_from("<I", out, 4 + 4)[0], 99)
+        self.assertEqual(struct.unpack_from("<I", out, 12 + 4)[0], 3)
+
+    def test_source_hash_is_not_modified(self):
+        blob = self._hash_blob()
+        before = bytes(blob)
+        _dynamic_hash_for_swap(blob, 16, self.KEYS, 99)
+        self.assertEqual(bytes(blob), before)
 
 
 class NupChestPatcherIntegrationTests(unittest.TestCase):

@@ -147,6 +147,28 @@ class ChestEntry:
     dynamic_offset: int = -1      # offset of the Dynamic hash node (may be shared between actors)
 
 
+# The game hands out Drop__DropActor_Substitute instead of the drop when the player already owns
+# Drop__CheckActor. Swapped chests must always give the randomized drop, so these keys are removed.
+_OWNED_SUBSTITUTE_KEYS = ("Drop__CheckActor", "Drop__DropActor_Substitute")
+
+
+def _dynamic_hash_for_swap(byml: bytes | bytearray, dyn_off: int, key_names: list[str],
+                           new_drop_idx: int) -> bytes:
+    """Return a copy of a Dynamic hash that drops new_drop_idx and has no owned-substitute keys."""
+    count = int.from_bytes(byml[dyn_off + 1:dyn_off + 4], "little")
+    kept: list[bytes] = []
+    for i in range(count):
+        entry = bytearray(byml[dyn_off + 4 + i * 8:dyn_off + 12 + i * 8])
+        name = key_names[int.from_bytes(entry[0:3], "little")]
+        if name in _OWNED_SUBSTITUTE_KEYS:
+            continue
+        if name == "Drop__DropActor":
+            struct.pack_into("<I", entry, 4, new_drop_idx)
+        kept.append(bytes(entry))
+    header = bytes([byml[dyn_off]]) + len(kept).to_bytes(3, "little")
+    return header + b"".join(kept)
+
+
 def _walk_byml_chests(byml: bytes) -> list[ChestEntry]:
     """Scan a BYML v7 LE file and return every Obj_TBox chest actor."""
     if byml[:2] != b"YB":
@@ -698,6 +720,7 @@ class NupChestPatcher:
             return result
 
         str_table = read_str_arr(st_off)
+        hash_key_names = read_str_arr(hk_off)
         wanted = list(swap_map.values()) + [
             str(t["replacement_item"]) for t in target_entries if t.get("replacement_item")
         ]
@@ -741,13 +764,11 @@ class NupChestPatcher:
                 )
             new_idx = str_to_idx[replacement]
             # The BYML writer dedupes identical Dynamic hashes, so give this chest its own copy.
-            dyn_size = 4 + int.from_bytes(byml[chest.dynamic_offset + 1:chest.dynamic_offset + 4], "little") * 8
             while len(byml) % 4:
                 byml.append(0)
             clone_off = len(byml)
-            byml += byml[chest.dynamic_offset:chest.dynamic_offset + dyn_size]
+            byml += _dynamic_hash_for_swap(byml, chest.dynamic_offset, hash_key_names, new_idx)
             struct.pack_into("<I", byml, chest.dynamic_ptr_offset, clone_off)
-            struct.pack_into("<I", byml, clone_off + (chest.byml_val_offset - chest.dynamic_offset), new_idx)
             swaps_applied.append({
                 "chest": chest.gyaml,
                 "room": chest.room_index,
