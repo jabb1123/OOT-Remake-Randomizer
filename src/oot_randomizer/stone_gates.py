@@ -23,7 +23,7 @@ STONE_BOOL_ITEMS: dict[str, str] = {
 
 # Diagnostic switch. False leaves the original Get_StoneOf*_IsCompleted_Exp gates untouched in the
 # flows, so the vanilla bool checks are back in effect. True converts them to pouch queries.
-POUCH_STONE_GATES = False
+POUCH_STONE_GATES = True
 
 # flow file name -> stone bools whose gates in that flow are converted
 STONE_GATE_FLOWS: dict[str, frozenset[str]] = {
