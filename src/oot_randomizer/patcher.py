@@ -24,8 +24,15 @@ from .event_items import EVENT_SLOTS, patch_event_item
 from .dampe_race import DAMPE_RACE_FLOW, patch_dampe_race_approach
 from .storm_song_npc import STORM_NPC_FLOW, patch_storm_song_npc
 from .sheik_medal_gate import ALLSAGE_FLOW, patch_sheik_medal_gate
+from .medal_progress import (
+    GET_IN_EVENT_FLOW,
+    GET_POUCH_CONTENT_FLOW,
+    add_medal_progress_after_pouch_adds,
+    add_medal_progress_after_shop_purchase,
+)
+from .sage_escape_flow import ESCAPE_FLOW, patch_escape_sage_completes
 from .npc_grants import (
-    DIN_FAIRY_FLOW,
+    FAIRY_FLOWS,
     NPC_SLOTS,
     REROUTED_FLOWS,
     SCRUB_BIGGORON_FLOW,
@@ -33,7 +40,7 @@ from .npc_grants import (
     add_slingshot_bag,
     disable_scrub_biggoron_sale,
     fix_progressive_branches,
-    patch_din_fairy_received,
+    patch_fairy_received,
     patch_npc_grants,
 )
 from .item_ids import resolve_actor_name
@@ -326,11 +333,13 @@ class RomPatcher:
             for flow_file, changes in npc_changes.items():
                 patcher.replace_file(flow_file, lambda data, c=changes: patch_npc_grants(data, c))
                 applied += 1
-            din_randomized = DIN_FAIRY_FLOW in npc_changes
-            if din_randomized:
-                # The fairy's "already received" check must follow the randomized grant, not Din's Fire.
-                patcher.replace_file(DIN_FAIRY_FLOW, patch_din_fairy_received)
-                applied += 1
+            fairy_randomized = False
+            for fairy in FAIRY_FLOWS:
+                if fairy.flow in npc_changes:
+                    # The fairy's "already received" check must follow the randomized grant, not the vanilla item.
+                    patcher.replace_file(fairy.flow, lambda data, f=fairy: patch_fairy_received(data, f))
+                    applied += 1
+                    fairy_randomized = True
             if npc_assignments:
                 # The Biggoron Sword is only obtainable from its randomized location, so the scrub's sale is removed.
                 patcher.replace_file(SCRUB_BIGGORON_FLOW, disable_scrub_biggoron_sale)
@@ -362,6 +371,19 @@ class RomPatcher:
                 applied += 1
             except NupPatchError:
                 pass
+            # AllSage follows the number of dungeon medals held. Temple exits no longer finish a sage or set
+            # AllSage, so each sage's own quest keeps its drops.
+            try:
+                patcher.replace_file(ESCAPE_FLOW, patch_escape_sage_completes)
+                applied += 1
+            except NupPatchError:
+                pass
+            for flow_file in (GET_POUCH_CONTENT_FLOW, GET_IN_EVENT_FLOW):
+                try:
+                    patcher.replace_file(flow_file, add_medal_progress_after_pouch_adds)
+                    applied += 1
+                except NupPatchError:
+                    pass
             if event_assignments:
                 for flow_file in STONE_GATE_FLOWS:
                     try:
@@ -387,10 +409,10 @@ class RomPatcher:
                         lambda data: add_stone_count_check_at_route_end(data, door_check, POUCH_ADD_SUBFLOW),
                     )
                     applied += 1
-            if shop_actors or din_randomized:
+            if shop_actors or fairy_randomized:
                 patcher.replace_file(
                     GAME_DATA_LIST,
-                    lambda data: patch_gamedata_list(data, shop=bool(shop_actors), npc_grant=din_randomized),
+                    lambda data: patch_gamedata_list(data, shop=bool(shop_actors), npc_grant=fairy_randomized),
                 )
             if shop_actors:
                 # Combine all DisplayShop edits in one transform. The bag gate reroutes the
@@ -403,7 +425,7 @@ class RomPatcher:
                         data = add_shop_slingshot_bag(data)
                     if event_assignments:
                         data = add_shop_stone_count_check(data, door_check)
-                    return data
+                    return add_medal_progress_after_shop_purchase(data)
 
                 patcher.replace_file(DISPLAY_SHOP_FLOW, display_shop)
                 applied += 1

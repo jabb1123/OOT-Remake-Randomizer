@@ -17,7 +17,14 @@ import random
 from dataclasses import dataclass
 
 from .game_flags import insert_bool_write_before, insert_pouch_add_before
-from .gamedata_list import DIN_FAIRY_RECEIVED_BOOL
+from .gamedata_list import (
+    COURAGE_FAIRY_RECEIVED_BOOL,
+    DIN_FAIRY_RECEIVED_BOOL,
+    FRORE_FAIRY_RECEIVED_BOOL,
+    NAYRU_FAIRY_RECEIVED_BOOL,
+    POWER_FAIRY_RECEIVED_BOOL,
+    WISDOM_FAIRY_RECEIVED_BOOL,
+)
 
 _HAND_OVER_SUBFLOW = frozenset(
     {
@@ -406,67 +413,92 @@ def fix_progressive_branches(data: bytes, flow_file: str) -> bytes:
     return out.getvalue()
 
 
+@dataclass(frozen=True)
+class FairyFlow:
+    flow: str  # fairy flow file
+    switch: str  # IsGet switch that decides whether the first-meeting offer runs
+    old_flag: str  # vanilla IsGet.* flag that the switch reads
+    offer: str  # SubFlowEvent that runs the first-meeting offer, which plays C15-01 and reaches the grant
+    grant: str  # SubFlowEvent GetInEvent_* that gives the randomized item
+    received_bool: str  # set when the fairy hands over its item (gamedata_list.NPC_GRANT_BOOL_NAMES)
+
+
 DIN_FAIRY_FLOW = "Dm_FairyFountain_Din.bfevfl.zs"
-_DIN_RECEIVED_SWITCH = "Event78"  # SwitchEvent: owned Din's Fire -> skip the 25-rupee offer
-_DIN_OLD_FLAG = "IsGet.Item_DinFire"
-_DIN_GRANT = "Event212"  # SubFlowEvent GetInEvent_GreatFairyDin, which gives the randomized item
-_DIN_FIRST_TIME = (
-    "Event334"  # SubFlowEvent FirstTime, the only path that offers the 25-rupee deal
+# Each fairy's switch is at the IsGet check after HavePlayedEvent. Case 0 means "not received". Din has
+# no HavePlayedEvent switch, so its offer is its FirstTime subflow.
+FAIRY_FLOWS: tuple[FairyFlow, ...] = (
+    FairyFlow(DIN_FAIRY_FLOW, "Event78", "IsGet.Item_DinFire", "Event334", "Event212", DIN_FAIRY_RECEIVED_BOOL),
+    FairyFlow(
+        "Dm_FairyFountain_Frore.bfevfl.zs", "Event11", "IsGet.Item_FaroreWind",
+        "Event14", "Event174", FRORE_FAIRY_RECEIVED_BOOL,
+    ),
+    FairyFlow(
+        "Dm_FairyFountain_Nayru.bfevfl.zs", "Event10", "IsGet.Item_NayruLove",
+        "Event12", "Event163", NAYRU_FAIRY_RECEIVED_BOOL,
+    ),
+    FairyFlow(
+        "Dm_FairyFountain_Power.bfevfl.zs", "Event11", "IsGet.Item_FairyBless_MP",
+        "Event19", "Event141", POWER_FAIRY_RECEIVED_BOOL,
+    ),
+    FairyFlow(
+        "Dm_FairyFountain_Wisdom.bfevfl.zs", "Event10", "IsGet.Item_FairyBless_MPDouble",
+        "Event12", "Event144", WISDOM_FAIRY_RECEIVED_BOOL,
+    ),
+    FairyFlow(
+        "Dm_FairyFountain_Courage.bfevfl.zs", "Event11", "IsGet.Item_FairyBless_DefenseDouble",
+        "Event13", "Event144", COURAGE_FAIRY_RECEIVED_BOOL,
+    ),
 )
 
 
-def patch_din_fairy_received(data: bytes) -> bytes:
-    """Make the Din's Fire fairy's "already received" check follow the randomized grant.
+def patch_fairy_received(data: bytes, fairy: FairyFlow) -> bytes:
+    """Make a great fairy's "already received" check follow its randomized grant.
 
-    The fairy's switch reads IsGet.Item_DinFire, which only reflects the vanilla item. This repoints
-    the switch at DIN_FAIRY_RECEIVED_BOOL and sets that bool right before the grant. Returns the
-    input unchanged when already patched. Raises ValueError if the flow does not have the expected shape.
+    The fairy's switch reads its vanilla IsGet.* flag, which only reflects the vanilla item. This
+    repoints the switch at the fairy's received bool, sends "not received" through the first-meeting
+    offer, and sets the bool (and the vanilla flag, so other IsGet readers follow the grant) right
+    before the grant. Returns the input unchanged when already patched. Raises ValueError if the flow
+    does not have the expected shape.
     """
     from evfl import EventFlow
     from evfl.event import ActionEvent, SubFlowEvent, SwitchEvent
+    from evfl.util import make_index
 
     flow = EventFlow()
     flow.read(data)
     by_name = {event.name: event for event in flow.flowchart.events}
-    switch, grant = by_name.get(_DIN_RECEIVED_SWITCH), by_name.get(_DIN_GRANT)
+    switch, offer, grant = by_name.get(fairy.switch), by_name.get(fairy.offer), by_name.get(fairy.grant)
     if switch is None or not isinstance(switch.data, SwitchEvent) or not switch.data.params:
-        raise ValueError(f"Din flow has no {_DIN_RECEIVED_SWITCH} switch")
+        raise ValueError(f"{fairy.flow} has no {fairy.switch} switch")
+    if offer is None or not isinstance(offer.data, SubFlowEvent):
+        raise ValueError(f"{fairy.flow} has no {fairy.offer} subflow")
     if grant is None or not isinstance(grant.data, SubFlowEvent) or grant.data.entry_point_name not in _GET_IN_EVENT_SUBFLOWS:
-        raise ValueError(f"Din flow has no {_DIN_GRANT} item grant")
+        raise ValueError(f"{fairy.flow} has no {fairy.grant} item grant")
     params = switch.data.params.data
     writers = [
         e for e in flow.flowchart.events
         if isinstance(e.data, ActionEvent)
         and e.data.params is not None
-        and e.data.params.data.get("GameDataName") == DIN_FAIRY_RECEIVED_BOOL
+        and e.data.params.data.get("GameDataName") == fairy.received_bool
         and e.data.nxt is not None
         and e.data.nxt.v is grant
     ]
-    if params.get("GameDataName") == DIN_FAIRY_RECEIVED_BOOL:
+    if params.get("GameDataName") == fairy.received_bool:
         if len(writers) == 1:
             return data
-        raise ValueError(f"Din flow is partly patched: {len(writers)} writers before {_DIN_GRANT}")
-    if params.get("GameDataName") != _DIN_OLD_FLAG:
-        raise ValueError(f"Din flow {_DIN_RECEIVED_SWITCH} is not {_DIN_OLD_FLAG}")
+        raise ValueError(f"{fairy.flow} is partly patched: {len(writers)} writers before {fairy.grant}")
+    if params.get("GameDataName") != fairy.old_flag:
+        raise ValueError(f"{fairy.flow} {fairy.switch} is not {fairy.old_flag}")
 
-    from evfl.util import make_index
-
-    first_time = by_name.get(_DIN_FIRST_TIME)
-    if first_time is None or not isinstance(first_time.data, SubFlowEvent):
-        raise ValueError(f"Din flow has no {_DIN_FIRST_TIME} subflow")
     # Met before but not yet received: the vanilla switch sent this to RecoverSequence, which never
     # offers the item. Send it through the first-meeting offer instead.
-    switch.data.cases[0] = make_index(first_time)
-    params["GameDataName"] = DIN_FAIRY_RECEIVED_BOOL
-    insert_bool_write_before(flow.flowchart, grant, DIN_FAIRY_RECEIVED_BOOL, True)
-    # Din's Fire counts as owned once the fairy hands over its item. Setting the vanilla flag too makes
-    # every check that reads IsGet.Item_DinFire (the owl, Death Mountain, scrub, Goron) follow the grant.
+    switch.data.cases[0] = make_index(offer)
+    params["GameDataName"] = fairy.received_bool
+    insert_bool_write_before(flow.flowchart, grant, fairy.received_bool, True)
     received = next(
-        e
-        for e in flow.flowchart.events
-        if e.name == f"AutoEvent_Set_{DIN_FAIRY_RECEIVED_BOOL}"
+        e for e in flow.flowchart.events if e.name == f"AutoEvent_Set_{fairy.received_bool}"
     )
-    insert_bool_write_before(flow.flowchart, received, _DIN_OLD_FLAG, True)
+    insert_bool_write_before(flow.flowchart, received, fairy.old_flag, True)
     out = io.BytesIO()
     flow.write(out)
     return out.getvalue()

@@ -8,6 +8,7 @@ from oot_randomizer.engine import load_default_slots
 from oot_randomizer.event_items import EVENT_SLOTS
 from oot_randomizer.logic_template import NPC_LOCATIONS
 from oot_randomizer.npc_grants import (
+    FAIRY_FLOWS,
     NPC_FLOWS,
     NPC_ITEM_DISPLAY_NAMES,
     NPC_SLOTS,
@@ -15,13 +16,14 @@ from oot_randomizer.npc_grants import (
     SLINGSHOT_BAG,
     SLINGSHOT_ITEM,
     _grant_params,
+    _successors,
     add_slingshot_bag,
     npc_location_name,
     disable_scrub_biggoron_sale,
     fix_progressive_branches,
+    patch_fairy_received,
     patch_npc_grant,
     patch_npc_grants,
-    patch_din_fairy_received,
     shuffle_npc_items,
 )
 from oot_randomizer.heart_pickups import FIRE_ARROW_ITEM
@@ -71,6 +73,103 @@ def _raw_or_skip(name: str) -> bytes:
         raise unittest.SkipTest(f"raw flow {name} not available")
     return path.read_bytes()
 
+
+def _loaded_events(data: bytes):
+    return {event.name: event for event in _load(data).flowchart.events}
+
+
+def patch_din_fairy_received(data: bytes) -> bytes:
+    return patch_fairy_received(data, FAIRY_FLOWS[0])
+
+
+def _next_events(data) -> list:
+    if hasattr(data, "cases"):
+        targets = [case.v for case in data.cases.values()]
+    elif hasattr(data, "forks"):
+        targets = [fork.v for fork in data.forks]
+        targets.append(data.join.v if data.join is not None else None)
+    else:
+        targets = [data.nxt.v if getattr(data, "nxt", None) is not None else None]
+    return [target for target in targets if target is not None]
+
+
+def _reaches_fairy_offer_grant(flow, start) -> bool:
+    """True if `start` reaches a C15-01 sub-flow (the fairy's grant entry) in the same flow file."""
+    from evfl.event import SubFlowEvent
+
+    entries = {
+        entry.name: entry.main_event.v
+        for entry in flow.flowchart.entry_points
+        if entry.main_event is not None
+    }
+    seen: set[int] = set()
+    stack = [start]
+    while stack:
+        event = stack.pop()
+        if id(event) in seen:
+            continue
+        seen.add(id(event))
+        data = event.data
+        if isinstance(data, SubFlowEvent):
+            if data.entry_point_name == "C15-01":
+                return True
+            if data.entry_point_name in entries:
+                stack.append(entries[data.entry_point_name])
+        stack.extend(_next_events(data))
+    return False
+
+
+class FairyReceivedTest(unittest.TestCase):
+    """Every great fairy's already-received check must follow its randomized grant."""
+
+    def _check(self, fairy):
+        from evfl.event import ActionEvent
+
+        raw = _raw_or_skip(fairy.flow.removesuffix(".zs"))
+        patched = patch_fairy_received(raw, fairy)
+        self.assertNotEqual(patched, raw)
+        self.assertEqual(patch_fairy_received(patched, fairy), patched)
+        self.assertEqual(_serialize(_load(patched)), patched)
+
+        before = _loaded_events(raw)
+        after = _loaded_events(patched)
+        switch = after[fairy.switch]
+        self.assertEqual(switch.data.params.data["GameDataName"], fairy.received_bool)
+        self.assertEqual(switch.data.cases[0].v.name, fairy.offer)
+        self.assertEqual(switch.data.cases[1].v.name, before[fairy.switch].data.cases[1].v.name)
+        self.assertTrue(_reaches_fairy_offer_grant(_load(patched), after[fairy.offer]))
+
+        writers = [
+            e for e in after.values()
+            if isinstance(e.data, ActionEvent)
+            and e.data.params is not None
+            and e.data.params.data.get("GameDataName") == fairy.received_bool
+        ]
+        self.assertEqual(len(writers), 1)
+        self.assertIs(writers[0].data.nxt.v, after[fairy.grant])
+        self.assertIs(writers[0].data.params.data["Value"], True)
+        owned = [
+            e for e in after.values()
+            if isinstance(e.data, ActionEvent)
+            and e.data.params is not None
+            and e.data.params.data.get("GameDataName") == fairy.old_flag
+        ]
+        self.assertEqual(len(owned), 1)
+        self.assertIs(owned[0].data.nxt.v, writers[0])
+        self.assertIs(owned[0].data.params.data["Value"], True)
+
+    def test_each_fairy_reads_its_bool_and_sets_it_before_the_grant(self):
+        for fairy in FAIRY_FLOWS:
+            with self.subTest(fairy=fairy.flow):
+                self._check(fairy)
+
+    def test_unexpected_switch_raises(self):
+        fairy = FAIRY_FLOWS[1]
+        raw = _raw_or_skip(fairy.flow.removesuffix(".zs"))
+        flow = _load(raw)
+        {event.name: event for event in flow.flowchart.events}[fairy.switch].data.params.data["GameDataName"] = "SomethingElse"
+        with self.assertRaises(ValueError):
+            patch_fairy_received(_serialize(flow), fairy)
 
 class DinFairyReceivedTest(unittest.TestCase):
     """The Din's Fire fairy's already-received check must follow the randomized grant."""

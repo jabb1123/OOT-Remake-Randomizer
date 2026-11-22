@@ -13,10 +13,22 @@ from .byml7 import U32, dump_byml7, parse_byml7_typed
 
 GAME_DATA_LIST = "GameDataList.Product.100.byml.zs"
 SHOP_SOLDOUT_NAMES = tuple(f"KokiriForest_Shop_SoldOut_{i}" for i in range(8))
-# Set when the Din's Fire fairy's randomized item has been handed over. The fairy's "already got
-# it" check reads this instead of IsGet.Item_DinFire, which is not registered for every item.
+# Set when a great fairy's randomized item has been handed over. Each fairy's "already got it" check
+# reads its bool instead of the vanilla IsGet.Item_* flag, which is not registered for every item.
 DIN_FAIRY_RECEIVED_BOOL = "Rando_Din_FairyGrant_Received"
-NPC_GRANT_BOOL_NAMES = (DIN_FAIRY_RECEIVED_BOOL,)
+FRORE_FAIRY_RECEIVED_BOOL = "Rando_Frore_FairyGrant_Received"
+NAYRU_FAIRY_RECEIVED_BOOL = "Rando_Nayru_FairyGrant_Received"
+POWER_FAIRY_RECEIVED_BOOL = "Rando_Power_FairyGrant_Received"
+WISDOM_FAIRY_RECEIVED_BOOL = "Rando_Wisdom_FairyGrant_Received"
+COURAGE_FAIRY_RECEIVED_BOOL = "Rando_Courage_FairyGrant_Received"
+NPC_GRANT_BOOL_NAMES = (
+    DIN_FAIRY_RECEIVED_BOOL,
+    FRORE_FAIRY_RECEIVED_BOOL,
+    NAYRU_FAIRY_RECEIVED_BOOL,
+    POWER_FAIRY_RECEIVED_BOOL,
+    WISDOM_FAIRY_RECEIVED_BOOL,
+    COURAGE_FAIRY_RECEIVED_BOOL,
+)
 _PROGRESS_SAVE_INDEX = 0
 _SOLDOUT_RESET_TYPE = 9  # ResetType for shop sold-out bools (see docs/shopsanity.md)
 _NPC_GRANT_RESET_TYPE = 8  # same as the IsGet.* story bools

@@ -111,32 +111,35 @@ bypass the randomized grant. `disable_scrub_biggoron_sale` repoints Event42's
 "not owned" case past that sale (Event46) to Event47, so Event46 is unreachable. The Giant's
 Knife sale (Event45, 300 rupees) is kept. The patch is applied only when NPC items are shuffled.
 
-## Din's Fire fairy (already-received check)
+## Great fairies (already-received check)
 
-The Great Fairy in `Dm_FairyFountain_Din` asks for 25 rupees to grant Din's Fire. Event78 gated
-the offer on `IsGet.Item_DinFire`, which is only set for the vanilla item. After a randomized
-grant, the fairy asked again on every visit.
+Each of the six Great Fairies (`Dm_FairyFountain_Din`, `Frore`, `Nayru`, `Power`, `Wisdom`,
+`Courage`) gates its offer on its vanilla `IsGet.Item_*` flag, which is only set for the vanilla
+item. After a randomized grant, the fairy would ask again on every visit. `FAIRY_FLOWS` in
+`npc_grants.py` lists each fairy's switch, offer node, grant node and custom bool, and
+`patch_fairy_received(data, fairy)` applies the same fix to each one:
 
-`patch_din_fairy_received` in `npc_grants.py` fixes this:
+- The switch reads a custom bool, `Rando_<Fairy>_FairyGrant_Received` (for example
+  `DIN_FAIRY_RECEIVED_BOOL`), registered in GameDataList by `add_npc_grant_bools`.
+- Case 0 (not received) points at the offer node, the first-meeting offer. For the other five fairies
+  it is the `HavePlayedEvent` switch's case-1 target. Din has no such switch, and its offer is
+  Event334 (`FirstTime`, 25 rupees), reached through Event32's MeetFirst switch.
+  Once the fairy has been met, the not-received case used to go to a path that never offers the
+  item, so the randomized item could be unreachable. Repointing it at the offer keeps it reachable
+  until the item is handed over.
+- A set-True write to the custom bool is inserted before the grant by `insert_bool_write_before`
+  in `game_flags.py`.
+- A second set-True write sets the vanilla `IsGet.Item_*` flag, inserted between the first write
+  and the grant. Other flows that read that flag therefore see the item as owned once the fairy has
+  handed it over, with no per-flow edits. The Din file also reads the other fairies' `IsGet` flags
+  to decide which abilities it still offers, so the write is needed for every fairy.
 
-- Event78 reads a custom bool, `Rando_Din_FairyGrant_Received` (`DIN_FAIRY_RECEIVED_BOOL`),
-  registered in GameDataList by `add_npc_grant_bools`.
-- A set-True write to that bool is inserted before the grant (Event212) by
-  `insert_bool_write_before` in `game_flags.py`.
-- A second set-True write sets the vanilla `IsGet.Item_DinFire` flag, inserted between the first
-  write and the grant. Every other flow that reads `IsGet.Item_DinFire` (the owl, Death Mountain,
-  scrubs, Goron, Gerudo, TriForce) therefore sees Din's Fire as owned once the fairy has handed
-  over its randomized item, with no per-flow edits.
+The fix is applied only when that fairy's slot is randomized (`npc_changes` in `patcher.py`), and
+the bools are registered only then. The fairy's own check stays on its custom bool, so the same
+item elsewhere (for example in a chest) does not hide the fairy's offer.
 
-The bool is registered only when the Din's Fire fairy slot is randomized. The fairy's own check
-stays on the custom bool, so a Din's Fire elsewhere (for example in a chest) does not hide the
-fairy's offer.
-
-The 25-rupee offer lives only on the first-meeting path (`FirstTime`, reached through Event32's
-MeetFirst switch). Once the fairy has been met, Event78's not-received case used to go to
-RecoverSequence, which never offers the item, so the randomized item could be unreachable. The
-patch repoints that case at the `FirstTime` subflow (Event334) so the offer is shown again until the
-item is handed over.
+Verified statically for all six fairies: each offer reaches the grant sub-flow (`C15-01`) in its own
+file. In-game behavior is confirmed for Din only.
 
 ## Slingshot hand-over
 
@@ -225,8 +228,9 @@ at its end (`After_GetStormSong` → `Event80`), so the award runs once. Case ma
 vanilla flag is set only by the Fire and Forest medal flows. If either medal was randomized elsewhere,
 the flag is never set and Sheik blocks a return to child that the logic allows.
 
-The patch keeps that flag check (case 0 still goes to `Event181`). On false it runs a chain of five
-pouch queries (`PouchSystemActor.EventQueryIsExistInPouch`) for `Item_Medal_Forest`, `Fire`, `Water`,
+The patch keeps that flag check (case 0, flag false, still goes to `Event181`). On true (Fire or
+Forest flag set) it runs a chain of five pouch queries (`PouchSystemActor.EventQueryIsExistInPouch`,
+where case 0 means owned) for `Item_Medal_Forest`, `Fire`, `Water`,
 `Shadow`, and `Spirit`, in that order. Any held medal goes to `Event181`, which sets
 `AllSage_MeetSheik_And_Gone`. The Light medal is not checked, because the first trip to adulthood
 always gives it. The check mirrors the logic `Time_Travel_Back` (`is_adult and (has_two_medals or
@@ -234,6 +238,54 @@ Forest_Temple_Clear or Fire_Temple_Clear)`). The new check events are named `Med
 
 Unverified in game: the chain's timing on the sage melody flows, and that the held medal is in the
 pouch when `Event178` runs.
+
+## Medal pickup AllSage progress (`medal_progress.py`)
+
+AllSage advances by the number of dungeon medals held, not by the individual sage quests. Each sage
+quest runs its original flow and completion unchanged. Medal pickups do not set any `SageOf*`
+step.
+
+The sync runs after each pouch add and shop purchase:
+
+- `GetPouchContent.bfevfl.zs` `Event0` (the core add used by chests, event slots, and most grants).
+- `Dm_SY_GetInEvent.bfevfl.zs` (direct pouch adds used by NPC handovers and GetInEvent grants).
+- `DisplayShop.bfevfl.zs` `EventTriggerShopItemPutInPouch` purchase nodes.
+
+Each hook gets a `MedalSync_<node>_` count tree. It checks which dungeon medals are held, then the
+held count. Each count maps to an AllSage step (`COUNT_STEPS`):
+
+| Medals held | AllSage step |
+|---|---|
+| 1 | `Step01_00` |
+| 2 | `Step01_00_01` |
+| 3 | `Step01_00_02` |
+| 4 | `Step01_00_03` |
+| 5 | `Step01_01` |
+
+Each progress node is `EventExecuteProgressChallengeStep` with `IsIgnoreChallengeProgressUI: True`
+and `IsIgnoreCompletedChallenge: True`. The step is set silently. A progress only runs if AllSage
+has not already passed that step, checked by an `AllSage_IsAfter_*` game-data bool
+(`COUNT_PAST_BOOLS`). This prevents a backward move.
+
+Light is not counted, because the first trip to adulthood always gives it.
+
+### Temple-exit AllSage bypass (`sage_escape_flow.py`)
+
+The temple-exit flow `Dm_SY_BancChange_EscapeDungeon` still sets `SageOf<X> Complete` when a player
+leaves a temple, as vanilla does. The Forest exit also set AllSage to `Step01_00`. That absolute set
+would move AllSage backward when a later exit runs, so `Event208` is removed and its edges point at
+its successor (`Event174`, the Forest popup). Only that node is removed (`BYPASSED_STEPS`).
+
+The patch is idempotent. It raises if the node is not the expected AllSage step. The flow
+replacement is optional (`NupPatchError` is ignored), matching the other optional flows.
+
+Unverified in game:
+- The `AllSage_IsAfter_*` bool boundaries. Only three of these bools exist in the dumps, so counts
+  2 and 4 use the nearest later bool. A count may be one step off in edge cases.
+- Light's Prelude and the return-to-child transition may still read `SageOf*_IsCompleted_Exp`,
+  which medal pickups no longer set. `sheik_medal_gate.py` accepts any dungeon medal in the pouch
+  for the Sheik return.
+- Whether the silent step move leaves the AllSage quest visibly correct.
 
 ## Options
 
