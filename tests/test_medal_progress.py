@@ -10,16 +10,22 @@ from oot_randomizer.medal_progress import (
     COUNT_PAST_BOOLS,
     COUNT_STEPS,
     MEDAL_ITEMS,
+    add_medal_progress_after_allsage_step01,
     add_medal_progress_after_pouch_adds,
     add_medal_progress_after_shop_purchase,
+    add_medal_progress_at_route_end,
 )
 from oot_randomizer.sage_escape_flow import BYPASSED_STEPS, ESCAPE_FLOW, patch_escape_sage_completes
+from oot_randomizer.stone_gates import POUCH_ADD_SUBFLOW, add_stone_count_check_at_route_end
 
 RAW_DIR = Path(__file__).resolve().parents[1] / "tmp" / "Events" / "raw"
 RAW_POUCH = RAW_DIR / "GetPouchContent.bfevfl.zs.raw"
 RAW_IN_EVENT = RAW_DIR / "Dm_SY_GetInEvent.bfevfl.zs.raw"
 RAW_SHOP = RAW_DIR / "DisplayShop.bfevfl.zs.raw"
+RAW_SY_GET = RAW_DIR / "Dm_SY_Get.bfevfl.zs.raw"
+RAW_DOOR_OF_TIME = RAW_DIR / "DoorOfTime.bfevfl.zs.raw"
 RAW_ESCAPE = RAW_DIR / f"{ESCAPE_FLOW}.raw"
+RAW_ALLSAGE = RAW_DIR / "AllSage.bfevfl.zs.raw"
 SYNC_PREFIX = "MedalSync_"
 
 
@@ -66,7 +72,8 @@ def _walk(events: dict, entry, owned: set, past: set):
                 case = 0 if body.params.data["Actor"] in owned else 1
             else:
                 case = 1 if body.params.data["GameDataName"] in past else 0
-            node = body.cases[case].v
+            target = body.cases.get(case)
+            node = target.v if target is not None else None
         else:
             if body.actor_action.v.v == "EventExecuteProgressChallengeStep":
                 steps.append((body.params.data["ChallengeName"], body.params.data["StepName"]))
@@ -148,6 +155,41 @@ class MedalCountTest(unittest.TestCase):
         self.assertEqual(add_medal_progress_after_shop_purchase(patched), patched)
 
 
+class AllSageStep01MedalCountTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        for path in (RAW_ALLSAGE, RAW_POUCH):
+            if not path.exists():
+                raise unittest.SkipTest(f"raw flow {path} not available")
+
+    def test_count_runs_right_after_step01(self):
+        patched = add_medal_progress_after_allsage_step01(RAW_ALLSAGE.read_bytes())
+        events = _by_name(patched)
+        self.assertTrue(events["Event18"].data.nxt.v.name.startswith(f"{SYNC_PREFIX}Event18_Check0_Held0"))
+        self.assertEqual(events["Event18"].data.params.data["StepName"], "Step01")
+
+    def test_every_held_medal_count_reaches_its_step_and_keeps_event19(self):
+        patched = add_medal_progress_after_allsage_step01(RAW_ALLSAGE.read_bytes())
+        events = _by_name(patched)
+        entry = events[f"{SYNC_PREFIX}Event18_Check0_Held0"]
+        for size in range(len(MEDAL_ITEMS) + 1):
+            for owned in itertools.combinations(MEDAL_ITEMS, size):
+                steps, exit_reached = _walk(events, entry, set(owned), set())
+                self.assertEqual(exit_reached, "Event19")
+                allsage = [step for challenge, step in steps if challenge == "AllSage"]
+                self.assertEqual(allsage, [COUNT_STEPS[size]] if size else [])
+                self.assertFalse(any(challenge.startswith("SageOf") for challenge, _ in steps))
+
+    def test_patch_is_idempotent_and_round_trips(self):
+        patched = add_medal_progress_after_allsage_step01(RAW_ALLSAGE.read_bytes())
+        self.assertEqual(add_medal_progress_after_allsage_step01(patched), patched)
+        self.assertEqual(_serialize(_load(patched)), patched)
+
+    def test_flow_without_allsage_step01_is_rejected(self):
+        with self.assertRaises(ValueError):
+            add_medal_progress_after_allsage_step01(RAW_POUCH.read_bytes())
+
+
 class EscapeSageCompletesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -174,6 +216,73 @@ class EscapeSageCompletesTest(unittest.TestCase):
         patched = patch_escape_sage_completes(RAW_ESCAPE.read_bytes())
         self.assertEqual(patch_escape_sage_completes(patched), patched)
         self.assertEqual(_serialize(_load(patched)), patched)
+
+
+class RouteEndMedalCountTest(unittest.TestCase):
+    """The shared pouch add in Dm_SY_Get counts medals after each grant's route, as the stone check does."""
+
+    @classmethod
+    def setUpClass(cls):
+        for path in (RAW_SY_GET, RAW_DOOR_OF_TIME):
+            if not path.exists():
+                raise unittest.SkipTest(f"raw flow {path} not available")
+
+    def _grant(self, flow: EventFlow):
+        grants = [
+            e for e in flow.flowchart.events
+            if isinstance(e.data, SubFlowEvent) and e.data.entry_point_name == POUCH_ADD_SUBFLOW
+        ]
+        self.assertEqual(len(grants), 1)
+        return grants[0]
+
+    def test_route_end_counts_held_medals(self):
+        data = add_medal_progress_at_route_end(RAW_SY_GET.read_bytes())
+        events = _by_name(data)
+        entry = events[f"{SYNC_PREFIX}Route_Check0_Held0"]
+        for size in range(len(MEDAL_ITEMS) + 1):
+            for owned in itertools.combinations(MEDAL_ITEMS, size):
+                steps, exit_reached = _walk(events, entry, set(owned), past=set())
+                # The count ends the route, so nothing follows it.
+                self.assertIsNone(exit_reached)
+                names = [step for challenge, step in steps if challenge == "AllSage"]
+                expected = [] if size == 0 else [COUNT_STEPS[size]]
+                self.assertEqual(names, expected)
+                self.assertFalse(any(challenge.startswith("SageOf") for challenge, _ in steps))
+
+    def test_route_end_leaves_no_open_exit_in_the_route(self):
+        flow = _load(add_medal_progress_at_route_end(RAW_SY_GET.read_bytes()))
+        seen: set[int] = set()
+        stack = [self._grant(flow).data.nxt.v]
+        route = []
+        while stack:
+            event = stack.pop()
+            if event is None or id(event) in seen or event.name.startswith(SYNC_PREFIX):
+                continue
+            seen.add(id(event))
+            route.append(event)
+            body = event.data
+            if isinstance(body, (ActionEvent, SubFlowEvent)):
+                self.assertIsNotNone(body.nxt.v, event.name)
+                stack.append(body.nxt.v)
+            elif isinstance(body, SwitchEvent):
+                stack.extend(case.v for case in body.cases.values())
+                self.assertGreater(len(body.cases), 1, event.name)
+        self.assertTrue(route)
+
+    def test_route_end_hook_is_idempotent_and_round_trips(self):
+        patched = add_medal_progress_at_route_end(RAW_SY_GET.read_bytes())
+        self.assertEqual(add_medal_progress_at_route_end(patched), patched)
+        self.assertEqual(_serialize(_load(patched)), patched)
+
+    def test_stone_check_runs_after_the_medal_count(self):
+        medal = add_medal_progress_at_route_end(RAW_SY_GET.read_bytes())
+        stone = add_stone_count_check_at_route_end(medal, RAW_DOOR_OF_TIME.read_bytes(), POUCH_ADD_SUBFLOW)
+        events = _by_name(stone)
+        entry = events[f"{SYNC_PREFIX}Route_Check0_Held0"]
+        for size in range(len(MEDAL_ITEMS) + 1):
+            for owned in itertools.combinations(MEDAL_ITEMS, size):
+                _, exit_reached = _walk(events, entry, set(owned), past=set())
+                self.assertEqual(exit_reached, "StoneCheck_IsAfterStep03")
 
 
 if __name__ == "__main__":

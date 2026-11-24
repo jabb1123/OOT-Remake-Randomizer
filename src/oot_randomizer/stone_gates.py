@@ -84,6 +84,8 @@ POUCH_ADD_SUBFLOW = "PouchAddItem"
 _STONE_CHECK_FLOW = "DoorOfTime"
 _STONE_CHECK_ENTRY = "DoorOfTime_CheckStoneNum"
 STONE_CHECK_FLOW_FILE = "DoorOfTime.bfevfl.zs"
+# Holds the DoorOfTime Step02 progress node that the stone check follows (Event7 in DoorOfTime).
+DOOR_OF_TIME_START_FLOW_FILE = "DoorOfTime.bfevfl.zs"
 # Prefix on the check's events once copied into a calling flow.
 _INLINE_PREFIX = "StoneCheck_"
 # Skips the copied check once the Door of Time quest is at Step03 or further, so a stone pickup
@@ -291,6 +293,43 @@ def add_stone_count_check_at_route_end(
             raise ValueError(f"unexpected {type(body).__name__} after {grant_subflow}")
     if exits == 0:
         raise ValueError(f"no route exit after {grant_subflow}")
+    return _write_flow(flow)
+
+
+_CHALLENGE_PROGRESS_ACTION = "EventExecuteProgressChallengeStep"
+_DOOR_OF_TIME_CHALLENGE = "DoorOfTime"
+_DOOR_OF_TIME_START_STEP = "Step02"
+
+
+def add_stone_count_check_after_step01(data: bytes, check_data: bytes) -> bytes:
+    """Run DoorOfTime_CheckStoneNum right after the Door of Time quest starts (Step02). This can't follow Step01 or we
+
+    A player who already holds the stones when the quest starts gets the same progress the check
+    gives on a later pickup, so the quest does not wait for a stone that was already held. The
+    check's own step gates still decide what it does. `check_data` is the DoorOfTime flow to copy
+    from. Returns the input unchanged when the check is already present. Raises ValueError unless
+    the flow has exactly one Door of Time Step01 progress node with a successor.
+    """
+    flow = _read_flow(data)
+    if _has_inline_check(flow):
+        return data
+    hits = [
+        e
+        for e in flow.flowchart.events
+        if isinstance(e.data, ActionEvent)
+        and e.data.actor_action.v is not None
+        and e.data.actor_action.v.v == _CHALLENGE_PROGRESS_ACTION
+        and e.data.params is not None
+        and e.data.params.data.get("ChallengeName") == _DOOR_OF_TIME_CHALLENGE
+        and e.data.params.data.get("StepName") == _DOOR_OF_TIME_START_STEP
+    ]
+    if len(hits) != 1 or hits[0].data.nxt.v is None:
+        raise ValueError(
+            f"Flow {DOOR_OF_TIME_START_FLOW_FILE} has {len(hits)} {_DOOR_OF_TIME_START_STEP} progress nodes, expected 1"
+        )
+    step = hits[0]
+    entry = _copy_check_into(flow, _read_flow(check_data), step.data.nxt.v)
+    step.data.nxt = make_index(entry)
     return _write_flow(flow)
 
 

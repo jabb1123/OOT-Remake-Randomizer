@@ -10,8 +10,8 @@ flow still finishes it and its dungeon drops are kept. The temple-exit steps are
 sage_escape_flow.py.
 
 Each count leaf reads an AllSage_IsAfter_* bool first and skips when the quest is already past its step,
-so the count never moves AllSage backwards. Light is not counted. Its medal comes from the first trip to
-adulthood, before any dungeon medal can be held.
+so the count never moves AllSage backwards. Light is not counted. It is a shuffled item that belongs to no
+dungeon, so it does not move any sage's step. Its logic is in has_two_medals (Sheik return to child).
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ import io
 
 from evfl import EventFlow
 from evfl.container import Container
-from evfl.event import ActionEvent, Event, SwitchEvent
+from evfl.event import ActionEvent, Event, SubFlowEvent, SwitchEvent
 from evfl.util import make_index, make_rindex
 
 from .game_flags import (
@@ -29,7 +29,14 @@ from .game_flags import (
     _find_or_create_action,
     game_data_actor,
 )
-from .stone_gates import _GAME_DATA_BOOL_QUERY, _POUCH_QUERY, _pouch_actor, _query
+from .stone_gates import (
+    _GAME_DATA_BOOL_QUERY,
+    _POUCH_QUERY,
+    POUCH_ADD_SUBFLOW,
+    _pouch_actor,
+    _query,
+    _single_grant,
+)
 
 GET_POUCH_CONTENT_FLOW = "GetPouchContent.bfevfl.zs"
 GET_IN_EVENT_FLOW = "Dm_SY_GetInEvent.bfevfl.zs"
@@ -91,12 +98,13 @@ def _progress_node(chart_actor, action, prefix: str, name: str, params: dict, nx
     return event
 
 
-def _count_tree(flow: EventFlow, exit_to: Event, prefix: str) -> Event:
+def _count_tree(flow: EventFlow, exit_to: Event | None, prefix: str) -> Event | None:
     """Build the held-medal count and return its entry. Every path ends at `exit_to`.
 
     A pouch check for each medal forms a binary tree. A node is keyed by the medal index and the count
     so far, so paths with the same count share their nodes. The leaves are the counts, each going to
-    its AllSage step. A count of 0 goes straight to `exit_to`.
+    its AllSage step. A count of 0 goes straight to `exit_to`. A None `exit_to` ends the branch, so
+    switch cases that would go there are left out.
     """
     chart = flow.flowchart
     pouch = _pouch_actor(flow)
@@ -107,16 +115,16 @@ def _count_tree(flow: EventFlow, exit_to: Event, prefix: str) -> Event:
     steps: dict[int, Event] = {}
     checks: dict[tuple[int, int], Event] = {}
 
-    def step_for(count: int) -> Event:
+    def step_for(count: int) -> Event | None:
         if count == 0:
             return exit_to
         if count not in steps:
-            # Silent: the step can be set again by a later pickup, and a popup would repeat each time.
+            # Popup on: this is a test build, so each sub-step advance shows its progress window.
             progress = _progress_node(challenge_actor, progress_action, prefix, f"Step_{count}", {
                 "ChallengeName": ALLSAGE_CHALLENGE,
                 "StepName": COUNT_STEPS[count],
                 "IsWaitEnd": True,
-                "IsIgnoreChallengeProgressUI": True,
+                "IsIgnoreChallengeProgressUI": False,
                 "IsIgnoreCompletedChallenge": True,
             }, exit_to)
             chart.events.append(progress)
@@ -127,7 +135,9 @@ def _count_tree(flow: EventFlow, exit_to: Event, prefix: str) -> Event:
             gate_node.params = Container()
             gate_node.params.data.update({"GameDataName": COUNT_PAST_BOOLS[count]})
             # EventQueryIsGameDataBoolExp: case 1 = true (already past the step), case 0 = false.
-            gate_node.cases = {0: make_rindex(progress), 1: make_rindex(exit_to)}
+            gate_node.cases = {0: make_rindex(progress)}
+            if exit_to is not None:
+                gate_node.cases[1] = make_rindex(exit_to)
             gate = Event()
             gate.name = f"{prefix}Gate_{count}"
             gate.data = gate_node
@@ -135,7 +145,7 @@ def _count_tree(flow: EventFlow, exit_to: Event, prefix: str) -> Event:
             steps[count] = gate
         return steps[count]
 
-    def check_for(index: int, held: int) -> Event:
+    def check_for(index: int, held: int) -> Event | None:
         if index == len(MEDAL_ITEMS):
             return step_for(held)
         key = (index, held)
@@ -147,8 +157,10 @@ def _count_tree(flow: EventFlow, exit_to: Event, prefix: str) -> Event:
             node.actor_query = make_rindex(pouch_query)
             node.params = Container()
             node.params.data.update({"Actor": MEDAL_ITEMS[index], "Num": 1})
-            # EventQueryIsExistInPouch: case 0 = owned, case 1 = not owned.
-            node.cases = {0: make_rindex(owned), 1: make_rindex(missing)}
+            # EventQueryIsExistInPouch: case 0 = owned, case 1 = not owned. A None `missing` ends that branch.
+            node.cases = {0: make_rindex(owned)}
+            if missing is not None:
+                node.cases[1] = make_rindex(missing)
             check = Event()
             check.name = f"{prefix}Check{index}_Held{held}"
             check.data = node
@@ -166,6 +178,54 @@ def _hook_after(flow: EventFlow, node: Event) -> None:
         raise ValueError(f"{node.name} has no successor to hook the medal count in front of")
     first = _count_tree(flow, body.nxt.v, prefix=f"{_SYNC_PREFIX}{node.name}_")
     body.nxt = make_index(first)
+
+
+def add_medal_progress_at_route_end(data: bytes, grant_subflow: str = POUCH_ADD_SUBFLOW) -> bytes:
+    """Run the medal count after the grant's get-item route has finished.
+
+    Chests, hearts, and NPC grants all pass through the shared pouch add in Dm_SY_Get, and a medal from
+    those does not reach the pouch add hooks in GetPouchContent. This walks the route after the grant
+    and points each open exit at the count, so it runs after the item is in the pouch and after the
+    presentation, the same placement the stone check uses. Every exit is collected before the count is
+    built, so the count's own events are not walked. Returns the input unchanged when the count is
+    already present. Raises ValueError unless the flow has exactly one grant and the route is simple.
+    """
+    flow = _read(data)
+    if _has_sync(flow):
+        return data
+    grant = _single_grant(flow, grant_subflow)
+
+    open_nxt: list[ActionEvent | SubFlowEvent] = []
+    open_cases: list[SwitchEvent] = []
+    seen: set[int] = set()
+    stack = [grant.data.nxt.v]
+    while stack:
+        event = stack.pop()
+        if id(event) in seen:
+            continue
+        seen.add(id(event))
+        body = event.data
+        if isinstance(body, (ActionEvent, SubFlowEvent)):
+            if body.nxt.v is None:
+                open_nxt.append(body)
+            else:
+                stack.append(body.nxt.v)
+        elif isinstance(body, SwitchEvent):
+            stack.extend(target.v for target in body.cases.values())
+            # A switch whose only case is 0 is a bool query, so its missing case 1 is the false exit.
+            if set(body.cases) == {0}:
+                open_cases.append(body)
+        else:
+            raise ValueError(f"unexpected {type(body).__name__} after {grant_subflow}")
+    if not open_nxt and not open_cases:
+        raise ValueError(f"no route exit after {grant_subflow}")
+
+    entry = _count_tree(flow, None, prefix=f"{_SYNC_PREFIX}Route_")
+    for body in open_nxt:
+        body.nxt = make_index(entry)
+    for body in open_cases:
+        body.cases[1] = make_rindex(entry)
+    return _write(flow)
 
 
 def _has_sync(flow: EventFlow) -> bool:
@@ -223,4 +283,32 @@ def add_medal_progress_after_shop_purchase(data: bytes) -> bytes:
         raise ValueError(f"DisplayShop has no {_SHOP_PURCHASE_ACTION} action")
     for node in purchases:
         _hook_after(flow, node)
+    return _write(flow)
+
+
+def add_medal_progress_after_allsage_step01(data: bytes) -> bytes:
+    """Run the medal count right after AllSage's Step01, the step the sages start from.
+
+    A player who already holds medals when AllSage reaches Step01 moves on to the step for that
+    count, the same as a medal picked up later. Returns the input unchanged when the chain is already
+    present. Raises ValueError unless the flow has exactly one AllSage Step01 progress node.
+    """
+    flow = _read(data)
+    if _has_sync(flow):
+        return data
+    nodes = [
+        event
+        for event in flow.flowchart.events
+        if isinstance(event.data, ActionEvent)
+        and event.data.actor_action.v is not None
+        and event.data.actor_action.v.v == CHALLENGE_PROGRESS_ACTION
+        and event.data.params is not None
+        and event.data.params.data.get("ChallengeName") == ALLSAGE_CHALLENGE
+        and event.data.params.data.get("StepName") == "Step01"
+    ]
+    if len(nodes) != 1:
+        raise ValueError(
+            f"flow has {len(nodes)} AllSage Step01 progress nodes, expected 1"
+        )
+    _hook_after(flow, nodes[0])
     return _write(flow)

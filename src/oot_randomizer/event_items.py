@@ -15,6 +15,7 @@ import random
 
 # flow file name -> vanilla event item granted by that flow
 EVENT_SLOTS: dict[str, str] = {
+    "Dm_SageRoom_0005.bfevfl.zs": "Item_Medal_Light",
     "Dm_Awake_Forest_Get.bfevfl.zs": "Item_Medal_Forest",
     "Dm_Awake_Fire_Get.bfevfl.zs": "Item_Medal_Fire",
     "Dm_Awake_Water_Get.bfevfl.zs": "Item_Medal_Water",
@@ -29,6 +30,7 @@ EVENT_SLOTS: dict[str, str] = {
 
 # Friendly names usable in logic requirements.
 EVENT_ITEM_DISPLAY_NAMES: dict[str, str] = {
+    "Item_Medal_Light": "Light Medallion",
     "Item_Medal_Forest": "Forest Medallion",
     "Item_Medal_Fire": "Fire Medallion",
     "Item_Medal_Water": "Water Medallion",

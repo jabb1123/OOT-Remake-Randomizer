@@ -6,9 +6,8 @@ Fire or Forest medal from another location would leave Sheik in place. This patc
 and adds a chain of pouch queries after it. Any dungeon medal in the pouch sets
 AllSage_MeetSheik_And_Gone the same way the flag does.
 
-The Light medal is not in the chain. It comes from the first trip to adulthood, so the player always
-has it before a dungeon medal can be held. Requiring a dungeon medal therefore matches the logic's
-"two medals including Light".
+The Light medal is not in the chain. It is a shuffled item now, so holding it alone must not open Sheik.
+Any dungeon medal is looser than the logic's two-medal rule (has_two_medals), so it never blocks progress.
 """
 
 from __future__ import annotations

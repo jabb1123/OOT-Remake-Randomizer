@@ -51,7 +51,7 @@ dungeon = "SpiritTemple"
 dungeon = "SpiritTemple"
 
 [regions."SpiritTempleCentralChamber".exits]
-"SpiritTempleChildClimb" = "true"
+"SpiritTempleChildClimb" = "is_child"
 "SpiritTempleChildStairCase" = "true"
 "SpiritTempleAdultClimb" = "has_hookshot"
 "SpiritTempleAdultStairCase" = "has_hookshot and Small_Key_SpiritTemple:4"

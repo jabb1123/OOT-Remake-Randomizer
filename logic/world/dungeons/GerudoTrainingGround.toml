@@ -145,12 +145,11 @@ dungeon = "GerudoTrainingGround"
 
 [regions."GTGKeyMaze".locations]
 "GerudoTrainingGround Static room 8 #0 (Item_BombchuBundle_Small)" = "true"
+"GerudoTrainingGround Static room 8 #1 (TBox_Rupee_Red)" = "true"
+"GerudoTrainingGround Dynamic room 8 #0 (Item_Dungeon_SmallKey)" = "true"
 
 
 "GerudoTrainingGround Static room 8 #0 (Item_Arrow_Ice)" = "true"
 "GerudoTrainingGround Static room 8 #0 (Item_Dungeon_SmallKey)" = "true"
 "GerudoTrainingGround Static room 8 #0 (TBox_Rupee_Purple)" = "true"
 "GerudoTrainingGround Static room 8 #0 (TBox_Rupee_Red)" = "true" 
-"GerudoTrainingGround Dynamic room 8 #0 (Item_Dungeon_SmallKey)" = "true"
-"GerudoTrainingGround Static room 8 #1 (TBox_Rupee_Red)" = "true"
-

@@ -21,14 +21,16 @@ from .starting_items import patch_intro_flow
 from .kokiri_blocker import MIDO_BLOCKER_PATCHES
 from .world_time import CASTLE_ENTRY_FLOW, add_goto_quest_progress_to_castle_entry
 from .event_items import EVENT_SLOTS, patch_event_item
-from .dampe_race import DAMPE_RACE_FLOW, patch_dampe_race_approach
+from .dampe_race import DAMPE_RACE_FLOW, patch_dampe_race_approach, patch_dampe_race_rewards
 from .storm_song_npc import STORM_NPC_FLOW, patch_storm_song_npc
 from .sheik_medal_gate import ALLSAGE_FLOW, patch_sheik_medal_gate
 from .medal_progress import (
     GET_IN_EVENT_FLOW,
     GET_POUCH_CONTENT_FLOW,
+    add_medal_progress_after_allsage_step01,
     add_medal_progress_after_pouch_adds,
     add_medal_progress_after_shop_purchase,
+    add_medal_progress_at_route_end,
 )
 from .sage_escape_flow import ESCAPE_FLOW, patch_escape_sage_completes
 from .npc_grants import (
@@ -48,6 +50,7 @@ from .location_mapper import build_scene_file_index, load_summary_file
 from .locations import OOTLocation
 from .skulltula_rewards import SKULL_FLOW, SKULL_REWARDS, patch_skull_rewards
 from .stone_gates import (
+    DOOR_OF_TIME_START_FLOW_FILE,
     POUCH_ADD_FLOWS,
     POUCH_ADD_SUBFLOW,
     STONE_CHECK_FLOW_FILE,
@@ -55,6 +58,7 @@ from .stone_gates import (
     STONE_SLOT_FLOWS,
     add_shop_stone_count_check,
     add_stone_count_check,
+    add_stone_count_check_after_step01,
     add_stone_count_check_at_route_end,
     patch_stone_gates,
 )
@@ -359,6 +363,12 @@ class RomPatcher:
                 applied += 1
             except NupPatchError:
                 pass
+            # Every race counts, and the first race's under-a-minute result gives the Hookshot slot.
+            try:
+                patcher.replace_file(DAMPE_RACE_FLOW, patch_dampe_race_rewards)
+                applied += 1
+            except NupPatchError:
+                pass
             # The storm song slot is awarded once by this NPC, so the pouch must not skip that award.
             try:
                 patcher.replace_file(STORM_NPC_FLOW, patch_storm_song_npc)
@@ -368,6 +378,12 @@ class RomPatcher:
             # Sheik's return-to-child gate also opens on any dungeon medal, not only the Fire or Forest flag.
             try:
                 patcher.replace_file(ALLSAGE_FLOW, patch_sheik_medal_gate)
+                applied += 1
+            except NupPatchError:
+                pass
+            # Medals already held when AllSage starts Step01 move it on, as a medal picked up later does.
+            try:
+                patcher.replace_file(ALLSAGE_FLOW, add_medal_progress_after_allsage_step01)
                 applied += 1
             except NupPatchError:
                 pass
@@ -384,6 +400,11 @@ class RomPatcher:
                     applied += 1
                 except NupPatchError:
                     pass
+            # Chests, hearts, and NPC grants use the shared pouch add, so a medal from any of them counts too.
+            # This runs before the stone check on the same flow, so the stone check follows the medal count.
+            for flow_file in POUCH_ADD_FLOWS:
+                patcher.replace_file(flow_file, add_medal_progress_at_route_end)
+                applied += 1
             if event_assignments:
                 for flow_file in STONE_GATE_FLOWS:
                     try:
@@ -409,6 +430,15 @@ class RomPatcher:
                         lambda data: add_stone_count_check_at_route_end(data, door_check, POUCH_ADD_SUBFLOW),
                     )
                     applied += 1
+                # Stones already held when the Door of Time quest starts (Step01) progress it too.
+                try:
+                    patcher.replace_file(
+                        DOOR_OF_TIME_START_FLOW_FILE,
+                        lambda data: add_stone_count_check_after_step01(data, door_check),
+                    )
+                    applied += 1
+                except NupPatchError:
+                    pass
             if shop_actors or fairy_randomized:
                 patcher.replace_file(
                     GAME_DATA_LIST,

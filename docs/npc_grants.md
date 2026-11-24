@@ -202,13 +202,29 @@ randomized Hookshot slot could never be collected. `patch_dampe_race_approach` r
 approach-talk pouch switches (`Event262`, `Event260`, `Event18`, `Event0`, `Event61`) at their
 not-owned branch. Every player then takes the first-race talk path.
 
-The reward order comes from the race itself: `MiniGame_DampeRace_ClearCount` 0 gives the
-Hookshot slot (the randomized static room item), 1 gives the heart piece, and 2 or more give
-rupees. The post-race pouch switches (`Event442`, `Event443`, `Event444`) are left vanilla.
-Forcing them could skip the ClearCount increment or change the retry dialogue.
+The reward is chosen by the Result entry switch `Event275`, which reads `MiniGame_DampeRace_ClearCount`.
+Each finished race adds one to the count, and a finished race always counts, including for a player
+without the Hookshot. The post-race pouch switch `Event442` case 1 (not owned) is repointed from
+`Event33` to `Event379`, the same clear subflow an owner uses. `patch_dampe_race_rewards` then
+remaps the result switch by count:
 
-Unverified in game: the approach talk on a player with the Hookshot already, and the heart piece
-on the second race.
+- ClearCount 1 (first race): `Event327`, the vanilla hookshot award talk (`Talk_55`). It flags the
+  box (`Event353`), sets `AppearHookShot` (`Event355`), and shows the box (`Event167`). Every player
+  gets the randomized Hookshot slot.
+- ClearCount 2 (second race): the vanilla timer check `Event359`. Under one minute gives the heart
+  piece (`Event372`). Over one minute gives the rupee-low box (`Event373`).
+- ClearCount 3 and up: a new `DampeRace_RupeeFromThird` setter sets the treasure box to `AppearRupee`
+  and goes to the vanilla rupee talk `Event393` (`Talk_28`), then `Event430` and the rupee box
+  `Event404`. The rupee box SUB only flags the box when the state is already set, so the setter must
+  run first.
+
+The post-race auto path `Event342` case 1 (`UnderTheGrave_DampeRace_HeartGeted` true) used to lead to
+the heart timer check `Event448`, which could hand out a heart piece on a later race. It now goes to
+the talk-only `Event394`, so the Result switch is the only place that gives a reward.
+
+Unverified in game: the approach talk on a player with the Hookshot already, the first-race
+Hookshot box, the second-race heart piece, the rupee on race 3 onward, and whether non-owner
+best-time records update (`Event378` is still reached only by owners).
 
 ## Windmill Song of Storms (Npc_Hylia_009_Adult)
 
@@ -232,9 +248,10 @@ The patch keeps that flag check (case 0, flag false, still goes to `Event181`). 
 Forest flag set) it runs a chain of five pouch queries (`PouchSystemActor.EventQueryIsExistInPouch`,
 where case 0 means owned) for `Item_Medal_Forest`, `Fire`, `Water`,
 `Shadow`, and `Spirit`, in that order. Any held medal goes to `Event181`, which sets
-`AllSage_MeetSheik_And_Gone`. The Light medal is not checked, because the first trip to adulthood
-always gives it. The check mirrors the logic `Time_Travel_Back` (`is_adult and (has_two_medals or
+`AllSage_MeetSheik_And_Gone`. The check mirrors the logic `Time_Travel_Back` (`is_adult and (has_two_medals or
 Forest_Temple_Clear or Fire_Temple_Clear)`). The new check events are named `MedalCheck_<Medal>`.
+Light is not in this chain. It is a shuffled item now, so holding it alone must not open Sheik. Any
+dungeon medal is looser than `has_two_medals`, so it never blocks progress.
 
 Unverified in game: the chain's timing on the sage melody flows, and that the held medal is in the
 pouch when `Event178` runs.
@@ -249,6 +266,10 @@ The sync runs after each pouch add and shop purchase:
 
 - `GetPouchContent.bfevfl.zs` `Event0` (the core add used by chests, event slots, and most grants).
 - `Dm_SY_GetInEvent.bfevfl.zs` (direct pouch adds used by NPC handovers and GetInEvent grants).
+- `Dm_SY_Get.bfevfl.zs` (the shared get-item flow for chests, hearts, and NPC grants). Its
+  `PouchAddItem` grant does not reach the `GetPouchContent` hook, so `add_medal_progress_at_route_end`
+  points each open exit of the route after the grant at one count. It is applied before the stone check
+  on the same flow, so the stone check runs after the medal count.
 - `DisplayShop.bfevfl.zs` `EventTriggerShopItemPutInPouch` purchase nodes.
 
 Each hook gets a `MedalSync_<node>_` count tree. It checks which dungeon medals are held, then the
@@ -262,12 +283,16 @@ held count. Each count maps to an AllSage step (`COUNT_STEPS`):
 | 4 | `Step01_00_03` |
 | 5 | `Step01_01` |
 
-Each progress node is `EventExecuteProgressChallengeStep` with `IsIgnoreChallengeProgressUI: True`
-and `IsIgnoreCompletedChallenge: True`. The step is set silently. A progress only runs if AllSage
-has not already passed that step, checked by an `AllSage_IsAfter_*` game-data bool
-(`COUNT_PAST_BOOLS`). This prevents a backward move.
+Each progress node is `EventExecuteProgressChallengeStep` with `IsIgnoreChallengeProgressUI: False`
+(the progress popup is on for testing) and `IsIgnoreCompletedChallenge: True`. A progress only runs if
+AllSage has not already passed that step, checked by an `AllSage_IsAfter_*` game-data bool
+(`COUNT_PAST_BOOLS`). This prevents a backward move. Turn the popup off again once the step moves are
+confirmed in game.
 
-Light is not counted, because the first trip to adulthood always gives it.
+Light is not counted. It is a shuffled item (`Dm_SageRoom_0005`) that belongs to no dungeon, so it does
+not move any sage's step. Its logic is in `has_two_medals` (`Item_Medal_Light` with a dungeon medal).
+
+The count also runs once right after AllSage's Step01 progress node (`Event18` in `AllSage.bfevfl.zs`, `add_medal_progress_after_allsage_step01`), before `Event19` (SageOfForest Step01). Medals already held when the quest starts move AllSage on, the same as a medal picked up later.
 
 ### Temple-exit AllSage bypass (`sage_escape_flow.py`)
 

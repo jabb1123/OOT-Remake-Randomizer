@@ -6,8 +6,9 @@
 "Market" = "true"
 
 [regions."TempleOfTime".events]
-"Time_Travel" = "is_child and can_play(Song_of_Time) and Deku_Tree_Clear and Dodongos_Cavern_Clear and Jabu_Jabu_Clear and Kokiris_Emerald and Goron_Ruby and Zora_Sapphire"
+"Time_Travel" = "is_child and can_play(Song_of_Time) and Goron_Ruby and Zora_Sapphire"
 "Time_Travel_Back" = "is_adult and (has_two_medals or Forest_Temple_Clear or Fire_Temple_Clear)"
 
 [regions."TempleOfTime".locations]
+"Dm_SageRoom_0005 (event item)" = "Time_Travel"
 "Dm_MelodyGet_Shine" = "is_adult and (Forest_Temple_Clear or Fire_Temple_Clear)"  # song: Prelude of Light from Sheik, Temple of Time

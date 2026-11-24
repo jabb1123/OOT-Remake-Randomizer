@@ -391,6 +391,55 @@ class StoneCountCheckTest(unittest.TestCase):
             stone_gates.add_shop_stone_count_check(_serialize(flow), self._check_raw())
 
 
+@unittest.skipUnless(
+    (RAW_DIR / "DoorOfTime.bfevfl").exists(),
+    "raw DoorOfTime not available",
+)
+class StepTwoStoneCheckTest(unittest.TestCase):
+    PREFIX = "StoneCheck_"
+
+    def _patched(self) -> bytes:
+        return stone_gates.add_stone_count_check_after_step01(
+            _raw(RAW_DIR / "DoorOfTime.bfevfl"), _raw(RAW_DIR / "DoorOfTime.bfevfl")
+        )
+
+    def test_check_runs_right_after_door_of_time_step02_and_continues_to_the_original_successor(self):
+        flow = _load(self._patched())
+        step = next(
+            e for e in flow.flowchart.events
+            if isinstance(e.data, ActionEvent)
+            and e.data.params is not None
+            and e.data.params.data.get("ChallengeName") == "DoorOfTime"
+            and e.data.params.data.get("StepName") == "Step02"
+        )
+        self.assertTrue(step.data.nxt.v.name.startswith(self.PREFIX))
+        exits = set()
+        for e in flow.flowchart.events:
+            if not e.name.startswith(self.PREFIX):
+                continue
+            targets = (
+                [e.data.nxt.v] if isinstance(e.data, ActionEvent)
+                else [c.v for c in e.data.cases.values()] if isinstance(e.data, SwitchEvent)
+                else []
+            )
+            exits.update(t.name for t in targets if t is not None and not t.name.startswith(self.PREFIX))
+        self.assertIn("Event62", exits)
+
+    def test_patch_is_idempotent_and_round_trips(self):
+        patched = self._patched()
+        self.assertEqual(
+            stone_gates.add_stone_count_check_after_step01(patched, _raw(RAW_DIR / "DoorOfTime.bfevfl")),
+            patched,
+        )
+        self.assertEqual(_serialize(_load(patched)), patched)
+
+    def test_flow_without_door_of_time_step02_is_rejected(self):
+        with self.assertRaises(ValueError):
+            stone_gates.add_stone_count_check_after_step01(
+                _raw(RAW_DIR / "Dm_SY_Get.bfevfl"), _raw(RAW_DIR / "DoorOfTime.bfevfl")
+            )
+
+
 class StoneCheckDiagnosticsTest(unittest.TestCase):
     def _diag_writes(self, flow: EventFlow) -> dict[str, ActionEvent]:
         writes = {}

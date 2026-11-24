@@ -46,6 +46,6 @@ can_dive = "Item_Scale_Silver or Item_Scale_Gold"
 can_get_to_hyrule_field = "Deku_Tree_Clear or has_explosives"
 
 # --- Sheik return to child -----------------------------------------------------------------
-# Two or more medals, counting Light: the Light medal comes with the first trip to adult, so it is
-# represented by Time_Travel instead of an item.
-has_two_medals = "(Time_Travel and (Item_Medal_Forest or Item_Medal_Fire or Item_Medal_Water or Item_Medal_Shadow or Item_Medal_Spirit)) or (Item_Medal_Forest and (Item_Medal_Fire or Item_Medal_Water or Item_Medal_Shadow or Item_Medal_Spirit)) or (Item_Medal_Fire and (Item_Medal_Water or Item_Medal_Shadow or Item_Medal_Spirit)) or (Item_Medal_Water and (Item_Medal_Shadow or Item_Medal_Spirit)) or (Item_Medal_Shadow and Item_Medal_Spirit)"
+# Two or more medals, counting Light. Light is a shuffled item (Dm_SageRoom_0005), so it is checked as
+# an item rather than assumed from Time_Travel.
+has_two_medals = "(Item_Medal_Light and (Item_Medal_Forest or Item_Medal_Fire or Item_Medal_Water or Item_Medal_Shadow or Item_Medal_Spirit)) or (Item_Medal_Forest and (Item_Medal_Fire or Item_Medal_Water or Item_Medal_Shadow or Item_Medal_Spirit)) or (Item_Medal_Fire and (Item_Medal_Water or Item_Medal_Shadow or Item_Medal_Spirit)) or (Item_Medal_Water and (Item_Medal_Shadow or Item_Medal_Spirit)) or (Item_Medal_Shadow and Item_Medal_Spirit)"
