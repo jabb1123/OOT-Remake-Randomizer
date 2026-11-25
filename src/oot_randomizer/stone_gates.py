@@ -37,6 +37,9 @@ _GAME_DATA_ACTOR = "GameDataActor"
 _GAME_DATA_BOOL_QUERY = "EventQueryIsGameDataBoolExp"
 _POUCH_ACTOR = "PouchSystemActor"
 _POUCH_QUERY = "EventQueryIsExistInPouch"
+# Held-medal checks from medal_progress read IsGet.Item_Medal_* with case 1 = held and no case 0 when the
+# count is built for a route, so the route walk must treat their missing case 0 as open.
+HELD_MEDAL_BOOL_PREFIX = "IsGet.Item_Medal_"
 
 
 def _stone_switches(flow: EventFlow, bools: frozenset[str]) -> list[SwitchEvent]:
@@ -247,6 +250,20 @@ def add_stone_count_check(data: bytes, check_data: bytes, grant_subflow: str = _
     return _write_flow(flow)
 
 
+def _open_case(body: SwitchEvent) -> int | None:
+    """Return the case that is still open on a route switch, or None when both cases are set.
+
+    A bool switch with only case 0 is open at case 1. A held-medal switch with only case 1 is open at case 0.
+    """
+    keys = set(body.cases)
+    if keys == {0}:
+        return 1
+    if keys == {1} and body.params is not None:
+        if str(body.params.data.get("GameDataName", "")).startswith(HELD_MEDAL_BOOL_PREFIX):
+            return 0
+    return None
+
+
 def add_stone_count_check_at_route_end(
     data: bytes, check_data: bytes, grant_subflow: str = POUCH_ADD_SUBFLOW
 ) -> bytes:
@@ -259,7 +276,7 @@ def add_stone_count_check_at_route_end(
     exactly one grant and the route after it is simple.
 
     A switch whose only case is 0 is a bool query, so its missing case 1 is the false exit and
-    also ends the route.
+    also ends the route. A held-medal switch whose only case is 1 gets its missing case 0 the same way.
     """
     flow = _read_flow(data)
     if _has_inline_check(flow):
@@ -284,10 +301,11 @@ def add_stone_count_check_at_route_end(
                 stack.append(body.nxt.v)
         elif isinstance(body, SwitchEvent):
             stack.extend(target.v for target in body.cases.values())
-            if set(body.cases) == {0}:
+            missing = _open_case(body)
+            if missing is not None:
                 false_exit = RequiredIndex()
                 false_exit.v = check
-                body.cases[1] = false_exit
+                body.cases[missing] = false_exit
                 exits += 1
         else:
             raise ValueError(f"unexpected {type(body).__name__} after {grant_subflow}")

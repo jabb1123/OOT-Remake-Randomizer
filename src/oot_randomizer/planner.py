@@ -26,6 +26,7 @@ import random
 from collections import Counter
 from dataclasses import dataclass, field
 
+from . import progressive
 from .engine import NOT_IN_GAME_SLOTS, UNSHUFFLED_ITEMS, ChestSlot
 from .event_items import EVENT_SLOTS, event_location_name
 from .heart_pickups import FIRE_ARROW_ITEM, FIRE_ARROW_LOCATIONS, HEART_LOCATIONS, can_pickup
@@ -73,6 +74,13 @@ class PlanOptions:
     max_shop_actors: int | None = None
     # Loose overworld heart pieces become locations that accept any pickupable item.
     shuffle_heart_pieces: bool = True
+    # Complete item families (every tier in the pool) become progressive copies, placed in chests or in
+    # progressive_npc slots.
+    progressive_items: bool = False
+    # Chest slots whose vanilla event must stay, so they never take a progressive copy.
+    progressive_excluded: frozenset[str] = frozenset()
+    # In-scope NPC and event grant slots that may also take a progressive copy (progressive_npc).
+    progressive_npc: frozenset[str] = frozenset()
 
 
 @dataclass
@@ -206,6 +214,7 @@ def plan_seed(seed: int, slots: list[ChestSlot], world: World | None, options: P
     heart_locs = frozenset(heart_names)
     extra = shop_requirements([(n, "", p) for n, p in prices.items()])
     seed_world = world.with_requirements(extra) if (world is not None and extra) else world
+    pool = progressive.convert_pool(pool, options.progressive_items)
 
     for attempt in range(1, options.max_attempts + 1):
         placed = _try_fill(rng, seed_world, dict(fixed), pool, open_locations, options, shop_locs, heart_locs,
@@ -260,15 +269,18 @@ def _try_fill(
 ) -> dict[str, str] | None:
     shop_prices = shop_prices or {}
     progression_names = world.referenced_items if world else set()
+    if world and options.progressive_items:
+        progression_names = progression_names | progressive.copies_with_any(progression_names)
     progression = [e for e in pool if e[0] in progression_names]
     rest = [e for e in pool if e[0] not in progression_names]
     rng.shuffle(progression)
     rng.shuffle(rest)
+    majors = _MAJORS | progressive.copies_with_any(_MAJORS)
     # Majors first so the per-dungeon limit still has room for them.
-    rest.sort(key=lambda e: e[0] not in _MAJORS)
+    rest.sort(key=lambda e: e[0] not in majors)
 
     dungeon_of = world.dungeon_locations if (world and options.one_major_per_dungeon) else {}
-    dungeons_with_major = {dungeon_of[loc] for loc, item in placed.items() if loc in dungeon_of and item in _MAJORS}
+    dungeons_with_major = {dungeon_of[loc] for loc, item in placed.items() if loc in dungeon_of and item in majors}
     in_shops: set[str] = set()
     # Filler copies share one shop actor, so every copy must sit in a slot with the same price.
     filler_price: dict[str, int] = {}
@@ -279,7 +291,8 @@ def _try_fill(
     group_of = {item: group for item, group in pool}
 
     def needs_chest(item: str) -> bool:
-        return item in CANNOT_NAME_GRANT or (group_of.get(item) == "chest" and not can_hand_over(item))
+        return item in CANNOT_NAME_GRANT or progressive.is_copy(item) or (
+            group_of.get(item) == "chest" and not can_hand_over(item))
 
     chest_free = sum(1 for loc, kind in kind_of.items() if kind == "chest" and loc not in placed)
     chest_needed = sum(1 for item, _ in pool if needs_chest(item))
@@ -289,6 +302,13 @@ def _try_fill(
     def allowed(loc: str, item: str, group: str) -> bool:
         if item == _WEIRD_EGG and loc != _WEIRD_EGG_SLOT:
             return False
+        # A progressive copy goes to a plain chest, or to an in-scope NPC or event grant slot. Those
+        # slots take it only with their own group (the copy's pool group), like any other item.
+        if progressive.is_copy(item):
+            plain_chest = (kind_of[loc] == "chest" and loc not in SKULL_LOCATIONS and loc not in shop_locs
+                           and loc not in heart_locs and loc not in options.progressive_excluded)
+            if not plain_chest and loc not in options.progressive_npc:
+                return False
         # Non-chest locations only take their own group, or an item an NPC can hand over.
         if kind_of[loc] != "chest" and group != kind_of[loc] and not can_hand_over(item):
             return False
@@ -308,7 +328,7 @@ def _try_fill(
                 return False
         if loc in heart_locs and not can_pickup(item):
             return False
-        return not (item in _MAJORS and loc in dungeon_of and dungeon_of[loc] in dungeons_with_major)
+        return not (item in majors and loc in dungeon_of and dungeon_of[loc] in dungeons_with_major)
 
     def place(loc: str, item: str) -> None:
         placed[loc] = item
@@ -317,7 +337,7 @@ def _try_fill(
                 filler_price.setdefault(item, shop_prices[loc])
             else:
                 in_shops.add(item)
-        if item in _MAJORS and loc in dungeon_of:
+        if item in majors and loc in dungeon_of:
             dungeons_with_major.add(dungeon_of[loc])
 
     # Reserve Malon's slot for the Weird Egg before anything else can take it.
@@ -377,7 +397,7 @@ def _try_fill(
     # so they are placed with the chest-only items, before flexible hand-over items use those slots.
     def placement_rank(entry: tuple[str, str]) -> int:
         item, group = entry
-        if item in CANNOT_NAME_GRANT:
+        if item in CANNOT_NAME_GRANT or progressive.is_copy(item):
             return 0
         if can_hand_over(item):
             return 2

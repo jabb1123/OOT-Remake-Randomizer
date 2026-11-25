@@ -67,11 +67,11 @@ def _walk(events: dict, entry, owned: set, past: set):
     while node is not None and node.name.startswith(SYNC_PREFIX):
         body = node.data
         if isinstance(body, SwitchEvent):
-            query = body.actor_query.v.v
-            if query == "EventQueryIsExistInPouch":
-                case = 0 if body.params.data["Actor"] in owned else 1
+            name = body.params.data["GameDataName"]
+            if name.startswith("IsGet.Item_Medal_"):
+                case = 1 if name.removeprefix("IsGet.") in owned else 0
             else:
-                case = 1 if body.params.data["GameDataName"] in past else 0
+                case = 1 if name in past else 0
             target = body.cases.get(case)
             node = target.v if target is not None else None
         else:
@@ -109,6 +109,14 @@ class MedalCountTest(unittest.TestCase):
         original_next = _by_name(raw)["Event0"].data.nxt.v.name
         data = add_medal_progress_after_pouch_adds(raw)
         self._check_count(data, "Event0", original_next, past=set())
+
+    def test_held_checks_read_the_medal_bools(self):
+        events = _by_name(add_medal_progress_after_pouch_adds(RAW_POUCH.read_bytes()))
+        checks = [e.data for name, e in events.items() if name.startswith(SYNC_PREFIX) and "_Check" in name]
+        self.assertTrue(checks)
+        for node in checks:
+            self.assertEqual(node.actor_query.v.v, "EventQueryIsGameDataBool")
+            self.assertTrue(node.params.data["GameDataName"].startswith("IsGet.Item_Medal_"))
 
     def test_count_does_not_move_allsage_past_its_step(self):
         raw = RAW_POUCH.read_bytes()

@@ -234,10 +234,20 @@ def add_slingshot_bag(data: bytes) -> bytes:
     the grant. Returns the input unchanged when the flow grants no Slingshot or already adds the bag.
     """
     from evfl import EventFlow
-    from evfl.event import SubFlowEvent
 
     flow = EventFlow()
     flow.read(data)
+    if not _add_slingshot_bag(flow):
+        return data
+    out = io.BytesIO()
+    flow.write(out)
+    return out.getvalue()
+
+
+def _add_slingshot_bag(flow) -> bool:
+    """The flow-level add. Returns whether it changed the flow."""
+    from evfl.event import SubFlowEvent
+
     slingshot_params = [p for p, k, _ in _grant_params(flow) if p[k] == SLINGSHOT_ITEM]
     grants = [
         event
@@ -248,12 +258,10 @@ def add_slingshot_bag(data: bytes) -> bytes:
     ]
     prefix = f"AutoEvent_Add_{SLINGSHOT_BAG}_before_"
     if not grants or any(event.name.startswith(prefix) for event in flow.flowchart.events):
-        return data
+        return False
     for grant in grants:
         insert_pouch_add_before(flow.flowchart, grant, SLINGSHOT_BAG)
-    out = io.BytesIO()
-    flow.write(out)
-    return out.getvalue()
+    return True
 
 
 @dataclass(frozen=True)
@@ -354,11 +362,21 @@ def fix_progressive_branches(data: bytes, flow_file: str) -> bytes:
     Raises ValueError if the switch or the kept grant event is missing or is not the expected kind.
     """
     from evfl import EventFlow
-    from evfl.event import SubFlowEvent, SwitchEvent
-    from evfl.util import make_index
 
     flow = EventFlow()
     flow.read(data)
+    if not _fix_progressive_branches(flow, flow_file):
+        return data
+    out = io.BytesIO()
+    flow.write(out)
+    return out.getvalue()
+
+
+def _fix_progressive_branches(flow, flow_file: str) -> bool:
+    """The flow-level fix. Returns whether it changed the flow."""
+    from evfl.event import SubFlowEvent, SwitchEvent
+    from evfl.util import make_index
+
     by_name = {event.name: event for event in flow.flowchart.events}
     changed = False
     for branch in PROGRESSIVE_BRANCHES.get(flow_file, ()):
@@ -406,11 +424,7 @@ def fix_progressive_branches(data: bytes, flow_file: str) -> bytes:
             raise ValueError(f"{flow_file}: {source} does not lead to {old_next}")
         event.data.nxt = make_index(target)
         changed = True
-    if not changed:
-        return data
-    out = io.BytesIO()
-    flow.write(out)
-    return out.getvalue()
+    return changed
 
 
 @dataclass(frozen=True)

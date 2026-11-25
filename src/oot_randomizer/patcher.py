@@ -23,6 +23,8 @@ from .world_time import CASTLE_ENTRY_FLOW, add_goto_quest_progress_to_castle_ent
 from .event_items import EVENT_SLOTS, patch_event_item
 from .dampe_race import DAMPE_RACE_FLOW, patch_dampe_race_approach, patch_dampe_race_rewards
 from .storm_song_npc import STORM_NPC_FLOW, patch_storm_song_npc
+from .medal_exp import PRELUDE_MODULE, patch_gamedata_medal_exps, patch_prelude_module
+from .lacs_gate import LACS_MAP_FILE, LACS_MODULE, patch_lacs_map, patch_lacs_module
 from .sheik_medal_gate import ALLSAGE_FLOW, patch_sheik_medal_gate
 from .medal_progress import (
     GET_IN_EVENT_FLOW,
@@ -46,6 +48,9 @@ from .npc_grants import (
     patch_npc_grants,
 )
 from .item_ids import resolve_actor_name
+from .progressive import is_copy
+from .progressive_chests import apply_progressive
+from .progressive_npc import patch_event_flow, patch_npc_flow
 from .location_mapper import build_scene_file_index, load_summary_file
 from .locations import OOTLocation
 from .skulltula_rewards import SKULL_FLOW, SKULL_REWARDS, patch_skull_rewards
@@ -197,6 +202,7 @@ class RomPatcher:
         npc_assignments: dict[str, str] | None = None,
         skip_intro: bool = False,
         heart_assignments: list[tuple[str, str]] | None = None,
+        progressive_chests: list[tuple[str, int, str]] | None = None,
     ) -> "PatchResult":
         """Apply chest, song, skull-reward, event-item, NPC-grant, shop and heart changes to a NUP copy, in place.
 
@@ -323,7 +329,13 @@ class RomPatcher:
                 applied += 1
             for flow_file, new_item in (event_assignments or {}).items():
                 old_item = EVENT_SLOTS[flow_file]
-                if new_item != old_item:
+                if is_copy(new_item):
+                    patcher.replace_file(
+                        flow_file,
+                        lambda data, o=old_item, n=new_item: patch_event_flow(data, o, n),
+                    )
+                    applied += 1
+                elif new_item != old_item:
                     patcher.replace_file(
                         flow_file,
                         lambda data, o=old_item, n=new_item: patch_event_item(data, o, n),
@@ -334,8 +346,13 @@ class RomPatcher:
                 slot = NPC_SLOTS[loc]
                 if new_item != slot.item:
                     npc_changes.setdefault(slot.flow, {})[(slot.group, slot.item)] = new_item
+            # A flow that takes a progressive copy is repointed, wrapped and fixed in one pass.
+            wrapped_flows = {f for f, changes in npc_changes.items() if any(is_copy(v) for v in changes.values())}
             for flow_file, changes in npc_changes.items():
-                patcher.replace_file(flow_file, lambda data, c=changes: patch_npc_grants(data, c))
+                if flow_file in wrapped_flows:
+                    patcher.replace_file(flow_file, lambda data, f=flow_file, c=changes: patch_npc_flow(data, f, c))
+                else:
+                    patcher.replace_file(flow_file, lambda data, c=changes: patch_npc_grants(data, c))
                 applied += 1
             fairy_randomized = False
             for fairy in FAIRY_FLOWS:
@@ -350,11 +367,13 @@ class RomPatcher:
                 applied += 1
                 # Progressive bullet bag games always pay out the one slot the logic keeps.
                 for flow_file in REROUTED_FLOWS:
+                    if flow_file in wrapped_flows:
+                        continue  # patch_npc_flow already fixed it
                     patcher.replace_file(flow_file, lambda data, f=flow_file: fix_progressive_branches(data, f))
                     applied += 1
                 # The bag add goes last: it must sit in front of the grant after the switches are rewired.
                 for flow_file, changes in npc_changes.items():
-                    if SLINGSHOT_ITEM in changes.values():
+                    if flow_file not in wrapped_flows and SLINGSHOT_ITEM in changes.values():
                         patcher.replace_file(flow_file, add_slingshot_bag)
                         applied += 1
             # The Dampe race reward follows the race, so an owned hookshot must not skip its talk.
@@ -439,11 +458,31 @@ class RomPatcher:
                     applied += 1
                 except NupPatchError:
                     pass
-            if shop_actors or fairy_randomized:
-                patcher.replace_file(
-                    GAME_DATA_LIST,
-                    lambda data: patch_gamedata_list(data, shop=bool(shop_actors), npc_grant=fairy_randomized),
-                )
+            # Kakariko Burning and the Forest prelude read medals (see medal_exp.py). The prelude module
+            # reads the flag whose formula is changed here, so both are patched together.
+            try:
+                patcher.replace_file(PRELUDE_MODULE, patch_prelude_module)
+                applied += 1
+            except NupPatchError:
+                pass
+            # Light Arrows reads AllSage_IsAfter_Step02_Exp (see lacs_gate.py): its logic module and the
+            # Temple of Time area in the adult Market map follow the formula, which GAME_DATA_LIST sets below.
+            try:
+                patcher.replace_file(LACS_MODULE, patch_lacs_module)
+                applied += 1
+            except NupPatchError:
+                pass
+            try:
+                patcher.replace_file(LACS_MAP_FILE, patch_lacs_map)
+                applied += 1
+            except NupPatchError:
+                pass
+            patcher.replace_file(
+                GAME_DATA_LIST,
+                lambda data: patch_gamedata_medal_exps(
+                    patch_gamedata_list(data, shop=bool(shop_actors), npc_grant=fairy_randomized)
+                ),
+            )
             if shop_actors:
                 # Combine all DisplayShop edits in one transform. The bag gate reroutes the
                 # sold-out gate; the stone recount runs after the purchase and before autosave.
@@ -459,10 +498,13 @@ class RomPatcher:
 
                 patcher.replace_file(DISPLAY_SHOP_FLOW, display_shop)
                 applied += 1
+            if progressive_chests:
+                apply_progressive(patcher, progressive_chests)
+                applied += len(progressive_chests)
             patcher.update_resource_size_tables()
         except Exception:
-            if shop_actors or heart_actors:
-                # The NUP already holds the new packs: "manifest-only" would hide a half-patched ROM.
+            if shop_actors or heart_actors or progressive_chests:
+                # The NUP already holds the new packs (or a progressive edit): "manifest-only" would hide it.
                 raise
             return PatchResult(
                 applied=0,

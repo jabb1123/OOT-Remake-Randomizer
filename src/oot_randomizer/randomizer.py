@@ -18,6 +18,10 @@ from .nup_parser import parse_nup_header, NupHeader
 from .oot_data import DUNGEON_ITEMS, GOAL_PRESETS, LOGIC_PRESETS, MAJOR_ITEMS
 from .patcher import RomPatcher, _legacy_item_id
 from .planner import PlanOptions, PlanningError, known_locations, plan_seed
+from .progressive import first_tier
+from .progressive_chests import excluded_slots as progressive_excluded_slots
+from .progressive_chests import progressive_targets as progressive_chest_targets
+from .progressive_npc import progressive_locations
 from .rom import RomValidationError, validate_nup_rom
 from .shop_slots import SHOP_SLOTS, shop_actor_capacity
 from .shops import ShopError, shop_actor_name
@@ -213,6 +217,7 @@ class OOTRandomizer:
         skull_assignments: dict[int, str] = {}
         shop_assignments: list[tuple[str, str, int]] = []
         heart_assignments: list[tuple[str, str]] = []
+        progressive_targets: list[tuple[str, int, str]] = []
         logic_report: dict[str, object] = {"enabled": False}
         if slots:
             world = self._load_world(slots)
@@ -234,12 +239,19 @@ class OOTRandomizer:
                 shop_slots_per_shop=self.config.shop_slots_per_shop,
                 max_shop_actors=max_shop_actors,
                 shuffle_heart_pieces=self.config.shuffle_heart_pieces,
+                progressive_items=self.config.progressive_items,
+                progressive_excluded=(progressive_excluded_slots(slots) if self.config.progressive_items
+                                      else frozenset()),
+                progressive_npc=progressive_locations() if self.config.progressive_items else frozenset(),
             )
             try:
                 plan = plan_seed(seed, slots, world, options)
             except PlanningError as exc:
                 raise RomValidationError(str(exc)) from exc
             assignments = plan.chest_assignments
+            # A progressive chest is patched with its family's lowest tier; the chest flow gives the rest.
+            progressive_targets = progressive_chest_targets(assignments) if self.config.progressive_items else []
+            patch_assignments = [(slot, first_tier(item)) for slot, item in assignments]
             song_assignments = {f: s for f, s in plan.song_assignments.items() if s != SONG_SLOTS[f]}
             event_assignments = {f: i for f, i in plan.event_assignments.items() if i != EVENT_SLOTS[f]}
             npc_assignments = {loc: i for loc, i in plan.npc_assignments.items() if i != NPC_SLOTS[loc].item}
@@ -255,7 +267,7 @@ class OOTRandomizer:
                     "extra_requirements": plan.extra_requirements,
                     "warnings": world.warnings,
                 }
-            patch_records = build_shuffle_patches(assignments)
+            patch_records = build_shuffle_patches(patch_assignments)
             placements = [
                 {
                     "location": slot.name,
@@ -324,7 +336,8 @@ class OOTRandomizer:
                                          shop_assignments, event_assignments=event_assignments,
                                          npc_assignments=npc_assignments,
                                          skip_intro=self.config.skip_intro,
-                                         heart_assignments=heart_assignments)
+                                         heart_assignments=heart_assignments,
+                                         progressive_chests=progressive_targets)
         except ShopError as exc:
             raise RomValidationError(f"Shop or heart items could not be applied: {exc}") from exc
         except OSError as exc:

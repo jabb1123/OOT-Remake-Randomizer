@@ -29,6 +29,8 @@ class RandomizerConfig:
     mod_dir: str | None = None
     item_pool_limit: int = 12
     dungeon_pool_limit: int = 6
+    # Complete item families become progressive copies (progressive.py); off keeps the vanilla items.
+    progressive_items: bool = False
 
     def normalized_seed(self) -> int:
         return self.seed if self.seed != 0 else 1

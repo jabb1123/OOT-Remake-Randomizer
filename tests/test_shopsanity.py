@@ -591,8 +591,21 @@ def simple_scene(shop_names: list[str], path: str) -> bytes:
 
 
 def game_data_list() -> bytes:
+    medal_bools = [
+        {"DefaultValue": False, "Hash": U32(murmur3_32(f"IsGet.Item_Medal_{m}".encode())), "ResetTypeValue": 8, "SaveFileIndex": -1}
+        for m in ("Forest", "Fire", "Water", "Shadow", "Spirit")
+    ]
+    played = {"DefaultValue": False, "Hash": U32(murmur3_32(b"HavePlayedEvent.Dm_TimeTemple_0130")), "ResetTypeValue": 8, "SaveFileIndex": -1}
+    medal_exps = [
+        {"Hash": U32(murmur3_32(b"SageOfShadow_Kakariko_Burning")), "ResetTypeValue": 0, "SaveFileIndex": -1, "Values": [[U64(10), U64(1)]]},
+        {"Hash": U32(murmur3_32(b"AllSage_IsAfter_Step01_02_Exp")), "ResetTypeValue": 0, "SaveFileIndex": -1, "Values": [[U64(12), U64(2)]]},
+        {"Hash": U32(murmur3_32(b"AllSage_IsAfter_Step02_Exp")), "ResetTypeValue": 0, "SaveFileIndex": -1, "Values": [[U64(10), U64(1)]]},
+    ]
     return B({
-        "Data": {"Bool": [{"DefaultValue": False, "Hash": U32(1), "ResetTypeValue": 9, "SaveFileIndex": 0}]},
+        "Data": {
+            "Bool": [{"DefaultValue": False, "Hash": U32(1), "ResetTypeValue": 9, "SaveFileIndex": 0}, *medal_bools, played],
+            "BoolExp": medal_exps,
+        },
         "MetaData": {
             "AllDataSaveOffset": U32(96984), "AllDataSaveSize": U32(781740),
             "SaveDataOffsetPos": [U32(86880), U32(560), U32(672), U32(320)],

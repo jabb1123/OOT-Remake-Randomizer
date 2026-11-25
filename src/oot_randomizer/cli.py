@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from .config import RandomizerConfig
+from .flag_consumers import DEFAULT_ROOT, find_consumers, format_result
 from .nup_parser import scan_nup_structure
 from .randomizer import OOTRandomizer
 
@@ -46,6 +47,8 @@ def build_parser() -> argparse.ArgumentParser:
                       help="Skip the opening Introduction cutscene (Kokiri Forest wake-up) at the start of a new game")
     rand.add_argument("--no-heart-shuffle", action="store_true",
                       help="Keep the loose overworld heart pieces as vanilla hearts (they are randomized by default)")
+    rand.add_argument("--progressive-items", action="store_true",
+                      help="Make complete item families (Hookshot, Bow, ...) progressive: each copy gives the next tier")
 
     # --- logic sub-command ---
     lg = sub.add_parser("logic", help="Create or check the world logic file")
@@ -62,6 +65,14 @@ def build_parser() -> argparse.ArgumentParser:
     sc.add_argument("--max-mb", type=int, default=256, help="Maximum megabytes to scan (default 256)")
     sc.add_argument("--chunk-mb", type=int, default=4, help="Chunk size in megabytes (default 4)")
     sc.add_argument("--json-out", default=None, help="Write full JSON report to this file")
+
+    # --- consumers sub-command ---
+    cs = sub.add_parser("consumers", help="List the dumped files that name a flag or token (read-only)")
+    cs.add_argument("token", help="Flag or token name, e.g. Item_Medal_Forest")
+    cs.add_argument("--root", default=None,
+                    help="Folder of dumps to search (default: tmp/Events/raw)")
+    cs.add_argument("--ext", action="append", default=None, metavar="EXT",
+                    help="Only search files with this extension, e.g. --ext raw (repeatable)")
 
     return parser
 
@@ -86,6 +97,7 @@ def _cmd_randomize(args: argparse.Namespace) -> None:
         shop_slots_per_shop=args.shop_slots,
         shuffle_heart_pieces=not args.no_heart_shuffle,
         skip_intro=args.skip_intro,
+        progressive_items=args.progressive_items,
     )
     result = OOTRandomizer(config).randomize(args.rom)
     print(json.dumps({
@@ -179,6 +191,21 @@ def _cmd_logic(args: argparse.Namespace) -> int:
     return 0 if world.goal_met(result, options) and not unreached else 1
 
 
+def _cmd_consumers(args: argparse.Namespace) -> int:
+    root = Path(args.root) if args.root else DEFAULT_ROOT
+    if not root.is_dir():
+        print(f"error: dump folder not found: {root}", file=sys.stderr)
+        return 1
+    suffixes = tuple(e.lstrip(".") for e in args.ext) if args.ext else None
+    try:
+        result = find_consumers(root, args.token, suffixes)
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+    print(format_result(args.token, root, result))
+    return 0
+
+
 def _cmd_scan(args: argparse.Namespace) -> None:
     max_bytes = args.max_mb * 1024 * 1024
     chunk_bytes = args.chunk_mb * 1024 * 1024
@@ -218,7 +245,7 @@ def main() -> None:
     # Legacy flat-flag form: oot-randomizer --rom ... (no subcommand)
     # Detect by checking for --rom before any subcommand token.
     argv = sys.argv[1:]
-    if argv and not argv[0].startswith("-") and argv[0] not in ("randomize", "scan", "logic"):
+    if argv and not argv[0].startswith("-") and argv[0] not in ("randomize", "scan", "logic", "consumers"):
         argv = ["randomize"] + argv
     elif argv and argv[0].startswith("-"):
         argv = ["randomize"] + argv
@@ -229,6 +256,8 @@ def main() -> None:
         _cmd_scan(args)
     elif args.command == "logic":
         sys.exit(_cmd_logic(args))
+    elif args.command == "consumers":
+        sys.exit(_cmd_consumers(args))
     else:
         _cmd_randomize(args)
 

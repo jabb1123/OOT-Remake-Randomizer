@@ -1,13 +1,13 @@
 """AllSage progress from the number of dungeon medals held.
 
 AllSage no longer checks each dungeon. Every pickup that adds an item runs a count of the five dungeon
-medals in the pouch, then moves AllSage to the step for that count, with the popup when it advances:
+medals held, then moves AllSage to the step for that count, with the popup when it advances:
 
     1 medal -> Step01_00, 2 -> Step01_00_01, 3 -> Step01_00_02, 4 -> Step01_00_03, 5 -> Step01_01
 
 The sage quests themselves are not changed. A medal does not set any SageOf<X> step, so each sage's own
 flow still finishes it and its dungeon drops are kept. The temple-exit steps are removed by
-sage_escape_flow.py.
+sage_escape_flow.py. Kakariko Burning and the Forest prelude read medals directly (medal_exp.py).
 
 Each count leaf reads an AllSage_IsAfter_* bool first and skips when the quest is already past its step,
 so the count never moves AllSage backwards. Light is not counted. It is a shuffled item that belongs to no
@@ -31,9 +31,8 @@ from .game_flags import (
 )
 from .stone_gates import (
     _GAME_DATA_BOOL_QUERY,
-    _POUCH_QUERY,
+    HELD_MEDAL_BOOL_PREFIX,
     POUCH_ADD_SUBFLOW,
-    _pouch_actor,
     _query,
     _single_grant,
 )
@@ -48,6 +47,16 @@ MEDAL_ITEMS: tuple[str, ...] = (
     "Item_Medal_Shadow",
     "Item_Medal_Spirit",
 )
+
+
+# The held check reads the IsGet.Item_Medal_* game bool, which is set when the medal is obtained.
+# A pouch check would miss a medal that is no longer in the pouch.
+_HELD_QUERY = "EventQueryIsGameDataBool"
+
+
+def held_medal_bool(medal: str) -> str:
+    return f"{HELD_MEDAL_BOOL_PREFIX}{medal.removeprefix('Item_Medal_')}"
+
 
 _SYNC_PREFIX = "MedalSync_"
 _POUCH_ADD_ACTION = "EventTriggerAddOrRemovePouchContent"
@@ -101,16 +110,15 @@ def _progress_node(chart_actor, action, prefix: str, name: str, params: dict, nx
 def _count_tree(flow: EventFlow, exit_to: Event | None, prefix: str) -> Event | None:
     """Build the held-medal count and return its entry. Every path ends at `exit_to`.
 
-    A pouch check for each medal forms a binary tree. A node is keyed by the medal index and the count
+    A held check for each medal forms a binary tree. A node is keyed by the medal index and the count
     so far, so paths with the same count share their nodes. The leaves are the counts, each going to
     its AllSage step. A count of 0 goes straight to `exit_to`. A None `exit_to` ends the branch, so
     switch cases that would go there are left out.
     """
     chart = flow.flowchart
-    pouch = _pouch_actor(flow)
-    pouch_query = _query(pouch, _POUCH_QUERY)
     game_data = game_data_actor(chart)
     bool_query = _query(game_data, _GAME_DATA_BOOL_QUERY)
+    held_query = _query(game_data, _HELD_QUERY)
     challenge_actor, progress_action = _find_or_create_action(chart, CHALLENGE_ACTOR, CHALLENGE_PROGRESS_ACTION)
     steps: dict[int, Event] = {}
     checks: dict[tuple[int, int], Event] = {}
@@ -153,14 +161,14 @@ def _count_tree(flow: EventFlow, exit_to: Event | None, prefix: str) -> Event | 
             owned = check_for(index + 1, held + 1)
             missing = check_for(index + 1, held)
             node = SwitchEvent()
-            node.actor = make_rindex(pouch)
-            node.actor_query = make_rindex(pouch_query)
+            node.actor = make_rindex(game_data)
+            node.actor_query = make_rindex(held_query)
             node.params = Container()
-            node.params.data.update({"Actor": MEDAL_ITEMS[index], "Num": 1})
-            # EventQueryIsExistInPouch: case 0 = owned, case 1 = not owned. A None `missing` ends that branch.
-            node.cases = {0: make_rindex(owned)}
+            node.params.data.update({"GameDataName": held_medal_bool(MEDAL_ITEMS[index])})
+            # EventQueryIsGameDataBool: case 1 = held, case 0 = not held. A None `missing` ends that branch.
+            node.cases = {1: make_rindex(owned)}
             if missing is not None:
-                node.cases[1] = make_rindex(missing)
+                node.cases[0] = make_rindex(missing)
             check = Event()
             check.name = f"{prefix}Check{index}_Held{held}"
             check.data = node

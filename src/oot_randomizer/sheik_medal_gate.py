@@ -1,10 +1,11 @@
-"""Sheik's return-to-child gate, opened by any of the five dungeon medals in the pouch.
+"""Sheik's return-to-child gate, opened by any of the five dungeon medals held.
 
 When a sage's melody is played, AllSage's MeetSheik_And_Gone entry (Event178) checks the
 AllSage_AwakeSage_Fire_Or_Forest flag. Only the vanilla Fire and Forest medal flows set that flag, so a
 Fire or Forest medal from another location would leave Sheik in place. This patch keeps the flag check
-and adds a chain of pouch queries after it. Any dungeon medal in the pouch sets
-AllSage_MeetSheik_And_Gone the same way the flag does.
+and adds a chain of held-medal checks after it. Any dungeon medal held sets
+AllSage_MeetSheik_And_Gone the same way the flag does. The checks read the IsGet.Item_Medal_* bools
+(see medal_progress.held_medal_bool).
 
 The Light medal is not in the chain. It is a shuffled item now, so holding it alone must not open Sheik.
 Any dungeon medal is looser than the logic's two-medal rule (has_two_medals), so it never blocks progress.
@@ -19,7 +20,9 @@ from evfl import EventFlow
 from evfl.event import Event, SwitchEvent
 from evfl.util import make_rindex
 
-from .stone_gates import _POUCH_QUERY, _pouch_actor, _query
+from .game_flags import game_data_actor
+from .medal_progress import _HELD_QUERY, held_medal_bool
+from .stone_gates import _query
 
 ALLSAGE_FLOW = "AllSage.bfevfl.zs"
 
@@ -37,7 +40,7 @@ MEDAL_ITEMS: tuple[str, ...] = (
 
 
 def patch_sheik_medal_gate(data: bytes) -> bytes:
-    """Add a pouch check for each dungeon medal after the Fire or Forest flag check.
+    """Add a held-medal check for each dungeon medal after the Fire or Forest flag check.
 
     Returns the input unchanged when the chain is already present. Raises ValueError when the flow
     does not have the expected gate, so a different game build is not patched silently.
@@ -56,21 +59,22 @@ def patch_sheik_medal_gate(data: bytes) -> bytes:
     ):
         raise ValueError(f"{ALLSAGE_FLOW}: {_GATE_SWITCH} is not the Fire or Forest flag gate")
 
-    pouch = _pouch_actor(flow)
-    query = _query(pouch, _POUCH_QUERY)
-    # Built last to first so each check's false case can point at the check after it.
+    game_data = game_data_actor(flow.flowchart)
+    query = _query(game_data, _HELD_QUERY)
+    # Built last to first so each check's not-held case can point at the check after it.
     following: Event | None = None
     for medal in reversed(MEDAL_ITEMS):
         check = Event()
         check.name = f"{_CHECK_PREFIX}{medal.removeprefix('Item_Medal_')}"
         node = SwitchEvent()
-        node.actor = make_rindex(pouch)
+        node.actor = make_rindex(game_data)
         node.actor_query = make_rindex(query)
         node.params = deepcopy(gate.data.params)
-        node.params.data = {"Actor": medal, "Num": 1}
-        node.cases = {0: make_rindex(awake)}
+        node.params.data["GameDataName"] = held_medal_bool(medal)
+        # EventQueryIsGameDataBool: case 1 = held, case 0 = not held.
+        node.cases = {1: make_rindex(awake)}
         if following is not None:
-            node.cases[1] = make_rindex(following)
+            node.cases[0] = make_rindex(following)
         check.data = node
         flow.flowchart.events.append(check)
         following = check

@@ -53,14 +53,14 @@ class SheikMedalGateTest(unittest.TestCase):
         for index, name in enumerate(names):
             node = events[name].data
             self.assertIsInstance(node, SwitchEvent)
-            self.assertEqual(node.params.data, {"Actor": MEDAL_ITEMS[index], "Num": 1})
-            self.assertEqual(node.actor.v.identifier.name, "PouchSystemActor")
-            self.assertEqual(node.actor_query.v.v, "EventQueryIsExistInPouch")
-            self.assertEqual(node.cases[0].v.name, "Event181")
+            self.assertEqual(node.params.data["GameDataName"], f"IsGet.{MEDAL_ITEMS[index]}")
+            self.assertEqual(node.actor.v.identifier.name, "GameDataActor")
+            self.assertEqual(node.actor_query.v.v, "EventQueryIsGameDataBool")
+            self.assertEqual(node.cases[1].v.name, "Event181")
             if index + 1 < len(names):
-                self.assertEqual(node.cases[1].v.name, names[index + 1])
+                self.assertEqual(node.cases[0].v.name, names[index + 1])
             else:
-                self.assertNotIn(1, node.cases)
+                self.assertNotIn(0, node.cases)
 
     def test_chain_is_idempotent(self):
         self.assertEqual(patch_sheik_medal_gate(self.patched), self.patched)

@@ -23,6 +23,7 @@ from collections import Counter
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 
+from . import progressive
 from .event_items import EVENT_ITEM_DISPLAY_NAMES
 from .item_ids import ITEM_ACTOR_BY_DISPLAY, ITEM_ACTOR_NAMES
 from .npc_grants import NPC_ITEM_DISPLAY_NAMES
@@ -319,6 +320,14 @@ def _items_in(node: Node) -> set[str]:
     return set()
 
 
+def _grant(items: Counter, item: str) -> None:
+    """Count one item. A progressive copy also adds the tier it unlocks (the k-th copy gives tiers[k-1])."""
+    items[item] += 1
+    tier = progressive.tier_for_copy(item, items[item])
+    if tier is not None:
+        items[tier] += 1
+
+
 def evaluate(node: Node, items: Counter, events: set[str], age: str, options: dict) -> bool:
     kind = node[0]
     if kind == "item":
@@ -444,8 +453,9 @@ class World:
         """
         options = options or {}
         items = Counter(self.start_items)
-        if extra_items:
-            items.update(extra_items)
+        for item, count in (extra_items or {}).items():
+            for _ in range(count):
+                _grant(items, item)
         if not self.token_locations:
             items[TOKEN_ITEM] += TOTAL_TOKENS
         reached: set[str] = set()
@@ -453,7 +463,7 @@ class World:
             if loc not in self.location_region:
                 reached.add(loc)
                 if item:
-                    items[item] += 1
+                    _grant(items, item)
         events: set[str] = set()
         regions: dict[str, set[str]] = {age: set() for age in AGES}
         other_age = "adult" if self.start_age == "child" else "child"
@@ -478,7 +488,7 @@ class World:
                         reached.add(loc)
                         item = self._item_at(loc, placements)
                         if item:
-                            items[item] += 1
+                            _grant(items, item)
                         changed = True
                 for target, req in (*region.exits.items(), *self.global_exits.items()):
                     if target not in seen and evaluate(req, items, events, age, options):

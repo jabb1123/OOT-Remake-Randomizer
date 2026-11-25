@@ -59,6 +59,8 @@ Placement logic lives in `logic/world/`, one TOML file per area:
 
 Every `*.toml` is loaded recursively in sorted path order and deep-merged. The same key in two files is an error, `dungeon`/`excluded` flags must agree, `[settings]` may appear only once, and each helper name may be defined only once. `--logic-file` (randomize) and `--file` (`logic check`) accept either this directory or a single TOML file. For example, `oot-randomizer logic template` writes a single-file starter to `logic/world_template.toml`.
 
+To find which dumped files name a flag or token, run `oot-randomizer consumers <Name>`. It searches `tmp/Events/raw` by default (`--root` picks another folder, `--ext raw` limits the file types). It only reads files. Files that are still zstd-compressed (`.zs`) are skipped, so use their `.raw` copies. Flag names that live in challenge or ainb data, such as `AllSage_IsAfter_*`, are not in the raw event dumps and will not be found.
+
 ## Shopsanity
 
 `--shop-slots N` (0-4, default 2; `RandomizerConfig.shop_slots_per_shop`) turns N random shelf slots of every shop into item locations, each selling a custom `Shop_Rando_<item>` actor for 10-200 rupees (steps of 5). The slot table is in `src/oot_randomizer/shop_slots.py`; only slots whose vanilla item needs no upgrade, bottle or side quest are used (Kokiri Shop, Bazaar, Goron Shop, Zora Shop), and only those listed in the world logic (`KokiriShop`, `Bazaar`, `GoronShop`, `ZoraShop` regions). Prices of 100+ require a wallet per seed (`World.with_requirements`). Each slot adds one rupee filler that only chests accept. New actor packs need TOC room in the NUP (about 28 fit), which the planner checks. The manifest lists every shop placement with its price.

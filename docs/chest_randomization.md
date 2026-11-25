@@ -49,6 +49,17 @@ The Kokiri Forest sword chest is a special case: [chest_events.py](../src/oot_ra
 2. Chest-related tests: `test_location_mapper` and `test_world_logic`.
 3. Playtest. Confirm the chest gives the right item and that Child and Adult versions match.
 
+## Progressive items (opt-in)
+
+`--progressive-items` (`RandomizerConfig.progressive_items`, default off) turns each complete item family into copies in the pool: Hookshot, Strength, Bomb Bag, Bow, Slingshot, Wallet, Scale, Nut and Stick Capacity, Magic, Ocarina. The family list and tier order are in [progressive.py](../src/oot_randomizer/progressive.py).
+
+- **Pool and logic.** Each tier actor in the pool becomes one copy (`Progressive Hookshot`). The logic counts k copies as the first k tiers, so `Item_Longshot` needs two Hookshot copies. The logic TOML is unchanged.
+- **Placement.** Copies go to plain chests and to the in-scope NPC and event grant slots (see below). Skull rewards, shop slots, heart pieces and song locations never take one, and neither do the 49 chests that already have a `GetEventName` (their vanilla event must stay). The planner keeps the same pool size.
+- **Chest flows.** A copy's chest drops its family's lowest tier and gets a `GetEventName` (`OOTREM_Prog_<family>_<Small|Big>`). The matching row in the RSDB `EventSetting` and `GameAnalyzedEventInfo` tables points at a new entry, `Success_Prog_<family>`, in `Dm_SY_TreasureboxSmall` or `Dm_SY_Treasurebox`. That entry asks the pouch tier by tier (`GameDataActor.EventQueryCheckIsGet`) and gives the lowest tier it does not own, by calling the flow's own `Success_` entry.
+- **NPC and event grants.** A copy placed at an in-scope grant slot (`progressive_npc.py`) wraps that grant in place. The grant node becomes the same ask chain, and each tier's give is a copy of the grant with the tier as its item, keeping the grant's successor. The in-scope slots are the bag, quiver, scale and Goron gauntlet grants in `npc_grants.py` (13 NPC slots) and the two Ocarina grants in `event_items.py`. Out of scope: the great fairies (their received bool and IsGet flag name the grant's item), the Biggoron Sword (no family in ootrr either), and the shop, skull, heart and song locations.
+
+The structure was checked against the NUP dumps and by a full randomize on the retail NUP. Whether the pouch ownership checks, the per-chest events and the Ocarina chest grant behave in game is not verified. The NPC and event chains are not verified in game either.
+
 ## Loose heart pieces
 
 The loose overworld `Obj_Heart_Piece` pickups (not chests) are randomized as pickupable items, the same set shops can sell. They are handled by [heart_pickups.py](../src/oot_randomizer/heart_pickups.py).
